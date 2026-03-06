@@ -23,4 +23,7 @@ dependencyResolutionManagement {
 }
 
 rootProject.name = "seed"
-include(":app")
+include(":seed")
+include(":core:data")
+include(":core:domain")
+include(":core:ui")
