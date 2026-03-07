@@ -1,5 +1,6 @@
 package com.example.seed.di
 
+import com.example.data.remote.api.SpaceXApi
 import com.example.seed.BuildConfig
 import dagger.Module
 import dagger.Provides
@@ -15,20 +16,17 @@ import javax.inject.Singleton
 
 @Module
 @InstallIn(SingletonComponent::class)
-object NetworkModule {
+object RemoteModule {
 
-    // Uncomment and replace ApiService with your actual API service interface.
-    // @Provides
-    // @Singleton
-    // fun provideApiService(
-    //     retrofit: Retrofit
-    // ): ApiService {
-    //     return retrofit
-    //         .newBuilder()
-    //         .baseUrl("https://api.example.com/") // Replace with your API base URL.
-    //         .build()
-    //         .create(ApiService::class.java)
-    // }
+    @Provides
+    @Singleton
+    fun provideApiService(
+        retrofit: Retrofit
+    ): SpaceXApi = retrofit
+        .newBuilder()
+        .baseUrl("https://api.spacexdata.com")
+        .build()
+        .create(SpaceXApi::class.java)
 
     @Provides
     @Singleton
@@ -36,7 +34,7 @@ object NetworkModule {
         okHttpClient: OkHttpClient
     ): Retrofit {
         val json = Json {
-            ignoreUnknownKeys = true // Ignore unknown JSON fields
+            ignoreUnknownKeys = true // Ignore unknown JSON fields.
         }
         val contentType = "application/json".toMediaType()
 
@@ -48,8 +46,8 @@ object NetworkModule {
 
     @Provides
     @Singleton
-    fun provideOkHttpClient(): OkHttpClient {
-        return OkHttpClient.Builder()
+    fun provideOkHttpClient(): OkHttpClient =
+        OkHttpClient.Builder()
             .addInterceptor(
                 HttpLoggingInterceptor()
                     .apply {
@@ -59,5 +57,4 @@ object NetworkModule {
                     }
             )
             .build()
-    }
 }
