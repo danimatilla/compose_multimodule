@@ -1,8 +1,8 @@
-package com.example.data.local.entity.ship
+package com.example.data.local.entity
 
 import androidx.room.Entity
 import androidx.room.PrimaryKey
-import com.example.data.remote.dto.ship.res.ShipResDto
+import com.example.data.remote.dto.ship.ShipResDto
 
 @Entity(tableName = "ships")
 data class ShipEntity(
@@ -15,7 +15,7 @@ data class ShipEntity(
     val name: String,
     val active: Boolean,
 ){
-    fun toShipDto() = ShipResDto(
+    fun toDto() = ShipResDto(
         id = id,
         type = type,
         yearBuilt = yearBuilt,

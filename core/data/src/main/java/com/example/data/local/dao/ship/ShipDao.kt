@@ -3,7 +3,7 @@ package com.example.data.local.dao.ship
 import androidx.room.Dao
 import androidx.room.Query
 import androidx.room.Upsert
-import com.example.data.local.entity.ship.ShipEntity
+import com.example.data.local.entity.ShipEntity
 import kotlinx.coroutines.flow.Flow
 
 @Dao

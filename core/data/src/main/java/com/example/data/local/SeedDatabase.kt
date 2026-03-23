@@ -3,17 +3,19 @@ package com.example.data.local
 import androidx.room.Database
 import androidx.room.RoomDatabase
 import com.example.data.local.dao.ship.ShipDao
-import com.example.data.local.entity.ship.ShipEntity
+import com.example.data.local.entity.RocketEntity
+import com.example.data.local.entity.ShipEntity
 
 @Database(
     version = 1,
     exportSchema = false,
     entities = [
         // Add your entities here.
-        ShipEntity::class
+        ShipEntity::class,
+        RocketEntity::class
     ],
 )
-abstract class SeedDatabase: RoomDatabase() {
+abstract class SeedDatabase : RoomDatabase() {
     // Define DAOs here.
     abstract fun shipDao(): ShipDao
 }

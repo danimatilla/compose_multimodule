@@ -1,6 +1,6 @@
-package com.example.data.remote.dto.ship.res
+package com.example.data.remote.dto.ship
 
-import com.example.data.local.entity.ship.ShipEntity
+import com.example.data.local.entity.ShipEntity
 import kotlinx.serialization.SerialName
 import kotlinx.serialization.Serializable
 
@@ -15,7 +15,7 @@ data class ShipResDto(
     val name: String,
     val active: Boolean,
 ) {
-    fun toShipEntity() = ShipEntity(
+    fun toEntity() = ShipEntity(
         id = id,
         type = type,
         yearBuilt = yearBuilt,

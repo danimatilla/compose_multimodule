@@ -24,6 +24,6 @@ data class ShipsReqDto(
         }
     }
     """.trimIndent().let { jsonString ->
-        Json.decodeFromString<Map<String, Any>>(jsonString)
+        Json.Default.decodeFromString<Map<String, Any>>(jsonString)
     }
 }

@@ -1,7 +1,7 @@
-package com.example.seed.di
+package com.example.data.di
 
+import com.example.data.BuildConfig
 import com.example.data.remote.api.SpaceXApi
-import com.example.seed.BuildConfig
 import dagger.Module
 import dagger.Provides
 import dagger.hilt.InstallIn
@@ -12,21 +12,34 @@ import okhttp3.OkHttpClient
 import okhttp3.logging.HttpLoggingInterceptor
 import retrofit2.Retrofit
 import retrofit2.converter.kotlinx.serialization.asConverterFactory
+import javax.inject.Qualifier
 import javax.inject.Singleton
 
 @Module
 @InstallIn(SingletonComponent::class)
 object RemoteModule {
 
+    @Retention(AnnotationRetention.RUNTIME)
+    @Qualifier
+    annotation class ShipApi
+
+    @Retention(AnnotationRetention.RUNTIME)
+    @Qualifier
+    annotation class RocketApi
+
+    @RocketApi
     @Provides
-    @Singleton
-    fun provideApiService(
+    fun provideRocketApi(
         retrofit: Retrofit
-    ): SpaceXApi = retrofit
-        .newBuilder()
-        .baseUrl("https://api.spacexdata.com")
-        .build()
-        .create(SpaceXApi::class.java)
+    ): SpaceXApi = retrofit.retrofitBuilder()
+        .create(SpaceXApi.Rockets::class.java)
+
+    @ShipApi
+    @Provides
+    fun provideShipApi(
+        retrofit: Retrofit
+    ): SpaceXApi = retrofit.retrofitBuilder()
+        .create(SpaceXApi.Ships::class.java)
 
     @Provides
     @Singleton
@@ -56,5 +69,10 @@ object RemoteModule {
                         }
                     }
             )
+            .build()
+
+    private fun Retrofit.retrofitBuilder() =
+        newBuilder()
+            .baseUrl("https://api.spacexdata.com")
             .build()
 }

@@ -1,4 +1,4 @@
-package com.example.data.remote.dto.ship.res
+package com.example.data.remote.dto.ship
 
 import kotlinx.serialization.SerialName
 import kotlinx.serialization.Serializable

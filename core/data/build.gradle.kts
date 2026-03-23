@@ -33,14 +33,20 @@ android {
         sourceCompatibility = JavaVersion.VERSION_11
         targetCompatibility = JavaVersion.VERSION_11
     }
+    buildFeatures {
+        buildConfig = true
+    }
 }
 
 dependencies {
     implementation(project(":core:domain"))
-    implementation(project(":seed"))
 
     implementation(libs.hilt)
     ksp(libs.hilt.compiler)
+
+    api(platform (libs.okhttp.bom))
+    api(libs.okhttp)
+    api(libs.okhttp.logging.interceptor)
 
     api(libs.retrofit)
     api(libs.converter.kotlinx.serialization)
