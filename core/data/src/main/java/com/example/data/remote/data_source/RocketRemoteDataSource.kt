@@ -3,17 +3,18 @@ package com.example.data.remote.data_source
 import com.example.data.di.CoroutineScopeModule
 import com.example.data.di.RemoteModule
 import com.example.data.remote.api.SpaceXApi
-import com.example.data.remote.dto.rocket.RocketResDto
+import com.example.data.remote.dto.rocket.RocketResponse
 import kotlinx.coroutines.CoroutineDispatcher
 import kotlinx.coroutines.withContext
+import retrofit2.Retrofit
 import javax.inject.Inject
 
 class RocketRemoteDataSource @Inject constructor(
-    @param:RemoteModule.RocketApi private val api: SpaceXApi.Rockets,
+    private val api: SpaceXApi.Rockets,
     @param:CoroutineScopeModule.IoDispatcher private val dispatcher: CoroutineDispatcher
 ) : IRocketRemoteDataSource {
 
-    override suspend fun fetchRockets(): List<RocketResDto>? {
+    override suspend fun fetchRockets(): List<RocketResponse>? {
         return withContext(dispatcher) {
             api.fetchRockets()
         }
@@ -21,5 +22,5 @@ class RocketRemoteDataSource @Inject constructor(
 }
 
 interface IRocketRemoteDataSource {
-    suspend fun fetchRockets(): List<RocketResDto>?
+    suspend fun fetchRockets(): List<RocketResponse>?
 }

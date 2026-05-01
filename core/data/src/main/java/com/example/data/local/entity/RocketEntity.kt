@@ -2,7 +2,7 @@ package com.example.data.local.entity
 
 import androidx.room.Entity
 import androidx.room.PrimaryKey
-import com.example.data.remote.dto.rocket.RocketResDto
+import com.example.data.remote.dto.rocket.RocketResponse
 
 @Entity(tableName = "rockets")
 data class RocketEntity(
@@ -16,12 +16,12 @@ data class RocketEntity(
     val wikipedia: String,
     val description: String,
 ){
-    fun toResDto() = RocketResDto(
+    fun toResDto() = RocketResponse(
         id = id,
         name = name,
         type = type,
-        height = RocketResDto.Dimension(height),
-        diameter = RocketResDto.Dimension(diameter),
+        height = RocketResponse.Dimension(height),
+        diameter = RocketResponse.Dimension(diameter),
         images = listOf(image),
         firstFlight = firstFlight,
         wikipedia = wikipedia,

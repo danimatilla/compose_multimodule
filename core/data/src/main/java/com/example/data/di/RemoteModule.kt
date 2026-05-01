@@ -19,27 +19,12 @@ import javax.inject.Singleton
 @InstallIn(SingletonComponent::class)
 object RemoteModule {
 
-    @Retention(AnnotationRetention.RUNTIME)
-    @Qualifier
-    annotation class ShipApi
-
-    @Retention(AnnotationRetention.RUNTIME)
-    @Qualifier
-    annotation class RocketApi
-
-    @RocketApi
     @Provides
+    @Singleton
     fun provideRocketApi(
         retrofit: Retrofit
-    ): SpaceXApi = retrofit.retrofitBuilder()
+    ): SpaceXApi.Rockets = retrofit.retrofitBuilder()
         .create(SpaceXApi.Rockets::class.java)
-
-    @ShipApi
-    @Provides
-    fun provideShipApi(
-        retrofit: Retrofit
-    ): SpaceXApi = retrofit.retrofitBuilder()
-        .create(SpaceXApi.Ships::class.java)
 
     @Provides
     @Singleton
