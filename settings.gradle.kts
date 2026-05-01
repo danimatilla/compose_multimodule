@@ -26,4 +26,3 @@ rootProject.name = "seed"
 include(":seed")
 include(":core:data")
 include(":core:domain")
-include(":core:ui")
