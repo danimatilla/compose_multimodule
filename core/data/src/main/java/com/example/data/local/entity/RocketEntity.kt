@@ -15,16 +15,4 @@ data class RocketEntity(
     val firstFlight: String,
     val wikipedia: String,
     val description: String,
-){
-    fun toResDto() = RocketResponse(
-        id = id,
-        name = name,
-        type = type,
-        height = RocketResponse.Dimension(height),
-        diameter = RocketResponse.Dimension(diameter),
-        images = listOf(image),
-        firstFlight = firstFlight,
-        wikipedia = wikipedia,
-        description = description
-    )
-}
+)
