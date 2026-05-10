@@ -3,13 +3,9 @@ package com.example.seed.navigation
 import android.util.Log
 import androidx.navigation3.runtime.NavBackStack
 import androidx.navigation3.runtime.NavKey
-import com.example.seed.navigation.screens.Graph
-import com.example.seed.navigation.screens.ProfileGraph
 import com.example.seed.navigation.screens.Screen
 
 object NavigationHandler {
-
-    private val initialScreens = mutableMapOf<Graph, Screen>()
 
     fun eventHandler(
         backStack: NavBackStack<NavKey>,
@@ -20,57 +16,51 @@ object NavigationHandler {
 
         when (event) {
             is NavigationEvent.PushScreen -> {
-                val screen = event.screen
                 backStack.add(event.screen)
-                screen.graph?.let { graph ->
-                    initialScreens[graph] = screen
-                }
-
                 eventString = event.toString()
             }
 
             is NavigationEvent.PopScreen -> {
-                event.screen?.let {
-                    // Hacer pop hasta la pantalla específica
-                    backStack.removeAll { screen -> screen != event.screen }
-                } ?: run {
-                    // Hacer pop normal
-                    backStack.removeLastOrNull()
+                val targetScreen = event.screen
+                if (targetScreen == null) {
+                    // Pop to the previous screen, but only if there is more than one screen in the stack.
+                    if (backStack.size > 1) {
+                        backStack.removeLastOrNull()
+                    }
+                } else {
+                    // Pop until the specific screen, removing all screens above it.
+                    val targetIndex = backStack.indexOfLast { it == targetScreen }
+                    if (targetIndex != -1) {
+                        // Clears everything above the target index in one go
+                        backStack.subList(targetIndex + 1, backStack.size).clear()
+                    }
                 }
-
                 eventString = event.toString()
             }
         }
 
         val currentBackStack = backStack.stackString()
-        Log.d(TAG, "$eventString :: $initialBackStack > $currentBackStack")
-    }
-
-    fun getInitialScreen(graph: Graph): Screen {
-        return initialScreens.remove(graph) ?: when (graph) {
-            // Aquí puedes definir pantallas iniciales por defecto para cada graph si lo deseas.
-            ProfileGraph -> ProfileGraph
-        }
+        Log.d(TAG, "$eventString$initialBackStack > $currentBackStack")
     }
 
     sealed interface NavigationEvent {
         /**
-         * Agrega una nueva [screen] al stack de navegación.
+         * Adds a new [screen] to the navigation stack.
          */
         data class PushScreen(val screen: Screen) : NavigationEvent {
 
             override fun toString(): String =
-                "${javaClass.simpleName}: ${screen.javaClass.simpleName}"
+                "🔻 ${screen.javaClass.simpleName} :: "
         }
 
         /**
-         * Regresa a la pantalla anterior. Si se está en la raíz del graph, se regresará al graph padre.
-         * Si se proporciona un [screen], se hará pop hasta esa pantalla específica.
+         * Returns to the previous screen.
+         * If a [screen] is provided, it will pop until that specific screen.
          */
         data class PopScreen(val screen: Screen? = null) : NavigationEvent {
 
             override fun toString(): String =
-                "${javaClass.simpleName}: ${screen?.javaClass?.simpleName}"
+                "🔺 ${screen?.run {"${javaClass.simpleName} :: "}.orEmpty()}"
         }
     }
 

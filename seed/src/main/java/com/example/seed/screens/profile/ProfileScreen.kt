@@ -19,7 +19,7 @@ fun ProfileScreen(onEvent: (NavigationHandler.NavigationEvent) -> Unit) {
         verticalArrangement = Arrangement.Center,
         horizontalAlignment = Alignment.CenterHorizontally
     ) {
-        Text("Profile Main Screen")
+        Text("Profile Screen")
         Button(onClick = { onEvent(NavigationHandler.NavigationEvent.PushScreen(ProfileGraph.Settings)) }) {
             Text("Go to Settings")
         }

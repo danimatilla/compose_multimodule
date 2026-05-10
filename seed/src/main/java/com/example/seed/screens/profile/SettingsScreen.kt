@@ -9,6 +9,7 @@ import androidx.compose.runtime.Composable
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import com.example.seed.navigation.NavigationHandler
+import com.example.seed.navigation.screens.DashGraph
 import com.example.seed.navigation.screens.Screen
 
 
@@ -23,7 +24,7 @@ fun SettingsScreen(onEvent: (NavigationHandler.NavigationEvent) -> Unit) {
         Button(onClick = { onEvent(NavigationHandler.NavigationEvent.PopScreen()) }) {
             Text("Back to Profile")
         }
-        Button(onClick = { onEvent(NavigationHandler.NavigationEvent.PopScreen(Screen.Home)) }) {
+        Button(onClick = { onEvent(NavigationHandler.NavigationEvent.PopScreen(DashGraph.Home)) }) {
             Text("Back to Home")
         }
     }
