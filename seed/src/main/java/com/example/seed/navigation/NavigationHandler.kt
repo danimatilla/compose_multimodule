@@ -21,20 +21,7 @@ object NavigationHandler {
             }
 
             is NavigationEvent.PopScreen -> {
-                val targetScreen = event.screen
-                if (targetScreen == null) {
-                    // Pop to the previous screen, but only if there is more than one screen in the stack.
-                    if (backStack.size > 1) {
-                        backStack.removeLastOrNull()
-                    }
-                } else {
-                    // Pop until the specific screen, removing all screens above it.
-                    val targetIndex = backStack.indexOfLast { it == targetScreen }
-                    if (targetIndex != -1) {
-                        // Clears everything above the target index in one go
-                        backStack.subList(targetIndex + 1, backStack.size).clear()
-                    }
-                }
+                event.onPopScreen(backStack)
                 eventString = event.toString()
             }
         }
@@ -60,12 +47,30 @@ object NavigationHandler {
         data class PopScreen(val screen: Screen? = null) : NavigationEvent {
 
             override fun toString(): String =
-                "🔺Pop${screen?.run {" to ${javaClass.simpleName}"}.orEmpty()} :: "
+                "🔺Pop${screen?.run { " to ${javaClass.simpleName}" }.orEmpty()} :: "
         }
     }
 
     private fun NavBackStack<NavKey>.stackString(): String =
         "[ ${joinToString { it.javaClass.simpleName }} ]"
+
+    private fun NavigationEvent.PopScreen.onPopScreen(
+        backStack: NavBackStack<NavKey>
+    ) {
+        screen?.run {
+            // Pop to the previous screen, but only if there is more than one screen in the stack.
+            if (backStack.size > 1) {
+                backStack.removeLastOrNull()
+            }
+        } ?: run {
+            // Pop until the specific screen, removing all screens above it.
+            val targetIndex = backStack.indexOfLast { it == screen }
+            if (targetIndex != -1) {
+                // Clears everything above the target index in one go
+                backStack.subList(targetIndex + 1, backStack.size).clear()
+            }
+        }
+    }
 
     const val TAG = "NavigationHandler"
 }
