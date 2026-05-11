@@ -49,6 +49,8 @@ dependencies {
     implementation(libs.androidx.appcompat)
     implementation(libs.material)
 
+    api(libs.kotlin.reflect)
+
     testImplementation(libs.junit)
 
     androidTestImplementation(libs.androidx.junit)
