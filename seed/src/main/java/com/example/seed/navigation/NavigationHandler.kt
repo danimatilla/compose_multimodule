@@ -50,7 +50,7 @@ object NavigationHandler {
         data class PushScreen(val screen: Screen) : NavigationEvent {
 
             override fun toString(): String =
-                "🔻 ${screen.javaClass.simpleName} :: "
+                "🔻Push to ${screen.javaClass.simpleName} :: "
         }
 
         /**
@@ -60,7 +60,7 @@ object NavigationHandler {
         data class PopScreen(val screen: Screen? = null) : NavigationEvent {
 
             override fun toString(): String =
-                "🔺 ${screen?.run {"${javaClass.simpleName} :: "}.orEmpty()}"
+                "🔺Pop${screen?.run {" to ${javaClass.simpleName}"}.orEmpty()} :: "
         }
     }
 
