@@ -7,7 +7,7 @@ plugins {
 }
 
 android {
-    namespace = "com.example.seed"
+    namespace = "com.dxmxp.seed"
     compileSdk {
         version = release(36) {
             minorApiLevel = 1
@@ -47,6 +47,7 @@ dependencies {
     implementation(project(":core:domain"))
     implementation(project(":core:data"))
     implementation(project(":core:ui"))
+    implementation(project(":stories"))
 
     implementation(libs.hilt)
     ksp(libs.hilt.compiler)
@@ -69,9 +70,6 @@ dependencies {
     implementation(libs.androidx.compose.ui.tooling.preview)
     implementation(libs.androidx.compose.material3)
     implementation(libs.bundles.material.icons)
-
-    implementation(libs.androidx.navigation3.runtime)
-    implementation(libs.androidx.navigation3.ui)
 
     testImplementation(libs.junit)
 
