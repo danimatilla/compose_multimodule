@@ -1,4 +1,4 @@
-package com.example.seed.screens.profile
+package com.example.seed.screens.dash.profile
 
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Column
@@ -20,14 +20,5 @@ fun ProfileScreen(onEvent: (NavigationHandler.NavigationEvent) -> Unit) {
         horizontalAlignment = Alignment.CenterHorizontally
     ) {
         Text("Profile Screen")
-        Button(onClick = { onEvent(NavigationHandler.NavigationEvent.PushScreen(ProfileGraph.Settings)) }) {
-            Text("Go to Settings")
-        }
-        Button(onClick = { onEvent(NavigationHandler.NavigationEvent.PushScreen(ProfileGraph.Account)) }) {
-            Text("Go to Account")
-        }
-        Button(onClick = { onEvent(NavigationHandler.NavigationEvent.PopScreen()) }) {
-            Text("Back")
-        }
     }
 }

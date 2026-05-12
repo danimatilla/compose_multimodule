@@ -1,4 +1,4 @@
-package com.example.seed.screens.profile
+package com.example.seed.screens.dash.profile
 
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Column
@@ -21,11 +21,5 @@ fun SettingsScreen(onEvent: (NavigationHandler.NavigationEvent) -> Unit) {
         horizontalAlignment = Alignment.CenterHorizontally
     ) {
         Text("Settings Screen")
-        Button(onClick = { onEvent(NavigationHandler.NavigationEvent.PopScreen()) }) {
-            Text("Back to Profile")
-        }
-        Button(onClick = { onEvent(NavigationHandler.NavigationEvent.PopScreen(DashGraph.Home)) }) {
-            Text("Back to Home")
-        }
     }
 }

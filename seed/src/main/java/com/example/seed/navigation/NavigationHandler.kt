@@ -21,19 +21,14 @@ object NavigationHandler {
             }
 
             is NavigationEvent.PopScreen -> {
-                val targetScreen = event.screen
-                if (targetScreen == null) {
-                    // Pop to the previous screen, but only if there is more than one screen in the stack.
-                    if (backStack.size > 1) {
-                        backStack.removeLastOrNull()
-                    }
-                } else {
-                    // Pop until the specific screen, removing all screens above it.
-                    val targetIndex = backStack.indexOfLast { it == targetScreen }
-                    if (targetIndex != -1) {
-                        // Clears everything above the target index in one go
-                        backStack.subList(targetIndex + 1, backStack.size).clear()
-                    }
+                event.popScreen(backStack)
+                eventString = event.toString()
+            }
+
+            is NavigationEvent.SetRootScreen -> {
+                backStack.apply {
+                    clear()
+                    add(event.screen)
                 }
                 eventString = event.toString()
             }
@@ -43,12 +38,31 @@ object NavigationHandler {
         Log.d(TAG, "$eventString$initialBackStack > $currentBackStack")
     }
 
+    private fun NavigationEvent.PopScreen.popScreen(
+        backStack: NavBackStack<NavKey>
+    ) {
+        screen?.run {
+            // Pop until the specific screen, removing all screens above it.
+            backStack
+                .indexOfLast { it == this }
+                .takeIf { it != -1 }
+                ?.let { targetIndex ->
+                    // Clears everything above the target index in one go
+                    backStack.subList(targetIndex + 1, backStack.size).clear()
+                }
+        } ?: run {
+            // Pop to the previous screen, but only if there is more than one screen in the stack.
+            if (backStack.size > 1) {
+                backStack.removeLastOrNull()
+            }
+        }
+    }
+
     sealed interface NavigationEvent {
         /**
          * Adds a new [screen] to the navigation stack.
          */
         data class PushScreen(val screen: Screen) : NavigationEvent {
-
             override fun toString(): String =
                 "🔻Push to ${screen.javaClass.simpleName} :: "
         }
@@ -58,9 +72,16 @@ object NavigationHandler {
          * If a [screen] is provided, it will pop until that specific screen.
          */
         data class PopScreen(val screen: Screen? = null) : NavigationEvent {
-
             override fun toString(): String =
-                "🔺Pop${screen?.run {" to ${javaClass.simpleName}"}.orEmpty()} :: "
+                "🔺Pop${screen?.run { " to ${javaClass.simpleName}" }.orEmpty()} :: "
+        }
+
+        /**
+         * Set specific screen as the root of the stack, clearing all previous screens.
+         */
+        data class SetRootScreen(val screen: Screen) : NavigationEvent {
+            override fun toString(): String =
+                "🔻Set root to ${screen.javaClass.simpleName} :: "
         }
     }
 

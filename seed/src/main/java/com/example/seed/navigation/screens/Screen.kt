@@ -1,7 +1,6 @@
 package com.example.seed.navigation.screens
 
 import androidx.navigation3.runtime.EntryProviderScope
-import androidx.navigation3.runtime.NavEntry
 import androidx.navigation3.runtime.NavKey
 import com.example.seed.navigation.NavigationHandler
 import kotlinx.serialization.Serializable
@@ -14,7 +13,10 @@ import kotlinx.serialization.Serializable
  * and when popping, it returns to the previous screen.
  */
 @Serializable
-sealed interface Screen : NavKey
+sealed interface Screen : NavKey {
+
+    val route: String
+}
 
 
 /**
