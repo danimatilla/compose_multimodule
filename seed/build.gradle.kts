@@ -15,13 +15,16 @@ android {
     }
 
     defaultConfig {
-        applicationId = "com.example.seed"
+        applicationId = "com.dxmxp.seed"
         minSdk = 24
         targetSdk = 36
         versionCode = 1
         versionName = "1.0"
 
         testInstrumentationRunner = "androidx.test.runner.AndroidJUnitRunner"
+
+        manifestPlaceholders["app_name"] = "SeedApp"
+        manifestPlaceholders["app_icon"] = "@mipmap/ic_launcher"
     }
 
     buildTypes {

@@ -39,13 +39,14 @@ class MainActivity : ComponentActivity() {
 
             SeedTheme {
                 Scaffold(
-                    bottomBar = { BottomNavigationBar(backStack) }
-                ) { paddingValues ->
+                    bottomBar = { BottomNavigationBar(backStack) },
+                    modifier = Modifier.fillMaxSize()
+                ) { innerPadding ->
                     NavGraph(
                         backStack = backStack,
                         modifier = Modifier
                             .fillMaxSize()
-                            .padding(paddingValues)
+                            .padding(innerPadding)
                     )
                 }
             }
