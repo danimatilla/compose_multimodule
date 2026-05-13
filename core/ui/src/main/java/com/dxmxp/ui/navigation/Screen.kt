@@ -23,5 +23,19 @@ interface Screen : NavKey {
  */
 interface Graph : Screen {
 
+    val children: List<Screen>
+        get() = javaClass.declaredClasses
+            .filter { Screen::class.java.isAssignableFrom(it) }
+            .mapNotNull { clazz ->
+                try {
+                    clazz.getField("INSTANCE").get(null) as? Screen
+                } catch (_: Exception) {
+                    null
+                }
+            }
+
+    fun contains(key: NavKey): Boolean =
+        children.any { it == key || (it is Graph && it.contains(key)) }
+
     fun EntryProviderScope<NavKey>.registerEntries(onEvent: (NavigationHandler.NavigationEvent) -> Unit)
 }

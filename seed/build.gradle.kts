@@ -25,6 +25,7 @@ android {
 
         manifestPlaceholders["app_name"] = "SeedApp"
         manifestPlaceholders["app_icon"] = "@mipmap/ic_launcher"
+        manifestPlaceholders["app_scheme"] = "dxmxp"
     }
 
     buildTypes {

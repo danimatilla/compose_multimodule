@@ -15,7 +15,7 @@ fun NavGraph(
     modifier: Modifier = Modifier
 ) {
     val onEvent: (NavigationHandler.NavigationEvent) -> Unit = { event ->
-        NavigationHandler.eventHandler(backStack, event)
+        NavigationHandler.handleEvent(backStack, event)
     }
 
     NavDisplay(

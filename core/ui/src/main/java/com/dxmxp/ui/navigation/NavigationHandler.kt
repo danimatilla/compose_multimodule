@@ -3,11 +3,10 @@ package com.dxmxp.ui.navigation
 import android.util.Log
 import androidx.navigation3.runtime.NavBackStack
 import androidx.navigation3.runtime.NavKey
-import kotlin.jvm.javaClass
 
 object NavigationHandler {
 
-    fun eventHandler(
+    fun handleEvent(
         backStack: NavBackStack<NavKey>,
         event: NavigationEvent
     ) {
