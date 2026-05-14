@@ -30,6 +30,7 @@ import com.dxmxp.seed.navigation.NavGraph
 import com.dxmxp.seed.navigation.routes.DeepLinkHandler
 import com.dxmxp.ui.navigation.Graph
 import com.dxmxp.ui.navigation.NavigationHandler
+import com.dxmxp.ui.navigation.Screen
 import com.dxmxp.seed.navigation.routes.SeedGraph
 import com.dxmxp.seed.navigation.routes.ProfileGraph
 import com.dxmxp.stories.navigation.routes.StoriesGraph
@@ -40,10 +41,10 @@ class MainActivity : ComponentActivity() {
     private var intentState by mutableStateOf<Intent?>(null)
 
     override fun onCreate(savedInstanceState: Bundle?) {
+        enableEdgeToEdge()
+
         super.onCreate(savedInstanceState)
         intentState = intent
-
-        enableEdgeToEdge()
 
         setContent {
             val backStack = rememberNavBackStack(SeedGraph)
@@ -58,8 +59,15 @@ class MainActivity : ComponentActivity() {
             }
 
             SeedTheme {
+                val currentDestination = backStack.lastOrNull() as? Screen
+                val shouldShowBottomBar = currentDestination?.showBottomBar == true
+
                 Scaffold(
-                    bottomBar = { BottomNavigationBar(backStack) },
+                    bottomBar = {
+                        if (shouldShowBottomBar) {
+                            BottomNavigationBar(backStack)
+                        }
+                    },
                     modifier = Modifier.fillMaxSize()
                 ) { innerPadding ->
                     NavGraph(

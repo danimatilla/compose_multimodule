@@ -9,6 +9,8 @@ import com.dxmxp.stories.navigation.routes.StoriesGraph
 import com.dxmxp.ui.navigation.Graph
 import com.dxmxp.ui.navigation.NavigationHandler
 import com.dxmxp.ui.navigation.Screen
+import com.dxmxp.ui.screens.WebView
+import com.dxmxp.ui.screens.WebViewScreen
 import kotlinx.serialization.Serializable
 
 @Serializable
@@ -32,6 +34,7 @@ object SeedGraph : Graph {
         entry<SeedGraph> { HomeScreen(onEvent) }
         entry<Search> { SearchScreen(onEvent) }
         entry<Menu> { MenuScreen(onEvent) }
+        entry<WebView> { screen -> WebViewScreen(screen, onEvent) }
 
         // Integrate the ProfileGraph entries into this graph.
         ProfileGraph.run { registerEntries(onEvent) }

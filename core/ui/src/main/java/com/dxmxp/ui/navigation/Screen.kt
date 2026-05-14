@@ -13,6 +13,8 @@ import androidx.navigation3.runtime.NavKey
 interface Screen : NavKey {
 
     val route: String
+
+    val showBottomBar: Boolean get() = true
 }
 
 
