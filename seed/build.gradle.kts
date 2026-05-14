@@ -23,9 +23,14 @@ android {
 
         testInstrumentationRunner = "androidx.test.runner.AndroidJUnitRunner"
 
-        manifestPlaceholders["app_name"] = "SeedApp"
-        manifestPlaceholders["app_icon"] = "@mipmap/ic_launcher"
-        manifestPlaceholders["app_scheme"] = "dxmxp"
+        addManifestPlaceholders(
+            mapOf(
+                "app_name" to "SeedApp",
+                "app_icon" to "@mipmap/ic_launcher",
+                "app_scheme" to "dxmxp",
+                "app_host" to "seed.dxmxp.com"
+            )
+        )
     }
 
     buildTypes {
@@ -56,7 +61,7 @@ dependencies {
     implementation(libs.hilt)
     ksp(libs.hilt.compiler)
 
-    implementation(platform (libs.okhttp.bom))
+    implementation(platform(libs.okhttp.bom))
     implementation(libs.okhttp)
     implementation(libs.okhttp.logging.interceptor)
 
