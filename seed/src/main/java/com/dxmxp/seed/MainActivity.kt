@@ -21,24 +21,31 @@ import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
+import androidx.compose.runtime.rememberCoroutineScope
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Modifier
 import androidx.navigation3.runtime.NavBackStack
 import androidx.navigation3.runtime.NavKey
 import androidx.navigation3.runtime.rememberNavBackStack
+import dagger.hilt.android.AndroidEntryPoint
 import com.dxmxp.seed.navigation.NavGraph
 import com.dxmxp.seed.navigation.routes.DeepLinkHandler
+import com.dxmxp.seed.navigation.routes.ProfileGraph
+import com.dxmxp.seed.navigation.routes.SeedGraph
+import com.dxmxp.stories.navigation.routes.StoriesGraph
+import com.dxmxp.theme.SeedTheme
+import com.dxmxp.ui.base.DataObserver
 import com.dxmxp.ui.navigation.Graph
 import com.dxmxp.ui.navigation.NavigationHandler
 import com.dxmxp.ui.navigation.Screen
-import com.dxmxp.seed.navigation.routes.SeedGraph
-import com.dxmxp.seed.navigation.routes.ProfileGraph
-import com.dxmxp.stories.navigation.routes.StoriesGraph
-import com.dxmxp.theme.SeedTheme
+import kotlinx.coroutines.launch
+import javax.inject.Inject
 
+@AndroidEntryPoint
 class MainActivity : ComponentActivity() {
 
-    private var intentState by mutableStateOf<Intent?>(null)
+    @Inject
+    lateinit var dataObserver: DataObserver
 
     override fun onCreate(savedInstanceState: Bundle?) {
         enableEdgeToEdge()
@@ -48,11 +55,22 @@ class MainActivity : ComponentActivity() {
 
         setContent {
             val backStack = rememberNavBackStack(SeedGraph)
+            val scope = rememberCoroutineScope()
+
+            val onEvent: (NavigationHandler.NavigationEvent) -> Unit = { event ->
+                scope.launch {
+                    NavigationHandler.handleEvent(
+                        backStack = backStack,
+                        event = event,
+                        dataObserver = dataObserver
+                    )
+                }
+            }
 
             LaunchedEffect(intentState) {
                 intentState?.data?.let { uri ->
                     DeepLinkHandler.handleDeepLink(uri)?.let { event ->
-                        NavigationHandler.handleEvent(backStack, event)
+                        onEvent(event)
                     }
                     intentState = null
                 }
@@ -65,13 +83,17 @@ class MainActivity : ComponentActivity() {
                 Scaffold(
                     bottomBar = {
                         if (shouldShowBottomBar) {
-                            BottomNavigationBar(backStack)
+                            BottomNavigationBar(
+                                backStack = backStack,
+                                onEvent = onEvent
+                            )
                         }
                     },
                     modifier = Modifier.fillMaxSize()
                 ) { innerPadding ->
                     NavGraph(
                         backStack = backStack,
+                        onEvent = onEvent,
                         modifier = Modifier
                             .fillMaxSize()
                             .padding(innerPadding)
@@ -87,7 +109,10 @@ class MainActivity : ComponentActivity() {
     }
 
     @Composable
-    private fun BottomNavigationBar(backStack: NavBackStack<NavKey>) {
+    private fun BottomNavigationBar(
+        backStack: NavBackStack<NavKey>,
+        onEvent: (NavigationHandler.NavigationEvent) -> Unit
+    ) {
         val navigationBarItems = listOf(
             SeedGraph to Icons.Default.Home,
             SeedGraph.Search to Icons.Default.Search,
@@ -106,15 +131,12 @@ class MainActivity : ComponentActivity() {
         NavigationBar {
             navigationBarItems.forEach { (screen, icon) ->
                 val selected = selectedItem == screen
-                
+
                 NavigationBarItem(
                     selected = selected,
                     onClick = {
                         if (!selected) {
-                            NavigationHandler.handleEvent(
-                                backStack,
-                                NavigationHandler.NavigationEvent.SetRootScreen(screen)
-                            )
+                            onEvent(NavigationHandler.NavigationEvent.SetRootScreen(screen))
                         }
                     },
                     icon = { Icon(icon, contentDescription = null) }
@@ -122,4 +144,6 @@ class MainActivity : ComponentActivity() {
             }
         }
     }
+
+    private var intentState by mutableStateOf<Intent?>(null)
 }

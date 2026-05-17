@@ -1,21 +1,33 @@
 package com.dxmxp.ui.navigation
 
 import android.util.Log
+import androidx.compose.runtime.rememberCoroutineScope
 import androidx.navigation3.runtime.NavBackStack
 import androidx.navigation3.runtime.NavKey
+import com.dxmxp.ui.base.DataObserver
 
 object NavigationHandler {
 
-    fun handleEvent(
+    suspend fun handleEvent(
         backStack: NavBackStack<NavKey>,
-        event: NavigationEvent
+        event: NavigationEvent,
+        dataObserver: DataObserver
     ) {
         var eventString: String
         val initialBackStack = backStack.stackString()
 
         when (event) {
             is NavigationEvent.PushScreen -> {
-                backStack.add(event.screen)
+                event.data?.run {
+                    dataObserver.emit(this)
+                }
+
+                val screen = event.screen
+                backStack.run {
+                    if(lastOrNull() != screen){
+                        add(screen)
+                    }
+                }
                 eventString = event.toString()
             }
 
@@ -25,7 +37,7 @@ object NavigationHandler {
             }
 
             is NavigationEvent.SetRootScreen -> {
-                backStack.apply {
+                backStack.run {
                     clear()
                     add(event.screen)
                 }
@@ -61,7 +73,7 @@ object NavigationHandler {
         /**
          * Adds a new [screen] to the navigation stack.
          */
-        data class PushScreen(val screen: Screen) : NavigationEvent {
+        data class PushScreen(val screen: Screen, val data: Any? = null) : NavigationEvent {
             override fun toString(): String =
                 "🔻Push to ${screen.javaClass.simpleName} :: "
         }
@@ -87,5 +99,5 @@ object NavigationHandler {
     private fun NavBackStack<NavKey>.stackString(): String =
         "[ ${joinToString { it.javaClass.simpleName }} ]"
 
-    const val TAG = "NavigationHandler"
+    private const val TAG = "NavigationHandler"
 }

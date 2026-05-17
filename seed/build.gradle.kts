@@ -58,7 +58,7 @@ dependencies {
     implementation(project(":core:ui"))
     implementation(project(":stories"))
 
-    implementation(libs.hilt)
+    implementation(libs.bundles.hilt)
     ksp(libs.hilt.compiler)
 
     implementation(platform(libs.okhttp.bom))

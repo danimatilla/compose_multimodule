@@ -25,19 +25,25 @@ interface Screen : NavKey {
  */
 interface Graph : Screen {
 
-    val children: List<Screen>
+    val children: List<Class<out Screen>>
         get() = javaClass.declaredClasses
             .filter { Screen::class.java.isAssignableFrom(it) }
-            .mapNotNull { clazz ->
-                try {
-                    clazz.getField("INSTANCE").get(null) as? Screen
-                } catch (_: Exception) {
-                    null
-                }
+            .map {
+                @Suppress("UNCHECKED_CAST")
+                it as Class<out Screen>
             }
 
     fun contains(key: NavKey): Boolean =
-        children.any { it == key || (it is Graph && it.contains(key)) }
+        children.any { clazz ->
+            clazz.isInstance(key) || (
+                try {
+                    val instance = clazz.getField("INSTANCE").get(null) as? Graph
+                    instance?.contains(key) == true
+                } catch (_: Exception) {
+                    false
+                }
+            )
+        }
 
     fun EntryProviderScope<NavKey>.registerEntries(onEvent: (NavigationHandler.NavigationEvent) -> Unit)
 }

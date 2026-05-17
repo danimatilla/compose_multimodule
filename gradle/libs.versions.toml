@@ -19,6 +19,7 @@ retrofit = "3.0.0"
 room = "2.8.4"
 okhttp = "5.3.2"
 navigation3 = "1.1.1"
+hiltNavigationCompose = "1.3.0"
 
 [libraries]
 androidx-core-ktx = { group = "androidx.core", name = "core-ktx", version.ref = "coreKtx" }
@@ -42,6 +43,7 @@ material = { group = "com.google.android.material", name = "material", version.r
 
 hilt = { group = "com.google.dagger", name = "hilt-android", version.ref = "hilt" }
 hilt-compiler = { group = "com.google.dagger", name = "hilt-android-compiler", version.ref = "hilt" }
+hilt-navigation-compose = { group = "androidx.hilt", name = "hilt-navigation-compose", version.ref = "hiltNavigationCompose" }
 
 okhttp-bom = { group = "com.squareup.okhttp3", name = "okhttp-bom", version.ref = "okhttp" }
 okhttp = { group = "com.squareup.okhttp3", name = "okhttp" }
@@ -72,3 +74,4 @@ ksp = { id = "com.google.devtools.ksp", version.ref = "ksp" }
 
 [bundles]
 material-icons = ["androidx-compose-material-icons-core", "androidx-compose-material-icons-extended"]
+hilt = ["hilt", "hilt-navigation-compose"]

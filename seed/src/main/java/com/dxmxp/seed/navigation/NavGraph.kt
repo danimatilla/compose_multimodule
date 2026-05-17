@@ -8,16 +8,14 @@ import androidx.navigation3.runtime.entryProvider
 import androidx.navigation3.ui.NavDisplay
 import com.dxmxp.seed.navigation.routes.SeedGraph
 import com.dxmxp.ui.navigation.NavigationHandler
+import com.dxmxp.ui.navigation.Screen
 
 @Composable
 fun NavGraph(
+    modifier: Modifier = Modifier,
     backStack: NavBackStack<NavKey>,
-    modifier: Modifier = Modifier
+    onEvent: (NavigationHandler.NavigationEvent) -> Unit
 ) {
-    val onEvent: (NavigationHandler.NavigationEvent) -> Unit = { event ->
-        NavigationHandler.handleEvent(backStack, event)
-    }
-
     NavDisplay(
         backStack = backStack,
         entryProvider = entryProvider {

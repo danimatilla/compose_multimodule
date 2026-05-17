@@ -28,7 +28,14 @@ object DeepLinkHandler {
         fun register(screen: Screen) {
             registeredScreens[screen.route] = screen
             if (screen is Graph) {
-                screen.children.forEach { register(it) }
+                screen.children.forEach { clazz ->
+                    try {
+                        val instance = clazz.getField("INSTANCE").get(null) as? Screen
+                        if (instance != null) register(instance)
+                    } catch (_: Exception) {
+                        // Skip data classes or objects that fail to load
+                    }
+                }
             }
         }
 

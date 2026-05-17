@@ -28,7 +28,7 @@ abstract class BaseViewModel<STATE, EFFECT, EVENT> : ViewModel() {
     private fun subscribeIntents() {
         viewModelScope.launch {
             events.collect {
-                handleIntent(it)
+                handleEvent(it)
             }
         }
     }
@@ -47,5 +47,5 @@ abstract class BaseViewModel<STATE, EFFECT, EVENT> : ViewModel() {
 
     protected abstract fun createInitialState(): STATE
 
-    protected abstract fun handleIntent(event: EVENT)
+    protected abstract fun handleEvent(event: EVENT)
 }
