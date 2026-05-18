@@ -9,6 +9,7 @@ import com.dxmxp.stories.navigation.routes.StoriesGraph
 import com.dxmxp.ui.navigation.Graph
 import com.dxmxp.ui.navigation.NavigationHandler
 import com.dxmxp.ui.navigation.Screen
+import com.dxmxp.ui.navigation.screenEntry
 import com.dxmxp.ui.screens.WebView
 import com.dxmxp.ui.screens.WebViewScreen
 import kotlinx.serialization.Serializable
@@ -31,10 +32,10 @@ object SeedGraph : Graph {
     override fun EntryProviderScope<NavKey>.registerEntries(
         onEvent: (NavigationHandler.NavigationEvent) -> Unit
     ) {
-        entry<SeedGraph> { HomeScreen(onEvent) }
-        entry<Search> { SearchScreen(onEvent) }
-        entry<Menu> { MenuScreen(onEvent) }
-        entry<WebView> { screen -> WebViewScreen(screen, onEvent) }
+        screenEntry<SeedGraph> { HomeScreen(onEvent) }
+        screenEntry<Search> { SearchScreen(onEvent) }
+        screenEntry<Menu> { MenuScreen(onEvent) }
+        screenEntry<WebView> { screen -> WebViewScreen(screen, onEvent) }
 
         // Integrate the ProfileGraph entries into this graph.
         ProfileGraph.run { registerEntries(onEvent) }

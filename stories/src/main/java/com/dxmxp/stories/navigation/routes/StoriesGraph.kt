@@ -1,12 +1,15 @@
 package com.dxmxp.stories.navigation.routes
 
+import androidx.hilt.lifecycle.viewmodel.compose.hiltViewModel
 import androidx.navigation3.runtime.EntryProviderScope
 import androidx.navigation3.runtime.NavKey
 import com.dxmxp.stories.screens.feed.FeedScreen
 import com.dxmxp.stories.screens.story_detail.StoryDetailScreen
+import com.dxmxp.stories.screens.story_detail.StoryDetailViewModel
 import com.dxmxp.ui.navigation.Graph
 import com.dxmxp.ui.navigation.NavigationHandler
 import com.dxmxp.ui.navigation.Screen
+import com.dxmxp.ui.navigation.screenEntry
 import kotlinx.serialization.Serializable
 
 @Serializable
@@ -33,10 +36,12 @@ object StoriesGraph : Graph {
     override fun EntryProviderScope<NavKey>.registerEntries(
         onEvent: (NavigationHandler.NavigationEvent) -> Unit,
     ) {
-        entry<StoriesGraph> { FeedScreen(onEvent) }
-        entry<StoryDetail> { storyDetail -> StoryDetailScreen(storyDetail.id, onEvent) }
-        entry<Search> { /* SearchScreen(onEvent) */ }
-        entry<Notifications> { /* NotificationsScreen(onEvent) */ }
+        screenEntry<StoriesGraph> { FeedScreen(onEvent) }
+        screenEntry<StoryDetail, StoryDetailViewModel>(
+            viewModelProvide = { hiltViewModel<StoryDetailViewModel>() },
+        ) { viewModel -> StoryDetailScreen(onEvent, viewModel) }
+        screenEntry<Search> { /* SearchScreen(onEvent) */ }
+        screenEntry<Notifications> { /* NotificationsScreen(onEvent) */ }
     }
 
     override val route: String

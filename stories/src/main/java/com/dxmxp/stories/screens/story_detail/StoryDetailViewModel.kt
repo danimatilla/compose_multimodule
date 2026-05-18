@@ -1,23 +1,30 @@
 package com.dxmxp.stories.screens.story_detail
 
 import com.dxmxp.domain.model.Story
+import com.dxmxp.stories.navigation.routes.StoriesGraph
 import com.dxmxp.ui.base.DataObserver
 import com.dxmxp.ui.base.BaseViewModel
+import com.dxmxp.ui.base.InitializableViewModel
 import dagger.hilt.android.lifecycle.HiltViewModel
 import javax.inject.Inject
 
 @HiltViewModel
 class StoryDetailViewModel @Inject constructor(
-    private val dataObserver: DataObserver
-) : BaseViewModel<StoryDetailViewModel.State, StoryDetailViewModel.Effect, StoryDetailViewModel.Event>() {
+    private val dataObserver: DataObserver,
+) : BaseViewModel<StoryDetailViewModel.State, StoryDetailViewModel.Effect, StoryDetailViewModel.Event>(),
+    InitializableViewModel<StoriesGraph.StoryDetail> {
 
     override fun createInitialState(): State = State()
+
+    override fun init(screen: StoriesGraph.StoryDetail) {
+        val story = dataObserver.getLast<Story>()
+        setState { copy(storyId = screen.id, story = story) }
+    }
 
     override fun handleEvent(event: Event) {
         when (event) {
             is Event.Init -> {
-                val story = dataObserver.getLast<Story>()
-                setState { copy(storyId = event.id, story = story) }
+                init(StoriesGraph.StoryDetail(event.id))
             }
         }
     }

@@ -1,10 +1,12 @@
 package com.dxmxp.ui.navigation
 
 import android.util.Log
-import androidx.compose.runtime.rememberCoroutineScope
 import androidx.navigation3.runtime.NavBackStack
 import androidx.navigation3.runtime.NavKey
 import com.dxmxp.ui.base.DataObserver
+import com.dxmxp.ui.navigation.helpers.EventExtension.popScreen
+import com.dxmxp.ui.navigation.helpers.EventExtension.pushScreen
+import com.dxmxp.ui.navigation.helpers.EventExtension.setRootScreen
 
 object NavigationHandler {
 
@@ -18,16 +20,7 @@ object NavigationHandler {
 
         when (event) {
             is NavigationEvent.PushScreen -> {
-                event.data?.run {
-                    dataObserver.emit(this)
-                }
-
-                val screen = event.screen
-                backStack.run {
-                    if(lastOrNull() != screen){
-                        add(screen)
-                    }
-                }
+                event.pushScreen(backStack, dataObserver)
                 eventString = event.toString()
             }
 
@@ -37,36 +30,13 @@ object NavigationHandler {
             }
 
             is NavigationEvent.SetRootScreen -> {
-                backStack.run {
-                    clear()
-                    add(event.screen)
-                }
+                event.setRootScreen(backStack)
                 eventString = event.toString()
             }
         }
 
         val currentBackStack = backStack.stackString()
         Log.d(TAG, "$eventString$initialBackStack > $currentBackStack")
-    }
-
-    private fun NavigationEvent.PopScreen.popScreen(
-        backStack: NavBackStack<NavKey>
-    ) {
-        screen?.run {
-            // Pop until the specific screen, removing all screens above it.
-            backStack
-                .indexOfLast { it == this }
-                .takeIf { it != -1 }
-                ?.let { targetIndex ->
-                    // Clears everything above the target index in one go
-                    backStack.subList(targetIndex + 1, backStack.size).clear()
-                }
-        } ?: run {
-            // Pop to the previous screen, but only if there is more than one screen in the stack.
-            if (backStack.size > 1) {
-                backStack.removeLastOrNull()
-            }
-        }
     }
 
     sealed interface NavigationEvent {

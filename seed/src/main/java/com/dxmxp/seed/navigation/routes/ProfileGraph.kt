@@ -7,6 +7,7 @@ import com.dxmxp.seed.screens.dash.profile.SettingsScreen
 import com.dxmxp.ui.navigation.Graph
 import com.dxmxp.ui.navigation.NavigationHandler
 import com.dxmxp.ui.navigation.Screen
+import com.dxmxp.ui.navigation.screenEntry
 import kotlinx.serialization.Serializable
 
 @Serializable
@@ -21,8 +22,8 @@ object ProfileGraph : Graph {
     override fun EntryProviderScope<NavKey>.registerEntries(
         onEvent: (NavigationHandler.NavigationEvent) -> Unit
     ) {
-        entry<ProfileGraph> { ProfileScreen(onEvent) }
-        entry<Settings> { SettingsScreen(onEvent) }
+        screenEntry<ProfileGraph> { ProfileScreen(onEvent) }
+        screenEntry<Settings> { SettingsScreen(onEvent) }
     }
 
     override val route: String

@@ -1,7 +1,11 @@
 package com.dxmxp.ui.navigation
 
+import androidx.compose.runtime.Composable
+import androidx.compose.runtime.LaunchedEffect
+import androidx.lifecycle.ViewModel
 import androidx.navigation3.runtime.EntryProviderScope
 import androidx.navigation3.runtime.NavKey
+import com.dxmxp.ui.base.InitializableViewModel
 
 
 /**
@@ -27,17 +31,19 @@ interface Graph : Screen {
 
     val children: List<Class<out Screen>>
         get() = javaClass.declaredClasses
+            .asSequence()
             .filter { Screen::class.java.isAssignableFrom(it) }
             .map {
                 @Suppress("UNCHECKED_CAST")
                 it as Class<out Screen>
             }
+            .toList()
 
     fun contains(key: NavKey): Boolean =
         children.any { clazz ->
             clazz.isInstance(key) || (
                 try {
-                    val instance = clazz.getField("INSTANCE").get(null) as? Graph
+                    val instance = clazz.getField("INSTANCE")[null] as? Graph
                     instance?.contains(key) == true
                 } catch (_: Exception) {
                     false
@@ -46,4 +52,41 @@ interface Graph : Screen {
         }
 
     fun EntryProviderScope<NavKey>.registerEntries(onEvent: (NavigationHandler.NavigationEvent) -> Unit)
+}
+
+/**
+ * Enhanced entry that automatically handles ViewModel initialization.
+ *
+ * If the [Screen] type [T] has parameters (data class), it forces the [VM] to implement
+ * [InitializableViewModel] and calls its [InitializableViewModel.init] method.
+ */
+inline fun <reified T : Screen, reified VM : ViewModel> EntryProviderScope<NavKey>.screenEntry(
+    crossinline viewModelProvide: @Composable () -> VM,
+    crossinline content: @Composable (VM) -> Unit,
+) {
+    val isSingleton = T::class.java.declaredFields.any { it.name == "INSTANCE" }
+
+    entry<T> { screen ->
+        val viewModel = viewModelProvide()
+
+        LaunchedEffect(screen) {
+            @Suppress("UNCHECKED_CAST")
+            (viewModel as? InitializableViewModel<T>)?.init(screen)
+        }
+
+        if (viewModel !is InitializableViewModel<*> && (!isSingleton)) {
+            error("Screen ${T::class.simpleName} has parameters but ViewModel ${VM::class.simpleName} does not implement InitializableViewModel")
+        }
+
+        content(viewModel)
+    }
+}
+
+/**
+ * Simple entry for screens that don't need a ViewModel or complex initialization.
+ */
+inline fun <reified T : Screen> EntryProviderScope<NavKey>.screenEntry(
+    crossinline content: @Composable (T) -> Unit,
+) {
+    entry<T> { content(it) }
 }
