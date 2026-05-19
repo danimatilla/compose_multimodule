@@ -57,25 +57,25 @@ interface Graph : Screen {
 /**
  * Enhanced entry that automatically handles ViewModel initialization.
  *
- * If the [Screen] type [T] has parameters (data class), it forces the [VM] to implement
+ * If the [Screen] type [K] has parameters (data class), it forces the [VM] to implement
  * [InitializableViewModel] and calls its [InitializableViewModel.init] method.
  */
-inline fun <reified T : Screen, reified VM : ViewModel> EntryProviderScope<NavKey>.screenEntry(
+@Suppress("UNCHECKED_CAST")
+inline fun <reified K : Screen, reified VM : ViewModel> EntryProviderScope<NavKey>.screenEntry(
     crossinline viewModelProvide: @Composable () -> VM,
     crossinline content: @Composable (VM) -> Unit,
 ) {
-    val isSingleton = T::class.java.declaredFields.any { it.name == "INSTANCE" }
+    val isSingleton = K::class.java.declaredFields.any { it.name == "INSTANCE" }
 
-    entry<T> { screen ->
+    entry<K> { screen ->
         val viewModel = viewModelProvide()
 
         LaunchedEffect(screen) {
-            @Suppress("UNCHECKED_CAST")
-            (viewModel as? InitializableViewModel<T>)?.init(screen)
+            (viewModel as? InitializableViewModel<K>)?.init(screen)
         }
 
         if (viewModel !is InitializableViewModel<*> && (!isSingleton)) {
-            error("Screen ${T::class.simpleName} has parameters but ViewModel ${VM::class.simpleName} does not implement InitializableViewModel")
+            error("Screen ${K::class.simpleName} has parameters but ViewModel ${VM::class.simpleName} does not implement InitializableViewModel")
         }
 
         content(viewModel)
@@ -85,8 +85,8 @@ inline fun <reified T : Screen, reified VM : ViewModel> EntryProviderScope<NavKe
 /**
  * Simple entry for screens that don't need a ViewModel or complex initialization.
  */
-inline fun <reified T : Screen> EntryProviderScope<NavKey>.screenEntry(
-    crossinline content: @Composable (T) -> Unit,
+inline fun <reified K : Screen> EntryProviderScope<NavKey>.screenEntry(
+    crossinline content: @Composable (K) -> Unit,
 ) {
-    entry<T> { content(it) }
+    entry<K> { screen -> content(screen) }
 }

@@ -82,15 +82,6 @@ private fun Content(
 
 @Preview
 @Composable
-private fun FeedScreenEmptyPreview() {
-    Content(
-        state = FeedViewModel.State(),
-        onEvent = {}
-    )
-}
-
-@Preview
-@Composable
 private fun FeedScreenPreview() {
     Content(
         state = FeedViewModel.State(

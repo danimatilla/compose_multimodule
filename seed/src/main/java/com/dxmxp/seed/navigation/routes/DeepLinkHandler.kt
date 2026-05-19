@@ -42,5 +42,4 @@ object DeepLinkHandler {
         graphs.forEach { register(it) }
         registeredScreens
     }
-
 }

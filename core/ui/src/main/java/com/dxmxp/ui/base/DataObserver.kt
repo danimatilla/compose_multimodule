@@ -7,8 +7,7 @@ import javax.inject.Singleton
 
 
 @Singleton
-class DataObserver @Inject constructor(
-) {
+class DataObserver @Inject constructor() {
     private val _events = MutableSharedFlow<Any>(replay = 1)
     val events = _events.asSharedFlow()
 
