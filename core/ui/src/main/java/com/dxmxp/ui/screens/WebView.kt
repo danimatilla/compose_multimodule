@@ -34,7 +34,7 @@ import android.webkit.WebView as NativeWebView
 @Serializable
 data class WebView(val url: String, val title: String? = null) : Screen {
     override val route: String get() = "/webview"
-    override val showSeedBottomBar: Boolean get() = false
+    override val showMainBottomBar: Boolean get() = false
 }
 
 /**

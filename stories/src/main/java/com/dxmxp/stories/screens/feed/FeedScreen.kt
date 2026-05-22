@@ -6,6 +6,14 @@ import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.itemsIndexed
+import androidx.compose.material.icons.Icons
+import androidx.compose.material.icons.filled.AutoStories
+import androidx.compose.material.icons.filled.Close
+import androidx.compose.material.icons.filled.Home
+import androidx.compose.material.icons.filled.Menu
+import androidx.compose.material.icons.filled.Notifications
+import androidx.compose.material.icons.filled.Person
+import androidx.compose.material.icons.filled.Search
 import androidx.compose.material3.CenterAlignedTopAppBar
 import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.HorizontalDivider
@@ -17,13 +25,18 @@ import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
+import androidx.compose.runtime.remember
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.hilt.lifecycle.viewmodel.compose.hiltViewModel
+import androidx.navigation3.runtime.NavBackStack
+import androidx.navigation3.runtime.NavKey
+import androidx.navigation3.runtime.rememberNavBackStack
 import com.dxmxp.domain.model.Story
 import com.dxmxp.stories.navigation.routes.StoriesGraph
 import com.dxmxp.ui.navigation.helpers.NavigationHandler
+import com.dxmxp.ui.screens.BottomBar
 import com.dxmxp.ui.screens.SeedScaffold
 
 @OptIn(ExperimentalMaterial3Api::class)
@@ -33,6 +46,14 @@ fun FeedScreen(
     viewModel: FeedViewModel = hiltViewModel()
 ) {
     val state by viewModel.uiState.collectAsState()
+    val navigationBarItems = remember {
+        listOf(
+            StoriesGraph to Icons.Default.Home,
+            StoriesGraph.Notifications to Icons.Default.Notifications,
+            StoriesGraph.Profile to Icons.Default.Person,
+        )
+    }
+    val backStack = rememberNavBackStack()
 
     SeedScaffold(
         topBar = {
@@ -40,13 +61,22 @@ fun FeedScreen(
                 title = { },
                 navigationIcon = {
                     IconButton(
-                        content = { Text("Cerrar") },
+                        content = { Icon(Icons.Default.Close, contentDescription = "Close") },
                         onClick = { onEvent(NavigationHandler.NavigationEvent.PopScreen()) }
                     )
                 }
             )
         },
-        bottomBar = { /* TODO: Add bottom bar */ },
+        bottomBar = {
+                BottomBar(
+                    navigationBarItems = navigationBarItems,
+                    shouldShowBottomBar = true,
+                    backStack = backStack,
+                    onClickItem = { screen ->
+                        onEvent(NavigationHandler.NavigationEvent.PushScreen(screen))
+                    }
+                )
+        },
     ) { innerPadding ->
         Box(modifier = Modifier.padding(innerPadding)) {
             Content(

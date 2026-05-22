@@ -11,6 +11,9 @@ import com.dxmxp.ui.navigation.helpers.NavigationHandler
  */
 interface Graph : Screen {
 
+    val isModal: Boolean
+        get() = false
+
     val children: List<Class<out Screen>>
         get() = javaClass.declaredClasses
             .asSequence()
@@ -24,13 +27,13 @@ interface Graph : Screen {
     fun contains(key: NavKey): Boolean =
         children.any { clazz ->
             clazz.isInstance(key) || (
-                try {
-                    val instance = clazz.getField("INSTANCE")[null] as? Graph
-                    instance?.contains(key) == true
-                } catch (_: Exception) {
-                    false
-                }
-            )
+                    try {
+                        val instance = clazz.getField("INSTANCE")[null] as? Graph
+                        instance?.contains(key) == true
+                    } catch (_: Exception) {
+                        false
+                    }
+                    )
         }
 
     fun EntryProviderScope<NavKey>.registerEntries(onEvent: (NavigationHandler.NavigationEvent) -> Unit)

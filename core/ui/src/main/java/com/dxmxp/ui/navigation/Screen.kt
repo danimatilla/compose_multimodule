@@ -18,39 +18,36 @@ interface Screen : NavKey {
 
     val route: String
 
-    val showSeedBottomBar: Boolean get() = true
+    val showMainBottomBar: Boolean get() = true
 
     /**
-     * Busca recursivamente si esta pantalla está anidada dentro de un Grafo
-     * y devuelve el valor de showSeedBottomBar de dicho Grafo.
+     * Determina si esta pantalla pertenece a un grafo modal,
+     * ya sea porque ella misma es un grafo modal o porque está dentro de uno.
      */
-    val inheritedShowSeedBottomBar: Boolean
-        get() {
-            // Si la propia llave es un Grafo, usamos su valor directamente
-            if (this is Graph) return this.showSeedBottomBar
+    fun belongModalGraph(): Boolean? {
+        // 1. Si la pantalla misma es un Grafo y es modal
+        if (this is Graph && this.isModal) return true
 
-            // Obtenemos la clase donde está definida esta pantalla (la clase envolvente)
-            var enclosingClass = this::class.java.enclosingClass
-
-            while (enclosingClass != null) {
-                // Si la clase envolvente es un Graph...
-                if (Graph::class.java.isAssignableFrom(enclosingClass)) {
-                    // Intentamos obtener la instancia del objeto (singleton de Kotlin)
-                    val graphInstance = try {
-                        enclosingClass.getField("INSTANCE")[null] as? Graph
-                    } catch (_: Exception) {
-                        null
-                    }
-                    // Si encontramos el Grafo, él manda sobre la visibilidad
-                    if (graphInstance != null) return graphInstance.showSeedBottomBar
+        // 2. Buscamos en las clases que envuelven a esta pantalla (enclosing classes)
+        var enclosingClass = this::class.java.enclosingClass
+        while (enclosingClass != null) {
+            // Si la clase que la envuelve implementa Graph...
+            if (Graph::class.java.isAssignableFrom(enclosingClass)) {
+                // Intentamos obtener la instancia singleton (object en Kotlin)
+                val graphInstance = try {
+                    enclosingClass.getField("INSTANCE")[null] as? Graph
+                } catch (_: Exception) {
+                    null
                 }
-                // Seguimos subiendo por si hay grafos anidados (Graph dentro de Graph)
-                enclosingClass = enclosingClass.enclosingClass
+                // Si el grafo es modal, devolvemos true
+                if (graphInstance?.isModal == true) return true
             }
-
-            // Si no hay padre o no es un Grafo, usamos el valor individual de la pantalla
-            return (this as? Screen)?.showSeedBottomBar ?: true
+            // Seguimos subiendo por si hay grafos anidados
+            enclosingClass = enclosingClass.enclosingClass
         }
+
+        return false
+    }
 
     companion object{
 

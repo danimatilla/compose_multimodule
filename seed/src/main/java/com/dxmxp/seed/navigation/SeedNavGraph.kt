@@ -37,13 +37,13 @@ fun SeedNavGraph(
         )
     }
     val currentDestination = backStack.lastOrNull() as? Screen
-    val shouldShowBottomBar = currentDestination?.inheritedShowSeedBottomBar == true
+    val isModal = currentDestination?.belongModalGraph() ?: false
 
     SeedScaffold(
         topBar = { /* You can add a top bar here if needed */ },
         bottomBar = {
             BottomBar(
-                shouldShowBottomBar = shouldShowBottomBar,
+                shouldShowBottomBar = !isModal,
                 navigationBarItems = navigationBarItems,
                 backStack = backStack,
                 onClickItem = { screen ->

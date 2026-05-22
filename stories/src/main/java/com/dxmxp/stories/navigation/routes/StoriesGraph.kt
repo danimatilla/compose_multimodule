@@ -17,6 +17,9 @@ import kotlinx.serialization.Serializable
 @Serializable
 object StoriesGraph : Graph {
 
+    override val isModal: Boolean
+        get() = true
+
     @Serializable
     data class StoryDetail(val id: String) : Screen {
         override val route: String
@@ -24,9 +27,9 @@ object StoriesGraph : Graph {
     }
 
     @Serializable
-    data object Search : Screen {
+    data object Profile : Screen {
         override val route: String
-            get() = "${this@StoriesGraph.route}/search"
+            get() = "${this@StoriesGraph.route}/profile"
     }
 
     @Serializable
@@ -44,13 +47,10 @@ object StoriesGraph : Graph {
         screenEntry<StoryDetail, StoryDetailViewModel>(
             viewModelProvide = { hiltViewModel<StoryDetailViewModel>() },
         ) { viewModel -> StoryDetailScreen(onEvent, viewModel) }
-        screenEntry<Search> { /* SearchScreen(onEvent) */ }
+        screenEntry<Profile> { /* ProfileScreen(onEvent) */ }
         screenEntry<Notifications> { /* NotificationsScreen(onEvent) */ }
     }
 
     override val route: String
         get() = "/stories"
-
-    override val showSeedBottomBar: Boolean
-        get() = false
 }
