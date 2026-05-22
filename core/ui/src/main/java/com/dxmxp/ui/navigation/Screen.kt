@@ -62,12 +62,13 @@ interface Graph : Screen {
  */
 @Suppress("UNCHECKED_CAST")
 inline fun <reified K : Screen, reified VM : ViewModel> EntryProviderScope<NavKey>.screenEntry(
+    metadata: Map<String, Any> = emptyMap(),
     crossinline viewModelProvide: @Composable () -> VM,
     crossinline content: @Composable (VM) -> Unit,
 ) {
     val isSingleton = K::class.java.declaredFields.any { it.name == "INSTANCE" }
 
-    entry<K> { screen ->
+    entry<K>(metadata = metadata) { screen ->
         val viewModel = viewModelProvide()
 
         LaunchedEffect(screen) {
@@ -86,7 +87,8 @@ inline fun <reified K : Screen, reified VM : ViewModel> EntryProviderScope<NavKe
  * Simple entry for screens that don't need a ViewModel or complex initialization.
  */
 inline fun <reified K : Screen> EntryProviderScope<NavKey>.screenEntry(
+    metadata: Map<String, Any> = emptyMap(),
     crossinline content: @Composable (K) -> Unit,
 ) {
-    entry<K> { screen -> content(screen) }
+    entry<K>(metadata = metadata) { screen -> content(screen) }
 }
