@@ -1,5 +1,8 @@
 package com.dxmxp.seed.navigation
 
+import androidx.compose.animation.AnimatedVisibility
+import androidx.compose.animation.slideInVertically
+import androidx.compose.animation.slideOutVertically
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.AutoStories
 import androidx.compose.material.icons.filled.Home
@@ -7,7 +10,11 @@ import androidx.compose.material.icons.filled.Menu
 import androidx.compose.material.icons.filled.Person
 import androidx.compose.material.icons.filled.Search
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.LaunchedEffect
+import androidx.compose.runtime.getValue
+import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
+import androidx.compose.runtime.setValue
 import androidx.compose.ui.Modifier
 import androidx.navigation3.runtime.NavBackStack
 import androidx.navigation3.runtime.NavKey
@@ -20,6 +27,7 @@ import com.dxmxp.ui.navigation.Screen
 import com.dxmxp.ui.navigation.helpers.NavigationHandler
 import com.dxmxp.ui.screens.BottomBar
 import com.dxmxp.ui.screens.SeedScaffold
+import kotlinx.coroutines.delay
 
 @Composable
 fun SeedNavGraph(
@@ -38,22 +46,31 @@ fun SeedNavGraph(
     }
     val currentDestination = backStack.lastOrNull() as? Screen
     val isModal = currentDestination?.belongModalGraph() ?: false
+    var animateBottomBar by remember { mutableStateOf(!isModal) }
+    LaunchedEffect(isModal) {
+        animateBottomBar = !isModal
+    }
 
     SeedScaffold(
-        topBar = { /* You can add a top bar here if needed */ },
         bottomBar = {
-            BottomBar(
-                shouldShowBottomBar = !isModal,
-                navigationBarItems = navigationBarItems,
-                backStack = backStack,
-                onClickItem = { screen ->
-                    if (screen == StoriesGraph) {
-                        onEvent(NavigationHandler.NavigationEvent.PushScreen(screen))
-                    } else {
-                        onEvent(NavigationHandler.NavigationEvent.SetRootScreen(screen))
+            AnimatedVisibility(
+                visible = animateBottomBar,
+                enter = slideInVertically(initialOffsetY = { it }),
+                exit = slideOutVertically(targetOffsetY = { it })
+            ) {
+                BottomBar(
+                    shouldShowBottomBar = !isModal,
+                    navigationBarItems = navigationBarItems,
+                    backStack = backStack,
+                    onClickItem = { screen ->
+                        if (screen == StoriesGraph) {
+                            onEvent(NavigationHandler.NavigationEvent.PushScreen(screen))
+                        } else {
+                            onEvent(NavigationHandler.NavigationEvent.SetRootScreen(screen))
+                        }
                     }
-                }
-            )
+                )
+            }
         }
     ) {
         NavDisplay(
