@@ -3,8 +3,8 @@ package com.dxmxp.seed.navigation.routes
 import android.net.Uri
 import com.dxmxp.stories.navigation.routes.StoriesGraph
 import com.dxmxp.ui.navigation.Graph
-import com.dxmxp.ui.navigation.NavigationHandler.NavigationEvent
 import com.dxmxp.ui.navigation.Screen
+import com.dxmxp.ui.navigation.helpers.NavigationHandler.NavigationEvent
 
 object DeepLinkHandler {
 

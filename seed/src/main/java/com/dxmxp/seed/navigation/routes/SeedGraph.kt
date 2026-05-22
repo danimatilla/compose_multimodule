@@ -2,14 +2,14 @@ package com.dxmxp.seed.navigation.routes
 
 import androidx.navigation3.runtime.EntryProviderScope
 import androidx.navigation3.runtime.NavKey
-import com.dxmxp.seed.screens.dash.HomeScreen
-import com.dxmxp.seed.screens.dash.MenuScreen
-import com.dxmxp.seed.screens.dash.SearchScreen
+import com.dxmxp.seed.screens.HomeScreen
+import com.dxmxp.seed.screens.MenuScreen
+import com.dxmxp.seed.screens.SearchScreen
 import com.dxmxp.stories.navigation.routes.StoriesGraph
 import com.dxmxp.ui.navigation.Graph
-import com.dxmxp.ui.navigation.NavigationHandler
 import com.dxmxp.ui.navigation.Screen
-import com.dxmxp.ui.navigation.screenEntry
+import com.dxmxp.ui.navigation.Screen.Companion.screenEntry
+import com.dxmxp.ui.navigation.helpers.NavigationHandler
 import com.dxmxp.ui.screens.WebView
 import com.dxmxp.ui.screens.WebViewScreen
 import kotlinx.serialization.Serializable

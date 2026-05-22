@@ -3,9 +3,14 @@ package com.dxmxp.stories.screens.feed
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.fillMaxSize
+import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.itemsIndexed
+import androidx.compose.material3.CenterAlignedTopAppBar
+import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.HorizontalDivider
+import androidx.compose.material3.Icon
+import androidx.compose.material3.IconButton
 import androidx.compose.material3.ListItem
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
@@ -18,8 +23,10 @@ import androidx.compose.ui.tooling.preview.Preview
 import androidx.hilt.lifecycle.viewmodel.compose.hiltViewModel
 import com.dxmxp.domain.model.Story
 import com.dxmxp.stories.navigation.routes.StoriesGraph
-import com.dxmxp.ui.navigation.NavigationHandler
+import com.dxmxp.ui.navigation.helpers.NavigationHandler
+import com.dxmxp.ui.screens.SeedScaffold
 
+@OptIn(ExperimentalMaterial3Api::class)
 @Composable
 fun FeedScreen(
     onEvent: (NavigationHandler.NavigationEvent) -> Unit,
@@ -27,10 +34,27 @@ fun FeedScreen(
 ) {
     val state by viewModel.uiState.collectAsState()
 
-    Content(
-        state = state,
-        onEvent = viewModel::setEvent
-    )
+    SeedScaffold(
+        topBar = {
+            CenterAlignedTopAppBar(
+                title = { },
+                navigationIcon = {
+                    IconButton(
+                        content = { Text("Cerrar") },
+                        onClick = { onEvent(NavigationHandler.NavigationEvent.PopScreen()) }
+                    )
+                }
+            )
+        },
+        bottomBar = { /* TODO: Add bottom bar */ },
+    ) { innerPadding ->
+        Box(modifier = Modifier.padding(innerPadding)) {
+            Content(
+                state = state,
+                onEvent = viewModel::setEvent
+            )
+        }
+    }
 
     LaunchedEffect(Unit) {
         viewModel.effect.collect { effect ->

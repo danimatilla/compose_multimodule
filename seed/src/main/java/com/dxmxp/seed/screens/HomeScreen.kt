@@ -1,4 +1,4 @@
-package com.dxmxp.seed.screens.dash
+package com.dxmxp.seed.screens
 
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Column
@@ -8,7 +8,7 @@ import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
-import com.dxmxp.ui.navigation.NavigationHandler
+import com.dxmxp.ui.navigation.helpers.NavigationHandler
 import com.dxmxp.ui.screens.WebView
 
 

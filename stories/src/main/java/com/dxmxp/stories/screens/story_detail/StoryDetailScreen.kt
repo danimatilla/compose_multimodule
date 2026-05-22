@@ -11,7 +11,7 @@ import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.hilt.lifecycle.viewmodel.compose.hiltViewModel
 import com.dxmxp.stories.navigation.routes.StoriesGraph
-import com.dxmxp.ui.navigation.NavigationHandler
+import com.dxmxp.ui.navigation.helpers.NavigationHandler
 
 
 @Composable
