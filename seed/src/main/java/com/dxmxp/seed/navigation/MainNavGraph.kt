@@ -20,7 +20,10 @@ fun MainNavGraph(
     NavDisplay(
         backStack = backStack,
         entryProvider = entryProvider {
-            MainScaffoldGraph.run { registerEntries(onEvent) }
+            MainScaffoldGraph.run {
+                registerEntries(onEvent)
+                registerCommonEntries(onEvent)
+            }
         },
         modifier = modifier
     )

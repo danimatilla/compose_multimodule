@@ -1,5 +1,8 @@
 package com.dxmxp.ui.screens
 
+import androidx.compose.animation.AnimatedVisibility
+import androidx.compose.animation.expandVertically
+import androidx.compose.animation.shrinkVertically
 import androidx.compose.foundation.layout.PaddingValues
 import androidx.compose.material3.Icon
 import androidx.compose.material3.NavigationBar
@@ -36,31 +39,35 @@ fun BottomBar(
     currentDestination: NavKey?,
     onClickItem: (Screen) -> Unit
 ) {
-    if (!shouldShowBottomBar) return
-
-    // Find the most specific match in the navigationBarItems list
-    val selectedItem = bottomBarItems.map { it.first }.findLast { screen ->
-        screen == currentDestination || (screen is Graph && currentDestination?.let {
-            screen.contains(
-                it
-            )
-        } == true)
-    }
-
-    NavigationBar(
-        modifier = modifier
+    AnimatedVisibility(
+        visible = shouldShowBottomBar,
+        enter = expandVertically(),
+        exit = shrinkVertically()
     ) {
-        bottomBarItems.forEach { (screen, icon) ->
-            val selected = selectedItem == screen
+        // Find the most specific match in the navigationBarItems list
+        val selectedItem = bottomBarItems.map { it.first }.findLast { screen ->
+            screen == currentDestination || (screen is Graph && currentDestination?.let {
+                screen.contains(
+                    it
+                )
+            } == true)
+        }
 
-            NavigationBarItem(
-                selected = selected,
-                onClick = {
-                    if (selected) return@NavigationBarItem
-                    onClickItem(screen)
-                },
-                icon = { Icon(icon, contentDescription = null) }
-            )
+        NavigationBar(
+            modifier = modifier
+        ) {
+            bottomBarItems.forEach { (screen, icon) ->
+                val selected = selectedItem == screen
+
+                NavigationBarItem(
+                    selected = selected,
+                    onClick = {
+                        if (selected) return@NavigationBarItem
+                        onClickItem(screen)
+                    },
+                    icon = { Icon(icon, contentDescription = null) }
+                )
+            }
         }
     }
 }

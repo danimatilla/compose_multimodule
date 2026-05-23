@@ -73,7 +73,6 @@ class MainActivity : ComponentActivity() {
                         screenEntry<StoriesScaffoldGraph>(
                             metadata = metadata { modalAnimation() }
                         ) { StoriesScaffold (onParentEvent = onEvent) }
-                        screenEntry<WebView> { screen -> WebViewScreen(screen, onEvent) }
                     }
                 )
             }

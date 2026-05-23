@@ -1,5 +1,6 @@
 package com.dxmxp.seed.navigation
 
+import androidx.compose.animation.AnimatedVisibility
 import androidx.compose.foundation.layout.padding
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.AutoStories
@@ -13,12 +14,12 @@ import androidx.compose.runtime.rememberCoroutineScope
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.platform.LocalContext
 import androidx.navigation3.runtime.rememberNavBackStack
+import androidx.navigation3.scene.Scene
 import com.dxmxp.seed.navigation.routes.MainScaffoldGraph
-import com.dxmxp.seed.navigation.routes.MainScaffoldGraph.Menu
-import com.dxmxp.seed.navigation.routes.MainScaffoldGraph.Search
 import com.dxmxp.seed.navigation.routes.ProfileGraph
 import com.dxmxp.stories.navigation.routes.StoriesScaffoldGraph
 import com.dxmxp.ui.base.DataObserverEntryPoint
+import com.dxmxp.ui.navigation.Screen
 import com.dxmxp.ui.navigation.helpers.NavigationHandler
 import com.dxmxp.ui.screens.BottomBar
 import com.dxmxp.ui.screens.SeedScaffold
@@ -29,9 +30,9 @@ import kotlinx.coroutines.launch
 fun MainScaffold(
     onParentEvent: (NavigationHandler.NavigationEvent) -> Unit,
 ) {
-    val backStack = rememberNavBackStack(MainScaffoldGraph)
-    val scope = rememberCoroutineScope()
     val context = LocalContext.current
+    val scope = rememberCoroutineScope()
+    val backStack = rememberNavBackStack(MainScaffoldGraph)
     val dataObserver = remember {
         EntryPointAccessors
             .fromApplication(
@@ -49,23 +50,25 @@ fun MainScaffold(
 
     val bottomBarItems = listOf(
         MainScaffoldGraph to Icons.Default.Home,
-        Search to Icons.Default.Search,
-        Menu to Icons.Default.Menu,
+        MainScaffoldGraph.Search to Icons.Default.Search,
+        MainScaffoldGraph.Menu to Icons.Default.Menu,
         StoriesScaffoldGraph to Icons.Default.AutoStories,
         ProfileGraph to Icons.Default.Person
     )
     val currentDestination = backStack.lastOrNull()
+    val shouldShowBottomBar = (currentDestination as? Screen)?.showMainBottomBar ?: true
 
     SeedScaffold(
         bottomBar = {
             BottomBar(
+                shouldShowBottomBar = shouldShowBottomBar,
                 bottomBarItems = bottomBarItems,
                 currentDestination = currentDestination,
                 onClickItem = { screen ->
                     if (screen == StoriesScaffoldGraph) {
                         onParentEvent(NavigationHandler.NavigationEvent.PushScreen(screen))
                     } else {
-                        onChildEvent(NavigationHandler.NavigationEvent.PushScreen(screen))
+                        onChildEvent(NavigationHandler.NavigationEvent.SetRootScreen(screen))
                     }
                 }
             )

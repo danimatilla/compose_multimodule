@@ -32,7 +32,6 @@ fun StoriesScaffold(
     val context = LocalContext.current
     val scope = rememberCoroutineScope()
     val backStack = rememberNavBackStack(StoriesScaffoldGraph)
-
     val dataObserver = remember {
         EntryPointAccessors
             .fromApplication(
@@ -44,7 +43,11 @@ fun StoriesScaffold(
 
     val onChildEvent: (NavigationHandler.NavigationEvent) -> Unit = { event ->
         scope.launch {
-            NavigationHandler.handleEvent(backStack, event, dataObserver)
+            if (event is NavigationHandler.NavigationEvent.PushScreen && !StoriesScaffoldGraph.contains(event.screen)) {
+                onParentEvent(event)
+            } else {
+                NavigationHandler.handleEvent(backStack, event, dataObserver)
+            }
         }
     }
 
@@ -55,6 +58,7 @@ fun StoriesScaffold(
             StoriesScaffoldGraph.Profile to Icons.Default.Person,
         )
     }
+    val currentDestination = backStack.lastOrNull()
 
     SeedScaffold(
         topBar = {
@@ -71,9 +75,9 @@ fun StoriesScaffold(
         bottomBar = {
             BottomBar(
                 bottomBarItems = navigationBarItems,
-                currentDestination = backStack.lastOrNull(),
+                currentDestination = currentDestination,
                 onClickItem = { screen ->
-                    onChildEvent(NavigationHandler.NavigationEvent.PushScreen(screen))
+                    onChildEvent(NavigationHandler.NavigationEvent.SetRootScreen(screen))
                 }
             )
         },

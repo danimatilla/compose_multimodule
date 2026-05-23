@@ -20,7 +20,10 @@ fun StoriesNavGraph(
     NavDisplay(
         backStack = backStack,
         entryProvider = entryProvider {
-            StoriesScaffoldGraph.run { registerEntries(onEvent) }
+            StoriesScaffoldGraph.run {
+                registerEntries(onEvent)
+                registerCommonEntries(onEvent)
+            }
         },
         modifier = modifier
     )

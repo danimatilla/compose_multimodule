@@ -2,7 +2,10 @@ package com.dxmxp.ui.navigation
 
 import androidx.navigation3.runtime.EntryProviderScope
 import androidx.navigation3.runtime.NavKey
+import com.dxmxp.ui.navigation.Screen.Companion.screenEntry
 import com.dxmxp.ui.navigation.helpers.NavigationHandler
+import com.dxmxp.ui.screens.WebView
+import com.dxmxp.ui.screens.WebViewScreen
 
 /**
  * A Graph is a collection of related screens that share a common navigation context.
@@ -26,15 +29,17 @@ interface Graph : Screen {
 
     fun contains(key: NavKey): Boolean =
         children.any { clazz ->
-            clazz.isInstance(key) || (
-                    try {
-                        val instance = clazz.getField("INSTANCE")[null] as? Graph
-                        instance?.contains(key) == true
-                    } catch (_: Exception) {
-                        false
-                    }
-                    )
+            clazz.isInstance(key) || try {
+                val instance = clazz.getField("INSTANCE")[null] as? Graph
+                instance?.contains(key) == true
+            } catch (_: Exception) {
+                false
+            }
         }
+
+    fun EntryProviderScope<NavKey>.registerCommonEntries(onEvent: (NavigationHandler.NavigationEvent) -> Unit){
+        screenEntry<WebView>{ WebViewScreen(it, onEvent) }
+    }
 
     fun EntryProviderScope<NavKey>.registerEntries(onEvent: (NavigationHandler.NavigationEvent) -> Unit)
 }
