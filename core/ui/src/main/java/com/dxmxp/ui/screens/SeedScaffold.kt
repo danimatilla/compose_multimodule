@@ -1,11 +1,6 @@
 package com.dxmxp.ui.screens
 
 import androidx.compose.foundation.layout.PaddingValues
-import androidx.compose.material.icons.Icons
-import androidx.compose.material.icons.filled.Home
-import androidx.compose.material.icons.filled.Menu
-import androidx.compose.material.icons.filled.Person
-import androidx.compose.material.icons.filled.Search
 import androidx.compose.material3.Icon
 import androidx.compose.material3.NavigationBar
 import androidx.compose.material3.NavigationBarItem
@@ -13,7 +8,6 @@ import androidx.compose.material3.Scaffold
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.vector.ImageVector
-import androidx.navigation3.runtime.NavBackStack
 import androidx.navigation3.runtime.NavKey
 import com.dxmxp.ui.navigation.Graph
 import com.dxmxp.ui.navigation.Screen
@@ -36,17 +30,16 @@ fun SeedScaffold(
 
 @Composable
 fun BottomBar(
-    shouldShowBottomBar: Boolean,
-    navigationBarItems: List<Pair<Screen, ImageVector>>,
-    backStack: NavBackStack<NavKey>,
+    modifier: Modifier = Modifier,
+    shouldShowBottomBar: Boolean = true,
+    bottomBarItems: List<Pair<Screen, ImageVector>>,
+    currentDestination: NavKey?,
     onClickItem: (Screen) -> Unit
 ) {
     if (!shouldShowBottomBar) return
 
-    val currentDestination = backStack.lastOrNull()
-
     // Find the most specific match in the navigationBarItems list
-    val selectedItem = navigationBarItems.map { it.first }.findLast { screen ->
+    val selectedItem = bottomBarItems.map { it.first }.findLast { screen ->
         screen == currentDestination || (screen is Graph && currentDestination?.let {
             screen.contains(
                 it
@@ -54,8 +47,10 @@ fun BottomBar(
         } == true)
     }
 
-    NavigationBar {
-        navigationBarItems.forEach { (screen, icon) ->
+    NavigationBar(
+        modifier = modifier
+    ) {
+        bottomBarItems.forEach { (screen, icon) ->
             val selected = selectedItem == screen
 
             NavigationBarItem(

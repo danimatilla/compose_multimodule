@@ -1,7 +1,7 @@
 package com.dxmxp.stories.screens.story_detail
 
 import com.dxmxp.domain.model.Story
-import com.dxmxp.stories.navigation.routes.StoriesGraph
+import com.dxmxp.stories.navigation.routes.StoriesScaffoldGraph
 import com.dxmxp.ui.base.DataObserver
 import com.dxmxp.ui.base.BaseViewModel
 import com.dxmxp.ui.base.InitializableViewModel
@@ -12,11 +12,11 @@ import javax.inject.Inject
 class StoryDetailViewModel @Inject constructor(
     private val dataObserver: DataObserver,
 ) : BaseViewModel<StoryDetailViewModel.State, StoryDetailViewModel.Effect, StoryDetailViewModel.Event>(),
-    InitializableViewModel<StoriesGraph.StoryDetail> {
+    InitializableViewModel<StoriesScaffoldGraph.StoryDetail> {
 
     override fun createInitialState(): State = State()
 
-    override fun init(screen: StoriesGraph.StoryDetail) {
+    override fun init(screen: StoriesScaffoldGraph.StoryDetail) {
         val story = dataObserver.getLast<Story>()
         setState { copy(storyId = screen.id, story = story) }
     }
@@ -24,7 +24,7 @@ class StoryDetailViewModel @Inject constructor(
     override fun handleEvent(event: Event) {
         when (event) {
             is Event.Init -> {
-                init(StoriesGraph.StoryDetail(event.id))
+                init(StoriesScaffoldGraph.StoryDetail(event.id))
             }
         }
     }

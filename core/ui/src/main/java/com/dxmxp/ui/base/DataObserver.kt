@@ -1,5 +1,8 @@
 package com.dxmxp.ui.base
 
+import dagger.hilt.EntryPoint
+import dagger.hilt.InstallIn
+import dagger.hilt.components.SingletonComponent
 import kotlinx.coroutines.flow.MutableSharedFlow
 import kotlinx.coroutines.flow.asSharedFlow
 import javax.inject.Inject
@@ -17,4 +20,10 @@ class DataObserver @Inject constructor() {
 
     inline fun <reified T> getLast(): T? =
         events.replayCache.lastOrNull() as? T
+}
+
+@EntryPoint
+@InstallIn(SingletonComponent::class)
+interface DataObserverEntryPoint {
+    fun dataObserver(): DataObserver
 }

@@ -1,24 +1,26 @@
-package com.dxmxp.seed.navigation.routes
+package com.dxmxp.seed.navigation
 
 import android.net.Uri
-import com.dxmxp.stories.navigation.routes.StoriesGraph
+import com.dxmxp.seed.navigation.routes.ProfileGraph
+import com.dxmxp.seed.navigation.routes.MainScaffoldGraph
+import com.dxmxp.stories.navigation.routes.StoriesScaffoldGraph
 import com.dxmxp.ui.navigation.Graph
 import com.dxmxp.ui.navigation.Screen
-import com.dxmxp.ui.navigation.helpers.NavigationHandler.NavigationEvent
+import com.dxmxp.ui.navigation.helpers.NavigationHandler
 
 object DeepLinkHandler {
 
-    fun handleDeepLink(uri: Uri): NavigationEvent? {
+    fun handleDeepLink(uri: Uri): NavigationHandler.NavigationEvent? {
         val path = uri.path ?: return null
         val screen = routesMap[path] ?: return null
-        return NavigationEvent.PushScreen(screen)
+        return NavigationHandler.NavigationEvent.PushScreen(screen)
     }
 
     // Register graphs here
     private val graphs = listOf(
-        StoriesGraph,
+        StoriesScaffoldGraph,
         ProfileGraph,
-        SeedGraph
+        MainScaffoldGraph
     )
 
     // Retrieve all routes registered in the graphs

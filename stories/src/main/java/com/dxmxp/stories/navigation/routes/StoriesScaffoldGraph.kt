@@ -3,7 +3,6 @@ package com.dxmxp.stories.navigation.routes
 import androidx.hilt.lifecycle.viewmodel.compose.hiltViewModel
 import androidx.navigation3.runtime.EntryProviderScope
 import androidx.navigation3.runtime.NavKey
-import androidx.navigation3.runtime.metadata
 import com.dxmxp.stories.screens.feed.FeedScreen
 import com.dxmxp.stories.screens.story_detail.StoryDetailScreen
 import com.dxmxp.stories.screens.story_detail.StoryDetailViewModel
@@ -11,11 +10,10 @@ import com.dxmxp.ui.navigation.Graph
 import com.dxmxp.ui.navigation.Screen
 import com.dxmxp.ui.navigation.Screen.Companion.screenEntry
 import com.dxmxp.ui.navigation.helpers.NavigationHandler
-import com.dxmxp.ui.navigation.helpers.NavigationUtils.modalAnimation
 import kotlinx.serialization.Serializable
 
 @Serializable
-object StoriesGraph : Graph {
+object StoriesScaffoldGraph : Graph {
 
     override val isModal: Boolean
         get() = true
@@ -23,27 +21,25 @@ object StoriesGraph : Graph {
     @Serializable
     data class StoryDetail(val id: String) : Screen {
         override val route: String
-            get() = "${this@StoriesGraph.route}/story"
+            get() = "${this@StoriesScaffoldGraph.route}/story"
     }
 
     @Serializable
     data object Profile : Screen {
         override val route: String
-            get() = "${this@StoriesGraph.route}/profile"
+            get() = "${this@StoriesScaffoldGraph.route}/profile"
     }
 
     @Serializable
     data object Notifications : Screen {
         override val route: String
-            get() = "${this@StoriesGraph.route}/notifications"
+            get() = "${this@StoriesScaffoldGraph.route}/notifications"
     }
 
     override fun EntryProviderScope<NavKey>.registerEntries(
         onEvent: (NavigationHandler.NavigationEvent) -> Unit,
     ) {
-        screenEntry<StoriesGraph>(
-            metadata = metadata { modalAnimation() }
-        ) { FeedScreen(onEvent) }
+        screenEntry<StoriesScaffoldGraph> { FeedScreen(onEvent) }
         screenEntry<StoryDetail, StoryDetailViewModel>(
             viewModelProvide = { hiltViewModel<StoryDetailViewModel>() },
         ) { viewModel -> StoryDetailScreen(onEvent, viewModel) }

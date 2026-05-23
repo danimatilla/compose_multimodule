@@ -27,5 +27,5 @@ object ProfileGraph : Graph {
     }
 
     override val route: String
-        get() = "${SeedGraph.route}/profile"
+        get() = "${MainScaffoldGraph.route}/profile"
 }

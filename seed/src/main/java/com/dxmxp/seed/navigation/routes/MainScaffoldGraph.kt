@@ -5,43 +5,36 @@ import androidx.navigation3.runtime.NavKey
 import com.dxmxp.seed.screens.HomeScreen
 import com.dxmxp.seed.screens.MenuScreen
 import com.dxmxp.seed.screens.SearchScreen
-import com.dxmxp.stories.navigation.routes.StoriesGraph
 import com.dxmxp.ui.navigation.Graph
 import com.dxmxp.ui.navigation.Screen
 import com.dxmxp.ui.navigation.Screen.Companion.screenEntry
 import com.dxmxp.ui.navigation.helpers.NavigationHandler
-import com.dxmxp.ui.screens.WebView
-import com.dxmxp.ui.screens.WebViewScreen
 import kotlinx.serialization.Serializable
 
 @Serializable
-object SeedGraph : Graph {
+object MainScaffoldGraph : Graph {
 
     @Serializable
     data object Search : Screen {
         override val route: String
-            get() = "${this@SeedGraph.route}/search"
+            get() = "${this@MainScaffoldGraph.route}/search"
     }
 
     @Serializable
     data object Menu : Screen {
         override val route: String
-            get() = "${this@SeedGraph.route}/menu"
+            get() = "${this@MainScaffoldGraph.route}/menu"
     }
 
     override fun EntryProviderScope<NavKey>.registerEntries(
         onEvent: (NavigationHandler.NavigationEvent) -> Unit
     ) {
-        screenEntry<SeedGraph> { HomeScreen(onEvent) }
+        screenEntry<MainScaffoldGraph> { HomeScreen(onEvent) }
         screenEntry<Search> { SearchScreen(onEvent) }
         screenEntry<Menu> { MenuScreen(onEvent) }
-        screenEntry<WebView> { screen -> WebViewScreen(screen, onEvent) }
 
         // Integrate the ProfileGraph entries into this graph.
         ProfileGraph.run { registerEntries(onEvent) }
-
-        // Integrate the StoriesGraph module into this graph.
-        StoriesGraph.run { registerEntries(onEvent) }
     }
 
     override val route: String
