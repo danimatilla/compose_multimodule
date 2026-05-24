@@ -1,5 +1,6 @@
 package com.dxmxp.seed.navigation
 
+import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Modifier
@@ -25,6 +26,6 @@ fun MainNavGraph(
                 registerCommonEntries(onEvent)
             }
         },
-        modifier = modifier
+        modifier = modifier.fillMaxSize()
     )
 }

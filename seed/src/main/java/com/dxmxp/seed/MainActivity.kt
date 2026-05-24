@@ -5,11 +5,14 @@ import android.os.Bundle
 import androidx.activity.ComponentActivity
 import androidx.activity.compose.setContent
 import androidx.activity.enableEdgeToEdge
+import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
+import androidx.compose.runtime.remember
 import androidx.compose.runtime.rememberCoroutineScope
 import androidx.compose.runtime.setValue
+import androidx.compose.ui.Modifier
 import androidx.navigation3.runtime.entryProvider
 import androidx.navigation3.runtime.metadata
 import androidx.navigation3.runtime.rememberNavBackStack
@@ -46,13 +49,15 @@ class MainActivity : ComponentActivity() {
             val scope = rememberCoroutineScope()
             val backStack = rememberNavBackStack(MainScaffoldGraph)
 
-            val onEvent: (NavigationHandler.NavigationEvent) -> Unit = { event ->
-                scope.launch {
-                    NavigationHandler.handleEvent(
-                        backStack = backStack,
-                        event = event,
-                        dataObserver = dataObserver
-                    )
+            val onEvent: (NavigationHandler.NavigationEvent) -> Unit = remember(backStack, dataObserver) {
+                { event ->
+                    scope.launch {
+                        NavigationHandler.handleEvent(
+                            backStack = backStack,
+                            event = event,
+                            dataObserver = dataObserver
+                        )
+                    }
                 }
             }
 
@@ -73,7 +78,8 @@ class MainActivity : ComponentActivity() {
                         screenEntry<StoriesScaffoldGraph>(
                             metadata = metadata { modalAnimation() }
                         ) { StoriesScaffold (onParentEvent = onEvent) }
-                    }
+                    },
+                    modifier = Modifier.fillMaxSize()
                 )
             }
         }
