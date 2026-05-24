@@ -3,6 +3,7 @@ package com.dxmxp.seed.navigation
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.remember
 import androidx.compose.ui.Modifier
 import androidx.navigation3.runtime.NavBackStack
 import androidx.navigation3.runtime.NavKey
@@ -18,14 +19,18 @@ fun MainNavGraph(
     backStack: NavBackStack<NavKey>,
     onEvent: (NavigationHandler.NavigationEvent) -> Unit
 ) {
-    NavDisplay(
-        backStack = backStack,
-        entryProvider = entryProvider {
+    val entryProvider = remember(onEvent) {
+        entryProvider {
             MainScaffoldGraph.run {
                 registerEntries(onEvent)
                 registerCommonEntries(onEvent)
             }
-        },
+        }
+    }
+
+    NavDisplay(
+        backStack = backStack,
+        entryProvider = entryProvider,
         modifier = modifier.fillMaxSize()
     )
 }

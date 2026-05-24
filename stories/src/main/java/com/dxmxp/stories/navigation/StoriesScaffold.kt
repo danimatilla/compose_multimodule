@@ -41,11 +41,9 @@ fun StoriesScaffold(
             .dataObserver()
     }
 
-    val onChildEvent: (NavigationHandler.NavigationEvent) -> Unit = { event ->
-        scope.launch {
-            if (event is NavigationHandler.NavigationEvent.PushScreen && !StoriesScaffoldGraph.contains(event.screen)) {
-                onParentEvent(event)
-            } else {
+    val onEvent: (NavigationHandler.NavigationEvent) -> Unit = remember(backStack) {
+        { event ->
+            scope.launch {
                 NavigationHandler.handleEvent(backStack, event, dataObserver)
             }
         }
@@ -77,16 +75,15 @@ fun StoriesScaffold(
                 bottomBarItems = navigationBarItems,
                 currentDestination = currentDestination,
                 onClickItem = { screen ->
-                    onChildEvent(NavigationHandler.NavigationEvent.SetRootScreen(screen))
+                    onEvent(NavigationHandler.NavigationEvent.SetRootScreen(screen))
                 }
             )
         },
     ) { innerPadding ->
         StoriesNavGraph(
             backStack = backStack,
-            onEvent = onChildEvent,
+            onEvent = onEvent,
             modifier = Modifier.padding(innerPadding),
         )
     }
-
 }

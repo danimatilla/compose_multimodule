@@ -41,7 +41,6 @@ fun BottomBar(
     currentDestination: NavKey?,
     onClickItem: (Screen) -> Unit
 ) {
-    val scope = rememberCoroutineScope()
     AnimatedVisibility(
         visible = shouldShowBottomBar,
         enter = expandVertically(),
@@ -66,9 +65,7 @@ fun BottomBar(
                     selected = selected,
                     onClick = {
                         if (selected) return@NavigationBarItem
-                        scope.launch {
-                            onClickItem(screen)
-                        }
+                        onClickItem(screen)
                     },
                     icon = { Icon(icon, contentDescription = null) }
                 )

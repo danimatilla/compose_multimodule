@@ -20,15 +20,14 @@ internal object EventExtension {
         backStack: NavBackStack<NavKey>,
         dataObserver: DataObserver,
     ) {
-        data?.run {
-            dataObserver.emit(this)
-        }
-
         val screen = screen
         backStack.run {
             if (lastOrNull() != screen) {
                 add(screen)
             }
+        }
+        data?.run {
+            dataObserver.emit(this)
         }
     }
 
