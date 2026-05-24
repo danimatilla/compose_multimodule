@@ -42,7 +42,7 @@ fun MainScaffold(
             .dataObserver()
     }
 
-    val onEvent: (NavigationHandler.NavigationEvent) -> Unit = remember(backStack) {
+    val onEvent: (NavigationHandler.NavigationEvent) -> Unit = remember(backStack, dataObserver) {
         { event ->
             scope.launch {
                 NavigationHandler.handleEvent(backStack, event, dataObserver)
