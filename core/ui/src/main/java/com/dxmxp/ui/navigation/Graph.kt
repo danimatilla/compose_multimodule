@@ -12,7 +12,7 @@ import com.dxmxp.ui.screens.WebViewScreen
  * In a common backstack architecture, a Graph provides the entries (EntryProvider) for its
  * screens, allowing the root to integrate them into a single navigation stack.
  */
-interface Graph : Screen {
+interface Graph : Screen, NavigationContributor {
 
     val isModal: Boolean
         get() = false
@@ -37,9 +37,13 @@ interface Graph : Screen {
             }
         }
 
-    fun EntryProviderScope<NavKey>.registerCommonEntries(onEvent: (NavigationHandler.NavigationEvent) -> Unit){
-        screenEntry<WebView>{ WebViewScreen(it, onEvent) }
+    fun EntryProviderScope<NavKey>.registerCommonEntries(onEvent: (NavigationHandler.NavigationEvent) -> Unit) {
+        screenEntry<WebView> { WebViewScreen(it, onEvent) }
     }
 
     fun EntryProviderScope<NavKey>.registerEntries(onEvent: (NavigationHandler.NavigationEvent) -> Unit)
+}
+
+interface NavigationContributor {
+    fun provideGraph(): Graph
 }

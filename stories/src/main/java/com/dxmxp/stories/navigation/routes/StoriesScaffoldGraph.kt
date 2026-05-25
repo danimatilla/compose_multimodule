@@ -10,9 +10,16 @@ import com.dxmxp.ui.navigation.Graph
 import com.dxmxp.ui.navigation.Screen
 import com.dxmxp.ui.navigation.Screen.Companion.screenEntry
 import com.dxmxp.ui.navigation.helpers.NavigationHandler
+import dagger.Module
+import dagger.Provides
+import dagger.hilt.InstallIn
+import dagger.hilt.components.SingletonComponent
+import dagger.multibindings.IntoSet
 import kotlinx.serialization.Serializable
 
 @Serializable
+@Module
+@InstallIn(SingletonComponent::class)
 object StoriesScaffoldGraph : Graph {
 
     override val isModal: Boolean
@@ -49,4 +56,8 @@ object StoriesScaffoldGraph : Graph {
 
     override val route: String
         get() = "/stories"
+
+    @Provides
+    @IntoSet
+    override fun provideGraph(): Graph = StoriesScaffoldGraph
 }

@@ -5,14 +5,20 @@ import androidx.navigation3.runtime.NavKey
 import com.dxmxp.seed.screens.HomeScreen
 import com.dxmxp.seed.screens.MenuScreen
 import com.dxmxp.seed.screens.SearchScreen
-import com.dxmxp.seed.screens.profile.ProfileScreen
 import com.dxmxp.ui.navigation.Graph
 import com.dxmxp.ui.navigation.Screen
 import com.dxmxp.ui.navigation.Screen.Companion.screenEntry
 import com.dxmxp.ui.navigation.helpers.NavigationHandler
+import dagger.Module
+import dagger.Provides
+import dagger.hilt.InstallIn
+import dagger.hilt.components.SingletonComponent
+import dagger.multibindings.IntoSet
 import kotlinx.serialization.Serializable
 
 @Serializable
+@Module
+@InstallIn(SingletonComponent::class)
 object MainScaffoldGraph : Graph {
 
     @Serializable
@@ -40,4 +46,8 @@ object MainScaffoldGraph : Graph {
 
     override val route: String
         get() = "/seed"
+
+    @Provides
+    @IntoSet
+    override fun provideGraph(): Graph = MainScaffoldGraph
 }

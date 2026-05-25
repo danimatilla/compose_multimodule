@@ -19,7 +19,7 @@ import androidx.navigation3.runtime.entryProvider
 import androidx.navigation3.runtime.metadata
 import androidx.navigation3.runtime.rememberNavBackStack
 import androidx.navigation3.ui.NavDisplay
-import com.dxmxp.seed.navigation.DeepLinkHandler
+import com.dxmxp.ui.navigation.helpers.DeepLinkHandler
 import com.dxmxp.seed.navigation.MainScaffold
 import com.dxmxp.seed.navigation.routes.MainScaffoldGraph
 import com.dxmxp.stories.navigation.StoriesScaffold
@@ -38,6 +38,9 @@ class MainActivity : ComponentActivity() {
 
     @Inject
     lateinit var dataObserver: DataObserver
+
+    @Inject
+    lateinit var deepLinkHandler: DeepLinkHandler
 
     override fun onCreate(savedInstanceState: Bundle?) {
         enableEdgeToEdge()
@@ -64,6 +67,8 @@ class MainActivity : ComponentActivity() {
             val entryProvider = remember(onEvent) {
                 entryProvider {
                     screenEntry<MainScaffoldGraph> { MainScaffold(onParentEvent = onEvent) }
+                    // Include StoriesScaffoldGraph in entryProvider, 
+                    // allowing it to be displayed as a modal over the main scaffold.
                     screenEntry<StoriesScaffoldGraph>(
                         metadata = metadata { modalAnimation() }
                     ) { StoriesScaffold(onParentEvent = onEvent) }
@@ -72,7 +77,7 @@ class MainActivity : ComponentActivity() {
 
             LaunchedEffect(intentState) {
                 intentState?.data?.let { uri ->
-                    DeepLinkHandler.handleDeepLink(uri)?.let { event ->
+                    deepLinkHandler.handle(uri)?.let { event ->
                         onEvent(event)
                     }
                     intentState = null
