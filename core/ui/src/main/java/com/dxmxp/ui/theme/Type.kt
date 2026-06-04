@@ -1,4 +1,8 @@
+<<<<<<<< HEAD:core/ui/src/main/java/com/dxmxp/ui/theme/Type.kt
 package com.dxmxp.ui.theme
+========
+package com.example.seed.theme
+>>>>>>>> offline-first:seed/src/main/java/com/example/seed/theme/Type.kt
 
 import androidx.compose.material3.Typography
 import androidx.compose.ui.text.TextStyle

@@ -1,4 +1,8 @@
+<<<<<<<< HEAD:core/ui/src/main/java/com/dxmxp/ui/theme/Color.kt
 package com.dxmxp.ui.theme
+========
+package com.example.seed.theme
+>>>>>>>> offline-first:seed/src/main/java/com/example/seed/theme/Color.kt
 
 import androidx.compose.ui.graphics.Color
 

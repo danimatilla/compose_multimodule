@@ -1,4 +1,8 @@
+<<<<<<<< HEAD:core/ui/src/main/java/com/dxmxp/ui/theme/Theme.kt
 package com.dxmxp.theme
+========
+package com.example.seed.theme
+>>>>>>>> offline-first:seed/src/main/java/com/example/seed/theme/Theme.kt
 
 import android.os.Build
 import androidx.compose.foundation.isSystemInDarkTheme

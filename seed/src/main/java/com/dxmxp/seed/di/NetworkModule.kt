@@ -1,6 +1,13 @@
+<<<<<<<< HEAD:seed/src/main/java/com/dxmxp/seed/di/NetworkModule.kt
 package com.dxmxp.seed.di
 
 import com.dxmxp.seed.BuildConfig
+========
+package com.example.data.di
+
+import com.example.data.BuildConfig
+import com.example.data.remote.api.SpaceXApi
+>>>>>>>> offline-first:core/data/src/main/java/com/example/data/di/RemoteModule.kt
 import dagger.Module
 import dagger.Provides
 import dagger.hilt.InstallIn
@@ -11,24 +18,19 @@ import okhttp3.OkHttpClient
 import okhttp3.logging.HttpLoggingInterceptor
 import retrofit2.Retrofit
 import retrofit2.converter.kotlinx.serialization.asConverterFactory
+import javax.inject.Qualifier
 import javax.inject.Singleton
 
 @Module
 @InstallIn(SingletonComponent::class)
-object NetworkModule {
+object RemoteModule {
 
-    // Uncomment and replace ApiService with your actual API service interface.
-    // @Provides
-    // @Singleton
-    // fun provideApiService(
-    //     retrofit: Retrofit
-    // ): ApiService {
-    //     return retrofit
-    //         .newBuilder()
-    //         .baseUrl("https://api.example.com/") // Replace with your API base URL.
-    //         .build()
-    //         .create(ApiService::class.java)
-    // }
+    @Provides
+    @Singleton
+    fun provideRocketApi(
+        retrofit: Retrofit
+    ): SpaceXApi.Rockets = retrofit.retrofitBuilder()
+        .create(SpaceXApi.Rockets::class.java)
 
     @Provides
     @Singleton
@@ -36,7 +38,7 @@ object NetworkModule {
         okHttpClient: OkHttpClient
     ): Retrofit {
         val json = Json {
-            ignoreUnknownKeys = true // Ignore unknown JSON fields
+            ignoreUnknownKeys = true // Ignore unknown JSON fields.
         }
         val contentType = "application/json".toMediaType()
 
@@ -48,8 +50,8 @@ object NetworkModule {
 
     @Provides
     @Singleton
-    fun provideOkHttpClient(): OkHttpClient {
-        return OkHttpClient.Builder()
+    fun provideOkHttpClient(): OkHttpClient =
+        OkHttpClient.Builder()
             .addInterceptor(
                 HttpLoggingInterceptor()
                     .apply {
@@ -59,5 +61,9 @@ object NetworkModule {
                     }
             )
             .build()
-    }
+
+    private fun Retrofit.retrofitBuilder() =
+        newBuilder()
+            .baseUrl("https://api.spacexdata.com")
+            .build()
 }

@@ -1,7 +1,7 @@
 plugins {
     alias(libs.plugins.android.library)
-    alias(libs.plugins.kotlin.serialization)
     alias(libs.plugins.hilt.android)
+    alias(libs.plugins.kotlin.serialization)
     alias(libs.plugins.ksp)
 }
 
@@ -16,7 +16,6 @@ android {
     defaultConfig {
         minSdk = 24
 
-        testInstrumentationRunner = "androidx.test.runner.AndroidJUnitRunner"
         consumerProguardFiles("consumer-rules.pro")
     }
 
@@ -33,6 +32,9 @@ android {
         sourceCompatibility = JavaVersion.VERSION_11
         targetCompatibility = JavaVersion.VERSION_11
     }
+    buildFeatures {
+        buildConfig = true
+    }
 }
 
 dependencies {
@@ -41,6 +43,14 @@ dependencies {
     implementation(libs.hilt)
     ksp(libs.hilt.compiler)
 
+    api(platform (libs.okhttp.bom))
+    api(libs.okhttp)
+    api(libs.okhttp.logging.interceptor)
+
+    api(libs.retrofit)
+    api(libs.converter.kotlinx.serialization)
+    api(libs.kotlinx.serialization.json)
+
     api(libs.room.runtime)
     ksp(libs.room.compiler)
     api(libs.room.ktx)
@@ -48,8 +58,6 @@ dependencies {
     implementation(libs.androidx.core.ktx)
     implementation(libs.androidx.appcompat)
     implementation(libs.material)
-
-    api(libs.kotlin.reflect)
 
     testImplementation(libs.junit)
 
