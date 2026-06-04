@@ -1,6 +1,6 @@
 package com.dxmxp.domain.model
 
-data class Story(
+data class StoryBo(
     val id: String,
     val title: String,
     val description: String

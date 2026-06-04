@@ -1,6 +1,6 @@
 package com.dxmxp.stories.screens.story_detail
 
-import com.dxmxp.domain.model.Story
+import com.dxmxp.domain.model.StoryBo
 import com.dxmxp.stories.navigation.routes.StoriesScaffoldGraph
 import com.dxmxp.ui.base.DataObserver
 import com.dxmxp.ui.base.BaseViewModel
@@ -17,7 +17,7 @@ class StoryDetailViewModel @Inject constructor(
     override fun createInitialState(): State = State()
 
     override fun init(screen: StoriesScaffoldGraph.StoryDetail) {
-        val story = dataObserver.getLast<Story>()
+        val story = dataObserver.getLast<StoryBo>()
         setState { copy(storyId = screen.id, story = story) }
     }
 
@@ -35,7 +35,7 @@ class StoryDetailViewModel @Inject constructor(
 
     data class State(
         val storyId: String? = null,
-        val story: Story? = null
+        val story: StoryBo? = null
     )
 
     interface Effect

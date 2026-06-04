@@ -1,6 +1,6 @@
 package com.dxmxp.stories.screens.feed
 
-import com.dxmxp.domain.model.Story
+import com.dxmxp.domain.model.StoryBo
 import com.dxmxp.ui.base.BaseViewModel
 import dagger.hilt.android.lifecycle.HiltViewModel
 import javax.inject.Inject
@@ -18,15 +18,15 @@ class FeedViewModel @Inject constructor() :
     }
 
     interface Event {
-        data class OpenDetail(val story: Story) : Event
+        data class OpenDetail(val story: StoryBo) : Event
     }
 
     data class State(
-        val stories: List<Story>? = null
+        val stories: List<StoryBo>? = null
     )
 
     interface Effect {
-        data class OpenDetail(val story: Story) : Effect
+        data class OpenDetail(val story: StoryBo) : Effect
     }
 
     init {
@@ -35,7 +35,7 @@ class FeedViewModel @Inject constructor() :
 
     private fun fetchStories() {
         val stories = (1..20).map {
-            Story(
+            StoryBo(
                 id = "$it",
                 title = "Story - $it",
                 description = "Description story - $it"
@@ -44,7 +44,7 @@ class FeedViewModel @Inject constructor() :
         setState { copy(stories = stories) }
     }
 
-    private fun openDetail(story: Story) {
+    private fun openDetail(story: StoryBo) {
         setEffect { Effect.OpenDetail(story) }
     }
 }

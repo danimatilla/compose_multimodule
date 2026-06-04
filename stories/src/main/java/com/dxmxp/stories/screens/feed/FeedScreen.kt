@@ -15,7 +15,7 @@ import androidx.compose.runtime.getValue
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.hilt.lifecycle.viewmodel.compose.hiltViewModel
-import com.dxmxp.domain.model.Story
+import com.dxmxp.domain.model.StoryBo
 import com.dxmxp.stories.navigation.routes.StoriesScaffoldGraph
 import com.dxmxp.ui.navigation.helpers.NavigationHandler
 
@@ -82,7 +82,7 @@ private fun FeedScreenPreview() {
     Content(
         state = FeedViewModel.State(
             stories = (1..20).map {
-                Story(
+                StoryBo(
                     id = "$it",
                     title = "Story - $it",
                     description = "Description story - $it"
