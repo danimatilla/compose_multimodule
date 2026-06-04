@@ -1,8 +1,8 @@
-package com.example.data.remote.repository
+package com.dxmxp.data.repository
 
-import com.example.data.remote.data_source.IRocketRemoteDataSource
-import com.example.domain.bo.rocket.RocketBo
-import com.example.domain.repository.remote.IRocketRemoteRepository
+import com.dxmxp.data.data_source.IRocketRemoteDataSource
+import com.dxmxp.domain.model.RocketBo
+import com.dxmxp.domain.repository.IRocketRemoteRepository
 import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.flow
 

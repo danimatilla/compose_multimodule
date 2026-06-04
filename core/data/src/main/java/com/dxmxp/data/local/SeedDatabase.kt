@@ -2,7 +2,7 @@ package com.dxmxp.data.local
 
 import androidx.room.Database
 import androidx.room.RoomDatabase
-import com.example.data.local.entity.RocketEntity
+import com.dxmxp.data.local.entity.RocketEntity
 
 @Database(
     version = 1,

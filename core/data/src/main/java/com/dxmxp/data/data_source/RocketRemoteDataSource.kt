@@ -1,12 +1,10 @@
-package com.example.data.remote.data_source
+package com.dxmxp.data.data_source
 
-import com.example.data.di.CoroutineScopeModule
-import com.example.data.di.RemoteModule
-import com.example.data.remote.api.SpaceXApi
-import com.example.data.remote.dto.rocket.RocketResponse
+import com.dxmxp.data.di.CoroutineScopeModule
+import com.dxmxp.data.remote.api.SpaceXApi
+import com.dxmxp.data.remote.dto.rocket.RocketResponse
 import kotlinx.coroutines.CoroutineDispatcher
 import kotlinx.coroutines.withContext
-import retrofit2.Retrofit
 import javax.inject.Inject
 
 class RocketRemoteDataSource @Inject constructor(

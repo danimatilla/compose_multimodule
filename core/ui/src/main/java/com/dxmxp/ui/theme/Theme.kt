@@ -1,8 +1,4 @@
-<<<<<<<< HEAD:core/ui/src/main/java/com/dxmxp/ui/theme/Theme.kt
-package com.dxmxp.theme
-========
-package com.example.seed.theme
->>>>>>>> offline-first:seed/src/main/java/com/example/seed/theme/Theme.kt
+package com.dxmxp.ui.theme
 
 import android.os.Build
 import androidx.compose.foundation.isSystemInDarkTheme
@@ -13,13 +9,6 @@ import androidx.compose.material3.dynamicLightColorScheme
 import androidx.compose.material3.lightColorScheme
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.platform.LocalContext
-import com.dxmxp.ui.theme.Pink40
-import com.dxmxp.ui.theme.Pink80
-import com.dxmxp.ui.theme.Purple40
-import com.dxmxp.ui.theme.Purple80
-import com.dxmxp.ui.theme.PurpleGrey40
-import com.dxmxp.ui.theme.PurpleGrey80
-import com.dxmxp.ui.theme.Typography
 
 private val DarkColorScheme = darkColorScheme(
     primary = Purple80,

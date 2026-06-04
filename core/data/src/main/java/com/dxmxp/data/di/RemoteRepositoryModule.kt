@@ -1,7 +1,7 @@
-package com.example.data.di
+package com.dxmxp.data.di
 
-import com.example.data.remote.repository.RocketRemoteRepository
-import com.example.domain.repository.remote.IRocketRemoteRepository
+import com.dxmxp.data.repository.RocketRemoteRepository
+import com.dxmxp.domain.repository.IRocketRemoteRepository
 import dagger.Binds
 import dagger.Module
 import dagger.hilt.InstallIn

@@ -1,4 +1,4 @@
-package com.example.data.remote.dto.rocket
+package com.dxmxp.data.remote.dto.rocket
 
 import android.annotation.SuppressLint
 import kotlinx.serialization.InternalSerializationApi

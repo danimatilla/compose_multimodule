@@ -1,8 +1,7 @@
-package com.example.data.local.entity
+package com.dxmxp.data.local.entity
 
 import androidx.room.Entity
 import androidx.room.PrimaryKey
-import com.example.data.remote.dto.rocket.RocketResponse
 
 @Entity(tableName = "rockets")
 data class RocketEntity(

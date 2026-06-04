@@ -1,13 +1,7 @@
-<<<<<<<< HEAD:seed/src/main/java/com/dxmxp/seed/di/NetworkModule.kt
-package com.dxmxp.seed.di
+package com.dxmxp.data.di
 
-import com.dxmxp.seed.BuildConfig
-========
-package com.example.data.di
-
-import com.example.data.BuildConfig
-import com.example.data.remote.api.SpaceXApi
->>>>>>>> offline-first:core/data/src/main/java/com/example/data/di/RemoteModule.kt
+import com.dxmxp.data.BuildConfig
+import com.dxmxp.data.remote.api.SpaceXApi
 import dagger.Module
 import dagger.Provides
 import dagger.hilt.InstallIn
@@ -18,7 +12,6 @@ import okhttp3.OkHttpClient
 import okhttp3.logging.HttpLoggingInterceptor
 import retrofit2.Retrofit
 import retrofit2.converter.kotlinx.serialization.asConverterFactory
-import javax.inject.Qualifier
 import javax.inject.Singleton
 
 @Module

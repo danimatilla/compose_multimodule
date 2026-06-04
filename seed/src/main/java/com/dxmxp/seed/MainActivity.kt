@@ -24,7 +24,7 @@ import com.dxmxp.seed.navigation.MainScaffold
 import com.dxmxp.seed.navigation.routes.MainScaffoldGraph
 import com.dxmxp.stories.navigation.StoriesScaffold
 import com.dxmxp.stories.navigation.routes.StoriesScaffoldGraph
-import com.dxmxp.theme.SeedTheme
+import com.dxmxp.ui.theme.SeedTheme
 import com.dxmxp.ui.base.DataObserver
 import com.dxmxp.ui.navigation.Screen.Companion.screenEntry
 import com.dxmxp.ui.navigation.helpers.NavigationHandler

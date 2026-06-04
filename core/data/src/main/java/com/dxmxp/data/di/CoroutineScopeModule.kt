@@ -1,8 +1,4 @@
-<<<<<<<< HEAD:seed/src/main/java/com/dxmxp/seed/di/CoroutineScopeModule.kt
-package com.dxmxp.seed.di
-========
-package com.example.data.di
->>>>>>>> offline-first:core/data/src/main/java/com/example/data/di/CoroutineScopeModule.kt
+package com.dxmxp.data.di
 
 import dagger.Module
 import dagger.Provides

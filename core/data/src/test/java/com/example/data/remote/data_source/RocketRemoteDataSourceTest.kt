@@ -1,7 +1,9 @@
 package com.example.data.remote.data_source
 
-import com.example.data.remote.api.SpaceXApi
-import com.example.data.remote.dto.rocket.RocketResponse
+import com.dxmxp.data.remote.api.SpaceXApi
+import com.dxmxp.data.data_source.IRocketRemoteDataSource
+import com.dxmxp.data.data_source.RocketRemoteDataSource
+import com.dxmxp.data.remote.dto.rocket.RocketResponse
 import io.mockk.coEvery
 import io.mockk.mockk
 import kotlinx.coroutines.test.StandardTestDispatcher

@@ -1,6 +1,6 @@
-package com.example.data.remote.api
+package com.dxmxp.data.remote.api
 
-import com.example.data.remote.dto.rocket.RocketResponse
+import com.dxmxp.data.remote.dto.rocket.RocketResponse
 import retrofit2.http.GET
 import retrofit2.http.Path
 

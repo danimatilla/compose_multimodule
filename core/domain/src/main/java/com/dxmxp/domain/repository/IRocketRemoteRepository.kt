@@ -1,6 +1,6 @@
-package com.example.domain.repository.remote
+package com.dxmxp.domain.repository
 
-import com.example.domain.bo.rocket.RocketBo
+import com.dxmxp.domain.model.RocketBo
 import kotlinx.coroutines.flow.Flow
 
 interface IRocketRemoteRepository {

@@ -1,7 +1,7 @@
-package com.example.data.di
+package com.dxmxp.data.di
 
-import com.example.data.remote.data_source.IRocketRemoteDataSource
-import com.example.data.remote.data_source.RocketRemoteDataSource
+import com.dxmxp.data.data_source.IRocketRemoteDataSource
+import com.dxmxp.data.data_source.RocketRemoteDataSource
 import dagger.Binds
 import dagger.Module
 import dagger.hilt.InstallIn

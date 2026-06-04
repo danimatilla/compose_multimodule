@@ -1,4 +1,4 @@
-package com.example.domain.bo.rocket
+package com.dxmxp.domain.model
 
 data class RocketBo(
     val id: String,
