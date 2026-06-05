@@ -1,5 +1,6 @@
 package com.dxmxp.data.data_source
 
+import com.dxmxp.data.common.NetworkHandler
 import com.dxmxp.data.common.Paginator
 import com.dxmxp.data.di.CoroutineScopeModule.IoDispatcher
 import com.dxmxp.data.di.PaginatorModule.RocketPaginatorDefault
@@ -12,12 +13,15 @@ import javax.inject.Inject
 class RocketRemoteDataSource @Inject constructor(
     private val api: SpaceXApi.Rockets,
     @param:RocketPaginatorDefault private val paginator: Paginator<Int, RocketResponse>,
+    private val networkHandler: NetworkHandler,
     @param:IoDispatcher private val dispatcher: CoroutineDispatcher
 ) : IRocketRemoteDataSource {
 
     override suspend fun fetchRockets(): List<RocketResponse>? {
         return withContext(dispatcher) {
-            paginator.fetchOneShot(api::fetchRockets)
+            networkHandler.safeCall {
+                paginator.fetchOneShot(api::fetchRockets)
+            }
         }
     }
 }

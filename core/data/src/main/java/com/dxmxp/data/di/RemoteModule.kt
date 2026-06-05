@@ -2,6 +2,7 @@ package com.dxmxp.data.di
 
 import com.dxmxp.data.BuildConfig
 import com.dxmxp.data.remote.api.SpaceXApi
+import com.dxmxp.data.remote.interceptor.ErrorInterceptor
 import dagger.Module
 import dagger.Provides
 import dagger.hilt.InstallIn
@@ -45,6 +46,7 @@ object RemoteModule {
     @Singleton
     fun provideOkHttpClient(): OkHttpClient =
         OkHttpClient.Builder()
+            .addInterceptor(ErrorInterceptor())
             .addInterceptor(
                 HttpLoggingInterceptor()
                     .apply {
