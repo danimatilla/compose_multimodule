@@ -27,5 +27,4 @@ class ErrorInterceptor @Inject constructor(): Interceptor {
 
         return response
     }
-
 }
