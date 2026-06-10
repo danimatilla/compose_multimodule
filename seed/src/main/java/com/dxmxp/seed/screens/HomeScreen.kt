@@ -8,6 +8,7 @@ import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import com.dxmxp.seed.navigation.routes.MainScaffoldGraph
 import com.dxmxp.ui.navigation.helpers.NavigationHandler
 import com.dxmxp.ui.screens.WebView
 
@@ -24,11 +25,21 @@ fun HomeScreen(onEvent: (NavigationHandler.NavigationEvent) -> Unit) {
             onClick = {
                 onEvent(
                     NavigationHandler.NavigationEvent.PushScreen(
-                        WebView(url = "https://www.inditex.com")
+                        WebView(url = "https://www.google.com")
                     )
                 )
             },
             content = { Text("WebView") }
+        )
+        Button(
+            onClick = {
+                onEvent(
+                    NavigationHandler.NavigationEvent.PushScreen(
+                        MainScaffoldGraph.Rockets
+                    )
+                )
+            },
+            content = { Text("Rockets") }
         )
     }
 }

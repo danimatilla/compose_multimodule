@@ -86,6 +86,8 @@ dependencies {
     implementation(libs.androidx.compose.material3)
     implementation(libs.bundles.material.icons)
     implementation(libs.kotlinx.serialization.json)
+    implementation(libs.coil.compose)
+    implementation(libs.coil.network.okhttp)
 
     testImplementation(libs.junit)
 
