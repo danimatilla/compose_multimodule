@@ -1,7 +1,7 @@
 package com.dxmxp.data.di
 
-import com.dxmxp.data.data_source.IRocketRemoteDataSource
 import com.dxmxp.data.data_source.RocketRemoteDataSource
+import com.dxmxp.data.data_source.RocketRemoteDataSourceImpl
 import dagger.Binds
 import dagger.Module
 import dagger.hilt.InstallIn
@@ -13,5 +13,5 @@ interface RemoteDatasourceModule {
     // Define your remote data source bindings here.
 
     @Binds
-    fun bindRocketRemoteDataSource(impl: RocketRemoteDataSource): IRocketRemoteDataSource
+    fun bindRocketRemoteDataSource(impl: RocketRemoteDataSourceImpl): RocketRemoteDataSource
 }

@@ -1,6 +1,6 @@
 package com.dxmxp.domain.model
 
-data class RocketBo(
+data class Rocket(
     val id: String,
     val name: String,
     val height: Float,

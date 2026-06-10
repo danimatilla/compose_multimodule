@@ -3,7 +3,6 @@ package com.dxmxp.data.di
 import com.dxmxp.data.common.Paginator
 import com.dxmxp.data.remote.dto.rocket.RocketResponse
 import com.dxmxp.data.remote.dto.story.StoryResponse
-import com.dxmxp.domain.model.RocketBo
 import dagger.Module
 import dagger.Provides
 import dagger.hilt.InstallIn
@@ -15,7 +14,7 @@ import javax.inject.Qualifier
 object PaginatorModule {
 
     @Provides
-    @RocketPaginatorByPage
+    @PaginatorByPage
     fun provideRocketPaginatorByPage(): Paginator<Int, List<RocketResponse>> =
         Paginator(
             initialKey = 0,
@@ -25,7 +24,7 @@ object PaginatorModule {
         )
 
     @Provides
-    @RocketPaginatorByToken
+    @PaginatorByToken
     fun provideRocketPaginatorByToken(): Paginator<String, StoryResponse> =
         Paginator(
             initialKey = "",
@@ -36,12 +35,9 @@ object PaginatorModule {
 
     @Retention(AnnotationRetention.RUNTIME)
     @Qualifier
-    /**
-     * Default paginator for rockets, with a page size of 20 and a simple next key provider that increments the key by the page size.
-     */
-    annotation class RocketPaginatorByPage
+    annotation class PaginatorByPage
 
     @Retention(AnnotationRetention.RUNTIME)
     @Qualifier
-    annotation class RocketPaginatorByToken
+    annotation class PaginatorByToken
 }

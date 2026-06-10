@@ -23,7 +23,7 @@ class RocketRemoteDataSourceTest {
     private lateinit var networkHandler: NetworkHandler
     private val testDispatcher = UnconfinedTestDispatcher()
 
-    private lateinit var dataSource: RocketRemoteDataSource
+    private lateinit var dataSource: RocketRemoteDataSourceImpl
 
     @Before
     fun setUp() {
@@ -31,7 +31,7 @@ class RocketRemoteDataSourceTest {
         paginator = mockk()
         networkHandler = mockk()
 
-        dataSource = RocketRemoteDataSource(
+        dataSource = RocketRemoteDataSourceImpl(
             api = api,
             paginator = paginator,
             networkHandler = networkHandler,

@@ -1,29 +1,28 @@
 package com.dxmxp.domain
 
 
-sealed class AppException(message: String? = null, cause: Throwable? = null) :
-    Exception(message, cause) {
-    // Errores de Conexión (normalmente envuelven una IOException)
+sealed class AppException(message: String? = null, cause: Throwable? = null) : Exception(message, cause) {
+    // Connection Errors (normally wrapping an IOException)
     class NoInternetException(cause: Throwable) : AppException("No internet connection", cause)
 
-    // Errores de Autorización (401)
+    // Authorization Errors (401)
     class UnauthorizedException(message: String = "Unauthorized access") : AppException(message)
 
-    // Recurso no encontrado (404)
+    // Resource not found (404)
     class NotFoundException(message: String = "Resource not found") : AppException(message)
 
-    // Errores de Servidor (5xx)
+    // Server Errors (5xx)
     class ServerException(
         val code: Int,
         message: String = "Server error: $code",
         cause: Throwable? = null
     ) : AppException(message, cause)
 
-    // Errores de red desconocidos
+    // Unknown network errors
     class UnknownNetworkException(val code: Int, message: String = "Unknown network error: $code") :
         AppException(message)
 
-    // Error genérico de la aplicación
+    // Generic application error
     class UnknownException(
         message: String = "An unknown error occurred",
         cause: Throwable? = null

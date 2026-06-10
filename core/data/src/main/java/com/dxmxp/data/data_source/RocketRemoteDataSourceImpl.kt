@@ -3,19 +3,19 @@ package com.dxmxp.data.data_source
 import com.dxmxp.data.common.NetworkHandler
 import com.dxmxp.data.common.Paginator
 import com.dxmxp.data.di.CoroutineScopeModule.IoDispatcher
-import com.dxmxp.data.di.PaginatorModule.RocketPaginatorByPage
+import com.dxmxp.data.di.PaginatorModule.PaginatorByPage
 import com.dxmxp.data.remote.api.SpaceXApi
 import com.dxmxp.data.remote.dto.rocket.RocketResponse
 import kotlinx.coroutines.CoroutineDispatcher
 import kotlinx.coroutines.withContext
 import javax.inject.Inject
 
-class RocketRemoteDataSource @Inject constructor(
+class RocketRemoteDataSourceImpl @Inject constructor(
     private val api: SpaceXApi.Rockets,
-    @param:RocketPaginatorByPage private val paginator: Paginator<Int, List<RocketResponse>>,
+    @param:PaginatorByPage private val paginator: Paginator<Int, List<RocketResponse>>,
     private val networkHandler: NetworkHandler,
     @param:IoDispatcher private val dispatcher: CoroutineDispatcher
-) : IRocketRemoteDataSource {
+) : RocketRemoteDataSource {
 
     override suspend fun fetchRockets(): List<RocketResponse>? {
         return withContext(dispatcher) {
@@ -26,6 +26,6 @@ class RocketRemoteDataSource @Inject constructor(
     }
 }
 
-interface IRocketRemoteDataSource {
+interface RocketRemoteDataSource {
     suspend fun fetchRockets(): List<RocketResponse>?
 }

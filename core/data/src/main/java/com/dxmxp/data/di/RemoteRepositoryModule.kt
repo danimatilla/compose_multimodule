@@ -1,7 +1,7 @@
 package com.dxmxp.data.di
 
-import com.dxmxp.data.repository.RocketRemoteRepository
-import com.dxmxp.domain.repository.IRocketRemoteRepository
+import com.dxmxp.data.repository.RocketRemoteRepositoryImpl
+import com.dxmxp.domain.repository.RocketRemoteRepository
 import dagger.Binds
 import dagger.Module
 import dagger.hilt.InstallIn
@@ -13,5 +13,5 @@ interface RemoteRepositoryModule {
     // Define your remote repositories bindings here.
 
     @Binds
-    fun bindRocketRemoteRepository(impl: RocketRemoteRepository): IRocketRemoteRepository
+    fun bindRocketRemoteRepository(impl: RocketRemoteRepositoryImpl): RocketRemoteRepository
 }

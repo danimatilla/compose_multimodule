@@ -39,6 +39,19 @@ object CoroutineScopeModule {
     @Provides
     fun provideDefaultDispatcher(): CoroutineDispatcher = Dispatchers.Default
 
+    @Qualifier
+    @Retention(AnnotationRetention.RUNTIME)
+    annotation class IoScope
+
+    @Qualifier
+    @Retention(AnnotationRetention.RUNTIME)
+    annotation class MainScope
+
+    @Qualifier
+    @Retention(AnnotationRetention.RUNTIME)
+    annotation class DefaultScope
+
+    @IoScope
     @Singleton
     @Provides
     fun provideIoCoroutineScope(
@@ -47,6 +60,7 @@ object CoroutineScopeModule {
         return CoroutineScope(SupervisorJob() + dispatcher)
     }
 
+    @MainScope
     @Singleton
     @Provides
     fun provideMainCoroutineScope(
@@ -55,6 +69,7 @@ object CoroutineScopeModule {
         return CoroutineScope(SupervisorJob() + dispatcher)
     }
 
+    @DefaultScope
     @Singleton
     @Provides
     fun provideDefaultCoroutineScope(
