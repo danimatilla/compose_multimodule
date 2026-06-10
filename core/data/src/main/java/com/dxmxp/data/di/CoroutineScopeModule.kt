@@ -1,5 +1,8 @@
 package com.dxmxp.data.di
 
+import com.dxmxp.domain.di.DispatchersModule.DefaultDispatcher
+import com.dxmxp.domain.di.DispatchersModule.IoDispatcher
+import com.dxmxp.domain.di.DispatchersModule.MainDispatcher
 import dagger.Module
 import dagger.Provides
 import dagger.hilt.InstallIn
@@ -14,18 +17,6 @@ import javax.inject.Singleton
 @Module
 @InstallIn(SingletonComponent::class)
 object CoroutineScopeModule {
-
-    @Retention(AnnotationRetention.RUNTIME)
-    @Qualifier
-    annotation class MainDispatcher // UI-related
-
-    @Retention(AnnotationRetention.RUNTIME)
-    @Qualifier
-    annotation class IoDispatcher // I/O-related
-
-    @Retention(AnnotationRetention.RUNTIME)
-    @Qualifier
-    annotation class DefaultDispatcher // CPU-related
 
     @IoDispatcher
     @Provides

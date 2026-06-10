@@ -24,10 +24,7 @@ object LocalModule {
         name = "seed_database"
     ).build()
 
-    // Provides DAOs here, for example:
-    // @Provides
-    // @Singleton
-    // fun provideUserDao(database: AppDatabase): UserDao {
-    //     return database.userDao()
-    // }
+    @Provides
+    @Singleton
+    fun provideRocketDao(database: SeedDatabase) = database.rocketDao
 }

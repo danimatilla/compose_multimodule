@@ -2,7 +2,7 @@ package com.dxmxp.data.data_source
 
 import com.dxmxp.data.common.NetworkHandler
 import com.dxmxp.data.common.Paginator
-import com.dxmxp.data.di.CoroutineScopeModule.IoDispatcher
+import com.dxmxp.domain.di.DispatchersModule.IoDispatcher
 import com.dxmxp.data.di.PaginatorModule.PaginatorByPage
 import com.dxmxp.data.remote.api.SpaceXApi
 import com.dxmxp.data.remote.dto.rocket.RocketResponse

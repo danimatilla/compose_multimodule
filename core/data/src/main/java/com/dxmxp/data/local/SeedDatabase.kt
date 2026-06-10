@@ -2,6 +2,7 @@ package com.dxmxp.data.local
 
 import androidx.room.Database
 import androidx.room.RoomDatabase
+import com.dxmxp.data.local.dao.RocketDao
 import com.dxmxp.data.local.entity.RocketEntity
 
 @Database(
@@ -14,4 +15,5 @@ import com.dxmxp.data.local.entity.RocketEntity
 )
 abstract class SeedDatabase : RoomDatabase() {
     // Define DAOs here.
+    abstract val rocketDao: RocketDao
 }
