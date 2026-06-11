@@ -13,6 +13,7 @@ import okhttp3.OkHttpClient
 import okhttp3.logging.HttpLoggingInterceptor
 import retrofit2.Retrofit
 import retrofit2.converter.kotlinx.serialization.asConverterFactory
+import javax.inject.Qualifier
 import javax.inject.Singleton
 
 @Module
@@ -22,25 +23,26 @@ object RemoteModule {
     @Provides
     @Singleton
     fun provideRocketApi(
-        retrofit: Retrofit
-    ): SpaceXApi.Rockets = retrofit.retrofitBuilder()
-        .create(SpaceXApi.Rockets::class.java)
+        @SpaceXRetrofit retrofit: Retrofit
+    ): SpaceXApi.Rockets = retrofit.create(SpaceXApi.Rockets::class.java)
 
     @Provides
     @Singleton
+    @SpaceXRetrofit
     fun provideRetrofit(
         okHttpClient: OkHttpClient
     ): Retrofit {
-        val json = Json {
-            ignoreUnknownKeys = true // Ignore unknown JSON fields.
-        }
-        val contentType = "application/json".toMediaType()
-
+        val json = Json { ignoreUnknownKeys = true }
         return Retrofit.Builder()
+            .baseUrl("https://api.spacexdata.com")
             .client(okHttpClient)
-            .addConverterFactory(json.asConverterFactory(contentType))
+            .addConverterFactory(json.asConverterFactory("application/json".toMediaType()))
             .build()
     }
+
+    @Qualifier
+    @Retention(AnnotationRetention.BINARY)
+    annotation class SpaceXRetrofit
 
     @Provides
     @Singleton
@@ -55,10 +57,5 @@ object RemoteModule {
                         }
                     }
             )
-            .build()
-
-    private fun Retrofit.retrofitBuilder() =
-        newBuilder()
-            .baseUrl("https://api.spacexdata.com")
             .build()
 }
