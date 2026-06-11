@@ -34,7 +34,7 @@ object RemoteModule {
     ): Retrofit {
         val json = Json { ignoreUnknownKeys = true }
         return Retrofit.Builder()
-            .baseUrl("https://api.spacexdata.com")
+            .baseUrl("https://api.spacexdata.com/v4/")
             .client(okHttpClient)
             .addConverterFactory(json.asConverterFactory("application/json".toMediaType()))
             .build()
@@ -46,9 +46,11 @@ object RemoteModule {
 
     @Provides
     @Singleton
-    fun provideOkHttpClient(): OkHttpClient =
+    fun provideOkHttpClient(
+        errorInterceptor: ErrorInterceptor
+    ): OkHttpClient =
         OkHttpClient.Builder()
-            .addInterceptor(ErrorInterceptor())
+            .addInterceptor(errorInterceptor)
             .addInterceptor(
                 HttpLoggingInterceptor()
                     .apply {

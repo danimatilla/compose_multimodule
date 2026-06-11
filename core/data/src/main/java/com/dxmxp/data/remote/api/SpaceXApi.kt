@@ -8,13 +8,7 @@ sealed interface SpaceXApi {
 
     interface Rockets : SpaceXApi {
 
-        @GET("/{version}/rockets")
-        suspend fun fetchRockets(
-            @Path("version") version: String = VERSION,
-        ): List<RocketResponse>?
-    }
-
-    companion object{
-        const val VERSION = "v4"
+        @GET("rockets")
+        suspend fun fetchRockets(): List<RocketResponse>?
     }
 }

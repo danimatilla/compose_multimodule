@@ -3,9 +3,12 @@ package com.dxmxp.ui.base
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import kotlinx.coroutines.channels.Channel
+import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.MutableSharedFlow
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.asStateFlow
+import kotlinx.coroutines.flow.catch
+import kotlinx.coroutines.flow.onStart
 import kotlinx.coroutines.flow.receiveAsFlow
 import kotlinx.coroutines.launch
 
@@ -43,6 +46,45 @@ abstract class BaseViewModel<STATE, EFFECT, EVENT> : ViewModel() {
 
     protected fun setEffect(builder: () -> EFFECT) {
         viewModelScope.launch { _effect.send(builder()) }
+    }
+
+    /**
+     * Launches a Flow and automatically manages loading, error, and success states.
+     * [onLoading] and [onError] are optional in case some states do not require them.
+     */
+    protected fun <T> launchFlow(
+        flow: Flow<T>,
+        onLoading: (STATE.(Boolean) -> STATE)? = null,
+        onError: (STATE.(String?) -> STATE)? = null,
+        onSuccess: STATE.(T) -> STATE
+    ) {
+        viewModelScope.launch {
+            flow
+                .onStart {
+                    setState {
+                        var state = this
+                        onLoading?.let { state = state.it(true) }
+                        onError?.let { state = state.it(null) }
+                        state
+                    }
+                }
+                .catch { e ->
+                    val msg = e.localizedMessage ?: "Unknown error"
+                    setState {
+                        var state = this
+                        onLoading?.let { state = state.it(false) }
+                        onError?.let { state = state.it(msg) }
+                        state
+                    }
+                }
+                .collect { data ->
+                    setState {
+                        var state = this
+                        onLoading?.let { state = state.it(false) }
+                        state.onSuccess(data)
+                    }
+                }
+        }
     }
 
     protected abstract fun createInitialState(): STATE
