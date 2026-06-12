@@ -1,7 +1,9 @@
 package com.dxmxp.domain
 
+import java.io.IOException
 
-sealed class AppException(message: String? = null, cause: Throwable? = null) : Exception(message, cause) {
+
+sealed class AppException(message: String? = null, cause: Throwable? = null) : IOException(message, cause) {
     // Connection Errors (normally wrapping an IOException)
     class NoInternetException(cause: Throwable) : AppException("No internet connection", cause)
 

@@ -13,6 +13,7 @@ class ErrorInterceptor @Inject constructor(): Interceptor {
         val response = try {
             chain.proceed(request)
         } catch (e: IOException) {
+            if (e is AppException) throw e
             throw AppException.NoInternetException(e)
         }
 
