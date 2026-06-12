@@ -2,7 +2,7 @@ package com.dxmxp.ui.navigation.helpers
 
 import androidx.navigation3.runtime.NavBackStack
 import androidx.navigation3.runtime.NavKey
-import com.dxmxp.ui.base.DataObserver
+import com.dxmxp.ui.common.DataObserver
 import com.dxmxp.ui.navigation.helpers.NavigationHandler.NavigationEvent
 
 internal object EventExtension {

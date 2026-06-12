@@ -3,7 +3,7 @@ package com.dxmxp.ui.navigation.helpers
 import android.util.Log
 import androidx.navigation3.runtime.NavBackStack
 import androidx.navigation3.runtime.NavKey
-import com.dxmxp.ui.base.DataObserver
+import com.dxmxp.ui.common.DataObserver
 import com.dxmxp.ui.navigation.Screen
 import com.dxmxp.ui.navigation.helpers.EventExtension.popScreen
 import com.dxmxp.ui.navigation.helpers.EventExtension.pushScreen

@@ -3,6 +3,8 @@ package com.dxmxp.seed.screens.rockets
 import com.dxmxp.domain.model.Rocket
 import com.dxmxp.domain.use_case.GetRocketsUseCase
 import com.dxmxp.ui.base.BaseViewModel
+import com.dxmxp.ui.common.launchFlow
+import androidx.lifecycle.viewModelScope
 import dagger.hilt.android.lifecycle.HiltViewModel
 import javax.inject.Inject
 
@@ -40,8 +42,9 @@ class RocketsViewModel @Inject constructor(
     }
 
     private fun fetchRockets() {
-        launchFlow(
+        viewModelScope.launchFlow(
             flow = getRocketsUseCase(Unit),
+            setState = { setState(it) },
             onLoading = { copy(isLoading = it) },
             onError = { copy(error = it) },
             onSuccess = { rocketList ->

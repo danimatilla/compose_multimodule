@@ -1,4 +1,4 @@
-package com.dxmxp.ui.base
+package com.dxmxp.ui.common
 
 import dagger.hilt.EntryPoint
 import dagger.hilt.InstallIn
@@ -24,6 +24,6 @@ class DataObserver @Inject constructor() {
 
 @EntryPoint
 @InstallIn(SingletonComponent::class)
-interface DataObserverEntryPoint {
+fun interface DataObserverEntryPoint {
     fun dataObserver(): DataObserver
 }

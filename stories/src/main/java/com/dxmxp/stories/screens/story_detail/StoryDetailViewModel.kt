@@ -2,9 +2,9 @@ package com.dxmxp.stories.screens.story_detail
 
 import com.dxmxp.domain.model.Story
 import com.dxmxp.stories.navigation.routes.StoriesScaffoldGraph
-import com.dxmxp.ui.base.DataObserver
+import com.dxmxp.ui.common.DataObserver
 import com.dxmxp.ui.base.BaseViewModel
-import com.dxmxp.ui.base.InitializableViewModel
+import com.dxmxp.ui.common.InitializableViewModel
 import dagger.hilt.android.lifecycle.HiltViewModel
 import javax.inject.Inject
 

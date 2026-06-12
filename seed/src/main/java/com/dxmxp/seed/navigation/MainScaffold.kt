@@ -1,6 +1,5 @@
 package com.dxmxp.seed.navigation
 
-import androidx.compose.animation.AnimatedVisibility
 import androidx.compose.foundation.layout.padding
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.AutoStories
@@ -14,11 +13,10 @@ import androidx.compose.runtime.rememberCoroutineScope
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.platform.LocalContext
 import androidx.navigation3.runtime.rememberNavBackStack
-import androidx.navigation3.scene.Scene
 import com.dxmxp.seed.navigation.routes.MainScaffoldGraph
 import com.dxmxp.seed.navigation.routes.ProfileGraph
 import com.dxmxp.stories.navigation.routes.StoriesScaffoldGraph
-import com.dxmxp.ui.base.DataObserverEntryPoint
+import com.dxmxp.ui.common.DataObserverEntryPoint
 import com.dxmxp.ui.navigation.Screen
 import com.dxmxp.ui.navigation.helpers.NavigationHandler
 import com.dxmxp.ui.screens.BottomBar

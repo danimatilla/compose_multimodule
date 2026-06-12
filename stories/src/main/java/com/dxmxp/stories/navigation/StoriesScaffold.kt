@@ -17,7 +17,7 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.platform.LocalContext
 import androidx.navigation3.runtime.rememberNavBackStack
 import com.dxmxp.stories.navigation.routes.StoriesScaffoldGraph
-import com.dxmxp.ui.base.DataObserverEntryPoint
+import com.dxmxp.ui.common.DataObserverEntryPoint
 import com.dxmxp.ui.navigation.helpers.NavigationHandler
 import com.dxmxp.ui.screens.BottomBar
 import com.dxmxp.ui.screens.SeedScaffold
