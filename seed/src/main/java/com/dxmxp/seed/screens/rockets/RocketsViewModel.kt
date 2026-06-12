@@ -1,7 +1,7 @@
 package com.dxmxp.seed.screens.rockets
 
 import com.dxmxp.domain.model.Rocket
-import com.dxmxp.domain.use_case.GetRocketsUseCase
+import com.dxmxp.seed.use_case.GetRocketsUseCase
 import com.dxmxp.ui.base.BaseViewModel
 import com.dxmxp.ui.common.launchFlow
 import androidx.lifecycle.viewModelScope
