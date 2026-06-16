@@ -1,7 +1,7 @@
 package com.dxmxp.data.di
 
 import com.dxmxp.data.BuildConfig
-import com.dxmxp.data.remote.api.SpaceXApi
+import com.dxmxp.data.remote.api.PunkapiApi
 import com.dxmxp.data.remote.interceptor.ErrorInterceptor
 import dagger.Module
 import dagger.Provides
@@ -22,42 +22,41 @@ object RemoteModule {
 
     @Provides
     @Singleton
-    fun provideRocketApi(
-        @SpaceXRetrofit retrofit: Retrofit
-    ): SpaceXApi.Rockets = retrofit.create(SpaceXApi.Rockets::class.java)
+    fun providePunkapiApi(
+        @PunkapiRetrofit retrofit: Retrofit
+    ): PunkapiApi.Beers = retrofit.create(PunkapiApi.Beers::class.java)
 
     @Provides
     @Singleton
-    @SpaceXRetrofit
+    @PunkapiRetrofit
     fun provideRetrofit(
         okHttpClient: OkHttpClient
     ): Retrofit {
         val json = Json { ignoreUnknownKeys = true }
         return Retrofit.Builder()
-            .baseUrl("https://api.spacexdata.com/v4/")
+            .baseUrl("https://punkapi-alxiw.amvera.io/v3/")
             .client(okHttpClient)
             .addConverterFactory(json.asConverterFactory("application/json".toMediaType()))
             .build()
     }
 
-    @Qualifier
-    @Retention(AnnotationRetention.BINARY)
-    annotation class SpaceXRetrofit
-
     @Provides
     @Singleton
     fun provideOkHttpClient(
         errorInterceptor: ErrorInterceptor
-    ): OkHttpClient =
-        OkHttpClient.Builder()
-            .addInterceptor(errorInterceptor)
-            .addInterceptor(
-                HttpLoggingInterceptor()
-                    .apply {
-                        if (BuildConfig.DEBUG) {
-                            level = HttpLoggingInterceptor.Level.BODY
-                        }
+    ): OkHttpClient = OkHttpClient.Builder()
+        .addInterceptor(errorInterceptor)
+        .addInterceptor(
+            HttpLoggingInterceptor()
+                .apply {
+                    if (BuildConfig.DEBUG) {
+                        level = HttpLoggingInterceptor.Level.BODY
                     }
-            )
-            .build()
+                }
+        )
+        .build()
+
+    @Qualifier
+    @Retention(AnnotationRetention.BINARY)
+    annotation class PunkapiRetrofit
 }

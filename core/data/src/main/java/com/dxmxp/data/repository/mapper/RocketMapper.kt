@@ -1,8 +1,8 @@
 package com.dxmxp.data.repository.mapper
 
-import com.dxmxp.data.local.entity.RocketEntity
-import com.dxmxp.data.remote.dto.rocket.RocketResponse
-import com.dxmxp.domain.model.Rocket
+import com.dxmxp.data.local.entity.BeerEntity
+import com.dxmxp.data.remote.dto.rocket.BeerResponse
+import com.dxmxp.domain.model.Beer
 
 /**
  * Mapper for Rocket related data transfers between layers.
@@ -10,45 +10,26 @@ import com.dxmxp.domain.model.Rocket
 object RocketMapper {
 
     /**
-     * Maps [RocketResponse] (Remote DTO) to [Rocket] (Domain Model).
+     * Maps [BeerResponse] (Remote DTO) to [Beer] (Domain Model).
      */
-    fun RocketResponse.toDomain(): Rocket =
-        Rocket(
-            id = id,
-            name = name,
-            height = height.toMeters(),
-            firstFlight = firstFlight,
-            images = flickrImages,
+    fun BeerResponse.toDomain(): Beer =
+        Beer(
+            id = "$id",
         )
 
     /**
-     * Maps [RocketEntity] (Local Database Entity) to [Rocket] (Domain Model).
+     * Maps [BeerEntity] (Local Database Entity) to [Beer] (Domain Model).
      */
-    fun RocketEntity.toDomain(): Rocket =
-        Rocket(
+    fun BeerEntity.toDomain(): Beer =
+        Beer(
             id = id,
-            name = name,
-            height = height,
-            firstFlight = firstFlight,
-            images = listOf(image),
         )
 
     /**
-     * Maps [RocketResponse] (Remote DTO) to [RocketEntity] (Local Database Entity).
+     * Maps [BeerResponse] (Remote DTO) to [BeerEntity] (Local Database Entity).
      */
-    fun RocketResponse.toEntity(): RocketEntity =
-        RocketEntity(
-            id = id,
-            name = name,
-            type = type,
-            height = height.toMeters(),
-            diameter = diameter.toMeters(),
-            image = flickrImages.firstOrNull() ?: "",
-            firstFlight = firstFlight,
-            wikipedia = wikipedia,
-            description = description,
+    fun BeerResponse.toEntity(): BeerEntity =
+        BeerEntity(
+            id = "$id",
         )
-
-    private fun RocketResponse.Dimension.toMeters(): Float =
-        meters ?: (feet?.let { it * 0.3048f } ?: 0f)
 }

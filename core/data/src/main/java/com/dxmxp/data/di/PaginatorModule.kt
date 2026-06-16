@@ -1,7 +1,7 @@
 package com.dxmxp.data.di
 
 import com.dxmxp.data.common.Paginator
-import com.dxmxp.data.remote.dto.rocket.RocketResponse
+import com.dxmxp.data.remote.dto.rocket.BeerResponse
 import com.dxmxp.data.remote.dto.story.StoryResponse
 import dagger.Module
 import dagger.Provides
@@ -15,9 +15,9 @@ object PaginatorModule {
 
     @Provides
     @PaginatorByPage
-    fun provideRocketPaginatorByPage(): Paginator<Int, List<RocketResponse>> =
+    fun providePaginatorByPage(): Paginator<Int, List<BeerResponse>> =
         Paginator(
-            initialKey = 0,
+            initialKey = 1,
             nextKeyProvider = { key, items, size ->
                 if(items.size < size) null else key + size
             }
@@ -25,7 +25,7 @@ object PaginatorModule {
 
     @Provides
     @PaginatorByToken
-    fun provideRocketPaginatorByToken(): Paginator<String, StoryResponse> =
+    fun providePaginatorByToken(): Paginator<String, StoryResponse> =
         Paginator(
             initialKey = "",
             nextKeyProvider = { _, result, _ ->

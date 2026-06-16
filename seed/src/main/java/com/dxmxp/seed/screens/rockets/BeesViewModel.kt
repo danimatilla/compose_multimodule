@@ -1,7 +1,7 @@
 package com.dxmxp.seed.screens.rockets
 
-import com.dxmxp.domain.model.Rocket
-import com.dxmxp.seed.use_case.GetRocketsUseCase
+import com.dxmxp.domain.model.Beer
+import com.dxmxp.seed.use_case.GetBeersUseCase
 import com.dxmxp.ui.base.BaseViewModel
 import com.dxmxp.ui.common.launchFlow
 import androidx.lifecycle.viewModelScope
@@ -9,19 +9,19 @@ import dagger.hilt.android.lifecycle.HiltViewModel
 import javax.inject.Inject
 
 @HiltViewModel
-class RocketsViewModel @Inject constructor(
-    private val getRocketsUseCase: GetRocketsUseCase
-) : BaseViewModel<RocketsViewModel.State, RocketsViewModel.Effect, RocketsViewModel.Event>() {
+class BeesViewModel @Inject constructor(
+    private val getBeersUseCase: GetBeersUseCase
+) : BaseViewModel<BeesViewModel.State, BeesViewModel.Effect, BeesViewModel.Event>() {
 
     data class State(
         val isLoading: Boolean = false,
-        val rockets: List<Rocket> = emptyList(),
+        val beers: List<Beer> = emptyList(),
         val error: String? = null
     )
 
     sealed interface Event {
-        data object LoadRockets : Event
-        data class OnRocketClicked(val rocket: Rocket) : Event
+        data object LoadBeers : Event
+        data class OnBeerClicked(val beer: Beer) : Event
     }
 
     sealed interface Effect {
@@ -32,25 +32,25 @@ class RocketsViewModel @Inject constructor(
 
     override fun handleEvent(event: Event) {
         when (event) {
-            is Event.LoadRockets -> fetchRockets()
-            is Event.OnRocketClicked -> setEffect { Effect.NavigateToDetail(event.rocket.id) }
+            is Event.LoadBeers -> fetchBeers()
+            is Event.OnBeerClicked -> setEffect { Effect.NavigateToDetail(event.beer.id) }
         }
     }
 
     init {
-        setEvent(Event.LoadRockets)
+        setEvent(Event.LoadBeers)
     }
 
-    private fun fetchRockets() {
+    private fun fetchBeers() {
         viewModelScope.launchFlow(
-            flow = getRocketsUseCase(Unit),
+            flow = getBeersUseCase(Unit),
             setState = { setState(it) },
             onLoading = { copy(isLoading = it) },
             onError = { copy(error = it) },
-            onSuccess = { rocketList ->
+            onSuccess = { result ->
                 copy(
-                    rockets = rocketList,
-                    error = if (rocketList.isEmpty()) "No rockets found" else null
+                    beers = result,
+                    error = if (result.isEmpty()) "No rockets found" else null
                 )
             }
         )

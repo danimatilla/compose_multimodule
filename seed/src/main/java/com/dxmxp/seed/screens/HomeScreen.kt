@@ -35,11 +35,11 @@ fun HomeScreen(onEvent: (NavigationHandler.NavigationEvent) -> Unit) {
             onClick = {
                 onEvent(
                     NavigationHandler.NavigationEvent.PushScreen(
-                        MainScaffoldGraph.Rockets
+                        MainScaffoldGraph.Beers
                     )
                 )
             },
-            content = { Text("Rockets") }
+            content = { Text("Beers") }
         )
     }
 }

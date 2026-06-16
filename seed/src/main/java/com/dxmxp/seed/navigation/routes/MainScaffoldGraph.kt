@@ -5,9 +5,7 @@ import androidx.navigation3.runtime.NavKey
 import com.dxmxp.seed.screens.HomeScreen
 import com.dxmxp.seed.screens.MenuScreen
 import com.dxmxp.seed.screens.SearchScreen
-import androidx.hilt.lifecycle.viewmodel.compose.hiltViewModel
-import com.dxmxp.seed.screens.rockets.RocketsScreen
-import com.dxmxp.seed.screens.rockets.RocketsViewModel
+import com.dxmxp.seed.screens.rockets.BeersScreen
 import com.dxmxp.ui.navigation.Graph
 import com.dxmxp.ui.navigation.Screen
 import com.dxmxp.ui.navigation.Screen.Companion.screenEntry
@@ -37,9 +35,9 @@ object MainScaffoldGraph : Graph {
     }
 
     @Serializable
-    data object Rockets : Screen {
+    data object Beers : Screen {
         override val route: String
-            get() = "${this@MainScaffoldGraph.route}/rockets"
+            get() = "${this@MainScaffoldGraph.route}/beers"
     }
 
     override fun EntryProviderScope<NavKey>.registerEntries(
@@ -48,7 +46,7 @@ object MainScaffoldGraph : Graph {
         screenEntry<MainScaffoldGraph> { HomeScreen(onEvent) }
         screenEntry<Search> { SearchScreen(onEvent) }
         screenEntry<Menu> { MenuScreen(onEvent) }
-        screenEntry<Rockets> { RocketsScreen(onEvent) }
+        screenEntry<Beers> { BeersScreen(onEvent) }
 
         // Integrate the ProfileGraph entries into this graph.
         ProfileGraph.run { registerEntries(onEvent) }
