@@ -10,6 +10,10 @@ import kotlinx.coroutines.CoroutineDispatcher
 import kotlinx.coroutines.withContext
 import javax.inject.Inject
 
+fun interface BeerRemoteDataSource {
+    suspend fun fetchBeers(): List<BeerResponse>?
+}
+
 class BeerRemoteDataSourceImpl @Inject constructor(
     private val api: PunkapiApi.Beers,
     @param:PaginatorByPage private val paginator: Paginator<Int, List<BeerResponse>>,
@@ -29,8 +33,4 @@ class BeerRemoteDataSourceImpl @Inject constructor(
             }
         }
     }
-}
-
-fun interface BeerRemoteDataSource {
-    suspend fun fetchBeers(): List<BeerResponse>?
 }
