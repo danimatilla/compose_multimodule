@@ -12,8 +12,8 @@ import javax.inject.Inject
  */
 class GetBeersUseCase @Inject constructor(
     private val repository: BeerRemoteRepository,
-) : BaseFlowUseCase<Unit, DataResult<List<Beer>?>>() {
+) : BaseFlowUseCase<Boolean, DataResult<List<Beer>?>>() {
 
-    override fun launch(params: Unit): Flow<DataResult<List<Beer>?>> =
-        repository.getBeers()
+    override fun launch(params: Boolean): Flow<DataResult<List<Beer>?>> =
+        repository.getBeers(isNextPage = params)
 }

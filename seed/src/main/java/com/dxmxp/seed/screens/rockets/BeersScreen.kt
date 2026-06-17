@@ -8,6 +8,7 @@ import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.items
+import androidx.compose.foundation.lazy.rememberLazyListState
 import androidx.compose.material3.Card
 import androidx.compose.material3.CircularProgressIndicator
 import androidx.compose.material3.MaterialTheme
@@ -21,6 +22,7 @@ import androidx.compose.ui.unit.dp
 import androidx.hilt.lifecycle.viewmodel.compose.hiltViewModel
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import com.dxmxp.domain.model.Beer
+import com.dxmxp.ui.common.InfiniteScrollHandler
 import com.dxmxp.ui.navigation.helpers.NavigationHandler
 
 @Composable
@@ -29,9 +31,18 @@ fun BeersScreen(
     viewModel: BeersViewModel = hiltViewModel()
 ) {
     val state by viewModel.uiState.collectAsStateWithLifecycle()
+    val listState = rememberLazyListState()
+
+    InfiniteScrollHandler(
+        listState = listState,
+        isLoading = state.isLoading,
+        endReached = state.endReached,
+        buffer = 5,
+        onLoadNextPage = { viewModel.setEvent(BeersViewModel.Event.LoadNextPage) }
+    )
 
     Box(modifier = Modifier.fillMaxSize()) {
-        if (state.isLoading && state.beers.isNullOrEmpty()) {
+        if (state.isLoading && state.beers.isEmpty()) {
             CircularProgressIndicator(modifier = Modifier.align(Alignment.Center))
         }
 
@@ -43,11 +54,17 @@ fun BeersScreen(
             )
         }
 
-        state.beers?.let { beers ->
-            BeersList(
-                beers = beers,
-                onEvent = viewModel::setEvent
-            )
+        LazyColumn(
+            state = listState,
+            modifier = Modifier.fillMaxSize(),
+            contentPadding = PaddingValues(16.dp)
+        ) {
+            items(state.beers) { beer ->
+                BeerItem(
+                    beer = beer,
+                    onClick = { viewModel.setEvent(BeersViewModel.Event.OnBeerClicked(beer)) }
+                )
+            }
         }
     }
 
@@ -58,24 +75,6 @@ fun BeersScreen(
                     // Navigation logic here
                 }
             }
-        }
-    }
-}
-
-@Composable
-private fun BeersList(
-    beers: List<Beer>,
-    onEvent: (BeersViewModel.Event) -> Unit
-) {
-    LazyColumn(
-        modifier = Modifier.fillMaxSize(),
-        contentPadding = PaddingValues(16.dp)
-    ) {
-        items(beers) {
-            BeerItem(
-                beer = it,
-                onClick = { onEvent(BeersViewModel.Event.OnBeerClicked(it)) }
-            )
         }
     }
 }

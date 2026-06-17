@@ -19,7 +19,7 @@ object PaginatorModule {
         Paginator(
             initialKey = 1,
             nextKeyProvider = { key, items, size ->
-                if(items.size < size) null else key + size
+                if(items.size < size) null else key + 1
             }
         )
 
