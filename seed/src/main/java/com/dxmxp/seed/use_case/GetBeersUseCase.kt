@@ -1,18 +1,19 @@
 package com.dxmxp.seed.use_case
 
 import com.dxmxp.domain.base.BaseFlowUseCase
+import com.dxmxp.domain.common.DataResult
 import com.dxmxp.domain.model.Beer
 import com.dxmxp.domain.repository.BeerRemoteRepository
 import kotlinx.coroutines.flow.Flow
 import javax.inject.Inject
 
 /**
- * Use case to retrieve the list of rockets.
+ * Use case to retrieve the list of beers.
  */
 class GetBeersUseCase @Inject constructor(
     private val repository: BeerRemoteRepository,
-) : BaseFlowUseCase<Unit, List<Beer>>() {
+) : BaseFlowUseCase<Unit, DataResult<List<Beer>?>>() {
 
-    override fun launch(params: Unit): Flow<List<Beer>> =
+    override fun launch(params: Unit): Flow<DataResult<List<Beer>?>> =
         repository.getBeers()
 }

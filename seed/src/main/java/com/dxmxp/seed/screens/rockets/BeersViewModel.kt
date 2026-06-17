@@ -3,19 +3,19 @@ package com.dxmxp.seed.screens.rockets
 import com.dxmxp.domain.model.Beer
 import com.dxmxp.seed.use_case.GetBeersUseCase
 import com.dxmxp.ui.base.BaseViewModel
-import com.dxmxp.ui.common.launchFlow
+import com.dxmxp.ui.common.launchResultFlow
 import androidx.lifecycle.viewModelScope
 import dagger.hilt.android.lifecycle.HiltViewModel
 import javax.inject.Inject
 
 @HiltViewModel
-class BeesViewModel @Inject constructor(
+class BeersViewModel @Inject constructor(
     private val getBeersUseCase: GetBeersUseCase
-) : BaseViewModel<BeesViewModel.State, BeesViewModel.Effect, BeesViewModel.Event>() {
+) : BaseViewModel<BeersViewModel.State, BeersViewModel.Effect, BeersViewModel.Event>() {
 
     data class State(
         val isLoading: Boolean = false,
-        val beers: List<Beer> = emptyList(),
+        val beers: List<Beer>? = null,
         val error: String? = null
     )
 
@@ -42,15 +42,15 @@ class BeesViewModel @Inject constructor(
     }
 
     private fun fetchBeers() {
-        viewModelScope.launchFlow(
+        viewModelScope.launchResultFlow(
             flow = getBeersUseCase(Unit),
             setState = { setState(it) },
             onLoading = { copy(isLoading = it) },
-            onError = { copy(error = it) },
+            onError = { copy(error = it.message) },
             onSuccess = { result ->
                 copy(
                     beers = result,
-                    error = if (result.isEmpty()) "No rockets found" else null
+                    error = if (result.isNullOrEmpty()) "No beers found" else null
                 )
             }
         )

@@ -1,5 +1,7 @@
 package com.dxmxp.ui.common
 
+import com.dxmxp.domain.AppException
+import com.dxmxp.domain.common.DataResult
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.catch
@@ -8,7 +10,6 @@ import kotlinx.coroutines.launch
 
 /**
  * Extension to launch a [Flow] from a [CoroutineScope] and update a state through a [setState] callback.
- * This is an idiomatic way to handle data flows in ViewModels when the base class cannot be modified.
  */
 fun <T, S> CoroutineScope.launchFlow(
     flow: Flow<T>,
@@ -38,6 +39,37 @@ fun <T, S> CoroutineScope.launchFlow(
                 var state = this
                 onLoading?.let { state = state.it(false) }
                 state.onSuccess(data)
+            }
+        }
+    }
+}
+
+/**
+ * Extension to launch a [Flow] of [DataResult] from a [CoroutineScope] and update a state.
+ */
+fun <T, S> CoroutineScope.launchResultFlow(
+    flow: Flow<DataResult<T>>,
+    setState: (S.() -> S) -> Unit,
+    onLoading: (S.(Boolean) -> S)? = null,
+    onError: (S.(AppException) -> S)? = null,
+    onSuccess: S.(T) -> S
+) {
+    this.launch {
+        flow.collect { result ->
+            setState {
+                when (result) {
+                    is DataResult.Loading -> {
+                        onLoading?.invoke(this, true) ?: this
+                    }
+                    is DataResult.Success -> {
+                        val state = onLoading?.invoke(this, false) ?: this
+                        state.onSuccess(result.data)
+                    }
+                    is DataResult.Error -> {
+                        val state = onLoading?.invoke(this, false) ?: this
+                        onError?.invoke(state, result.exception) ?: state
+                    }
+                }
             }
         }
     }

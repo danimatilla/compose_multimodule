@@ -25,25 +25,13 @@ import com.dxmxp.ui.navigation.helpers.NavigationHandler
 
 @Composable
 fun BeersScreen(
-    onEvent: (NavigationHandler.NavigationEvent) -> Unit,
-    viewModel: BeesViewModel = hiltViewModel()
+    onNavigationEvent: (NavigationHandler.NavigationEvent) -> Unit,
+    viewModel: BeersViewModel = hiltViewModel()
 ) {
     val state by viewModel.uiState.collectAsStateWithLifecycle()
 
-    LaunchedEffect(Unit) {
-        viewModel.effect.collect { effect ->
-            when (effect) {
-                is BeesViewModel.Effect.NavigateToDetail -> {
-                    // Here you would convert the VM Effect to a NavigationEvent
-                    // For example:
-                    // onEvent(NavigationHandler.NavigationEvent.PushScreen(RocketDetail(effect.rocketId)))
-                }
-            }
-        }
-    }
-
     Box(modifier = Modifier.fillMaxSize()) {
-        if (state.isLoading && state.beers.isEmpty()) {
+        if (state.isLoading && state.beers.isNullOrEmpty()) {
             CircularProgressIndicator(modifier = Modifier.align(Alignment.Center))
         }
 
@@ -55,35 +43,45 @@ fun BeersScreen(
             )
         }
 
-        RocketsList(
-            beers = state.beers,
-            onRocketClick = { rocket ->
-                viewModel.setEvent(BeesViewModel.Event.OnBeerClicked(rocket))
+        state.beers?.let { beers ->
+            BeersList(
+                beers = beers,
+                onEvent = viewModel::setEvent
+            )
+        }
+    }
+
+    LaunchedEffect(Unit) {
+        viewModel.effect.collect { effect ->
+            when (effect) {
+                is BeersViewModel.Effect.NavigateToDetail -> {
+                    // Navigation logic here
+                }
             }
-        )
+        }
     }
 }
 
 @Composable
-private fun RocketsList(
+private fun BeersList(
     beers: List<Beer>,
-    onRocketClick: (Beer) -> Unit
+    onEvent: (BeersViewModel.Event) -> Unit
 ) {
     LazyColumn(
         modifier = Modifier.fillMaxSize(),
         contentPadding = PaddingValues(16.dp)
     ) {
-        items(beers) { rocket ->
-            RocketItem(
-                beer = rocket,
-                onClick = { onRocketClick(rocket) }
+        items(beers) {
+            BeerItem(
+                beer = it,
+                onClick = { onEvent(BeersViewModel.Event.OnBeerClicked(it)) }
             )
         }
     }
 }
 
 @Composable
-private fun RocketItem(
+private fun BeerItem(
     beer: Beer,
     onClick: () -> Unit
 ) {
@@ -93,5 +91,9 @@ private fun RocketItem(
             .padding(vertical = 8.dp)
             .clickable(onClick = onClick)
     ) {
+        Text(
+            text = beer.id,
+            modifier = Modifier.padding(16.dp)
+        )
     }
 }
