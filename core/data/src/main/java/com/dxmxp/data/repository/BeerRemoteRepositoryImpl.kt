@@ -19,9 +19,8 @@ class BeerRemoteRepositoryImpl @Inject constructor(
     @param:IoDispatcher private val ioDispatcher: CoroutineDispatcher
 ) : BeerRemoteRepository {
 
-    override fun getBeers(isNextPage: Boolean): Flow<DataResult<List<Beer>?>> = 
+    override fun getBeers(shouldReset: Boolean): Flow<DataResult<List<Beer>?>> = 
         DataResult.loadingFlow(ioDispatcher) {
-            val remoteBeers = remoteDataSource.fetchBeers(isNextPage)
-            remoteBeers?.map { it.toDomain() }
+            remoteDataSource.fetchBeers(shouldReset)?.map { it.toDomain() }
         }
 }

@@ -34,8 +34,8 @@ class BeersViewModel @Inject constructor(
 
     override fun handleEvent(event: Event) {
         when (event) {
-            is Event.LoadBeers -> fetchBeers(isNextPage = false)
-            is Event.LoadNextPage -> fetchBeers(isNextPage = true)
+            is Event.LoadBeers -> fetchBeers(shouldReset = true)
+            is Event.LoadNextPage -> fetchBeers(shouldReset = false)
             is Event.OnBeerClicked -> setEffect { Effect.NavigateToDetail(event.beer.id) }
         }
     }
@@ -44,19 +44,19 @@ class BeersViewModel @Inject constructor(
         setEvent(Event.LoadBeers)
     }
 
-    private fun fetchBeers(isNextPage: Boolean) {
-        if (isNextPage && (uiState.value.isLoading || uiState.value.endReached)) return
+    private fun fetchBeers(shouldReset: Boolean) {
+        if (!shouldReset && (uiState.value.isLoading || uiState.value.endReached)) return
 
         viewModelScope.launchResultFlow(
-            flow = getBeersUseCase(isNextPage),
+            flow = getBeersUseCase(shouldReset),
             setState = { setState(it) },
             onLoading = { copy(isLoading = it) },
             onError = { copy(error = it.message) },
             onSuccess = { result ->
                 val newBeers = result ?: emptyList()
                 copy(
-                    beers = if (isNextPage) beers + newBeers else newBeers,
-                    error = if (!isNextPage && newBeers.isEmpty()) "No beers found" else null,
+                    beers = if (shouldReset) newBeers else beers + newBeers,
+                    error = if (shouldReset && newBeers.isEmpty()) "No beers found" else null,
                     endReached = newBeers.isEmpty()
                 )
             }

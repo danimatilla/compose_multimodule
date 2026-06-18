@@ -11,7 +11,7 @@ import kotlinx.coroutines.withContext
 import javax.inject.Inject
 
 interface BeerRemoteDataSource {
-    suspend fun fetchBeers(isNextPage: Boolean = false): List<BeerResponse>?
+    suspend fun fetchBeers(shouldReset: Boolean = false): List<BeerResponse>?
 }
 
 class BeerRemoteDataSourceImpl @Inject constructor(
@@ -21,10 +21,10 @@ class BeerRemoteDataSourceImpl @Inject constructor(
     @param:IoDispatcher private val dispatcher: CoroutineDispatcher
 ) : BeerRemoteDataSource {
 
-    override suspend fun fetchBeers(isNextPage: Boolean): List<BeerResponse>? {
+    override suspend fun fetchBeers(shouldReset: Boolean): List<BeerResponse>? {
         return withContext(dispatcher) {
             networkHandler.safeCall {
-                if (!isNextPage) {
+                if (shouldReset) {
                     paginator.reset()
                 }
                 paginator.fetchPaged { key, limit ->

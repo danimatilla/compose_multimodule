@@ -5,5 +5,5 @@ import com.dxmxp.domain.model.Beer
 import kotlinx.coroutines.flow.Flow
 
 interface BeerRemoteRepository {
-    fun getBeers(isNextPage: Boolean = false): Flow<DataResult<List<Beer>?>>
+    fun getBeers(shouldReset: Boolean = false): Flow<DataResult<List<Beer>?>>
 }

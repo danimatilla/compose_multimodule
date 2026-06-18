@@ -13,11 +13,11 @@ abstract class BaseUseCase<in P, out R> {
     /**
      * Executes the use case.
      *
-     * @param params The input parameters.
+     * @param input The input parameters.
      * @return The result of the execution.
      */
-    suspend operator fun invoke(params: P): R {
-        return launch(params)
+    suspend operator fun invoke(input: P): R {
+        return launch(input)
     }
 
     /**
@@ -34,9 +34,9 @@ abstract class BaseFlowUseCase<in P, out R> {
     /**
      * Executes the use case and returns a Flow.
      */
-    operator fun invoke(params: P): Flow<R> {
-        return launch(params)
+    operator fun invoke(input: P): Flow<R> {
+        return launch(input)
     }
 
-    protected abstract fun launch(params: P): Flow<R>
+    protected abstract fun launch(input: P): Flow<R>
 }
