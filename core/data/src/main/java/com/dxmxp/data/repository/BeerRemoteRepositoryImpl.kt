@@ -21,10 +21,14 @@ class BeerRemoteRepositoryImpl @Inject constructor(
     @param:IoDispatcher private val ioDispatcher: CoroutineDispatcher
 ) : BeerRemoteRepository {
 
-    override fun getBeers(shouldReset: Boolean): Flow<DataResult<List<Beer>?>> = 
+    override fun getBeers(shouldReset: Boolean): Flow<DataResult<List<Beer>?>> =
         DataResult.loadingFlow(ioDispatcher) {
             remoteDataSource.fetchBeers(shouldReset)?.map { it.toDomain() }
         }.onEach {
-            Log.d("BeerRepository", "Emitting: ${it.getOrNull()}")
+            Log.d(TAG, "$it")
         }
+
+    companion object {
+        const val TAG = "BeerRepository"
+    }
 }
