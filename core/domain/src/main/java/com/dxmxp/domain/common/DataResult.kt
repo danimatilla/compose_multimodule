@@ -16,5 +16,20 @@ sealed class DataResult<out T> {
      */
     fun getOrNull(): T? = (this as? Success)?.data
 
+    override fun toString(): String {
+        return when (this) {
+            is Loading -> "DataResult.Loading"
+            is Success -> {
+                val data = this.data
+                if (data is List<*>) {
+                    "DataResult.Success(itemsCount=${data.size})"
+                } else {
+                    "DataResult.Success(data=$data)"
+                }
+            }
+            is Error -> "DataResult.Error(exception=${exception.message})"
+        }
+    }
+
     companion object
 }

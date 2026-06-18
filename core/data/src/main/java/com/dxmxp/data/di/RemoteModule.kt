@@ -49,8 +49,10 @@ object RemoteModule {
         .addInterceptor(
             HttpLoggingInterceptor()
                 .apply {
-                    if (BuildConfig.DEBUG) {
-                        level = HttpLoggingInterceptor.Level.BODY
+                    level = if (BuildConfig.DEBUG) {
+                        HttpLoggingInterceptor.Level.HEADERS
+                    } else {
+                        HttpLoggingInterceptor.Level.NONE
                     }
                 }
         )

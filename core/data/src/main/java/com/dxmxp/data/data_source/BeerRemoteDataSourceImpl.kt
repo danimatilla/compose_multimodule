@@ -16,8 +16,8 @@ interface BeerRemoteDataSource {
 
 class BeerRemoteDataSourceImpl @Inject constructor(
     private val api: PunkapiApi.Beers,
-    @param:PaginatorByPage private val paginator: Paginator<Int, List<BeerResponse>>,
     private val networkHandler: NetworkHandler,
+    @param:PaginatorByPage private val paginator: Paginator<Int, List<BeerResponse>>,
     @param:IoDispatcher private val dispatcher: CoroutineDispatcher
 ) : BeerRemoteDataSource {
 

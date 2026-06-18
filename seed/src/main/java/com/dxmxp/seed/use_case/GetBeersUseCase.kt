@@ -10,13 +10,13 @@ import javax.inject.Inject
 /**
  * Use case to retrieve the list of beers.
  *
- * @param params If true, it restarts pagination from the first page. 
+ * @param input If true, it restarts pagination from the first page.
  * Default is false (loads next page).
  */
 class GetBeersUseCase @Inject constructor(
     private val repository: BeerRemoteRepository,
 ) : BaseFlowUseCase<Boolean, DataResult<List<Beer>?>>() {
 
-    override fun launch(params: Boolean): Flow<DataResult<List<Beer>?>> =
-        repository.getBeers(shouldReset = params)
+    override fun launch(input: Boolean): Flow<DataResult<List<Beer>?>> =
+        repository.getBeers(shouldReset = input)
 }
