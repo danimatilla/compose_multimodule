@@ -25,6 +25,6 @@ class BeerRemoteRepositoryImpl @Inject constructor(
         DataResult.loadingFlow(ioDispatcher) {
             remoteDataSource.fetchBeers(shouldReset)?.map { it.toDomain() }
         }.onEach {
-            Log.i("BeerRepository", "Emitting: ${it.getOrNull()}")
+            Log.d("BeerRepository", "Emitting: ${it.getOrNull()}")
         }
 }
