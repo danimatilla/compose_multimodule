@@ -23,6 +23,7 @@ import androidx.hilt.lifecycle.viewmodel.compose.hiltViewModel
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import com.dxmxp.domain.model.Beer
 import com.dxmxp.ui.common.InfiniteScrollHandler
+import com.dxmxp.ui.common.SeedPullRefresh
 import com.dxmxp.ui.navigation.helpers.NavigationHandler
 
 @Composable
@@ -54,16 +55,22 @@ fun BeersScreen(
             )
         }
 
-        LazyColumn(
-            state = listState,
-            modifier = Modifier.fillMaxSize(),
-            contentPadding = PaddingValues(16.dp)
+        SeedPullRefresh(
+            isRefreshing = state.isRefreshing,
+            onRefresh = { viewModel.setEvent(BeersViewModel.Event.Refresh) },
+            modifier = Modifier.fillMaxSize()
         ) {
-            items(state.beers) { beer ->
-                BeerItem(
-                    beer = beer,
-                    onClick = { viewModel.setEvent(BeersViewModel.Event.OnBeerClicked(beer)) }
-                )
+            LazyColumn(
+                state = listState,
+                modifier = Modifier.fillMaxSize(),
+                contentPadding = PaddingValues(16.dp)
+            ) {
+                items(state.beers, key = { it.id }) { beer ->
+                    BeerItem(
+                        beer = beer,
+                        onClick = { viewModel.setEvent(BeersViewModel.Event.OnBeerClicked(beer)) }
+                    )
+                }
             }
         }
     }

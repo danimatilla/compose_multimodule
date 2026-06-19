@@ -50,8 +50,8 @@ fun <T, S> CoroutineScope.launchFlow(
 fun <T, S> CoroutineScope.launchResultFlow(
     flow: Flow<DataResult<T>>,
     setState: (S.() -> S) -> Unit,
-    onLoading: (S.(Boolean) -> S)? = null,
-    onError: (S.(AppException) -> S)? = null,
+    onLoading: (S.(isLoading: Boolean) -> S)? = null,
+    onError: (S.(exception: AppException) -> S)? = null,
     onSuccess: S.(T) -> S
 ) {
     this.launch {

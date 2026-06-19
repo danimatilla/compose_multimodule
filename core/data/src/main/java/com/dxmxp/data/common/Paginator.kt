@@ -1,6 +1,8 @@
 package com.dxmxp.data.common
 
 
+import com.dxmxp.domain.common.PaginationConfig.DEFAULT_PAGE_SIZE
+
 /**
  * A generic class for handling paginated data fetching.
  * It manages the current page key, page size, and whether the last page has been reached.
@@ -12,7 +14,7 @@ package com.dxmxp.data.common
  */
 class Paginator<K, R>(
     private val initialKey: K,
-    private val pageSize: Int = 20,
+    private val pageSize: Int = DEFAULT_PAGE_SIZE,
     private val nextKeyProvider: (key: K, result: R, pageSize: Int) -> K?,
 ) {
     private var currentKey: K? = initialKey
