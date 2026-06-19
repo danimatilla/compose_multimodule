@@ -67,7 +67,7 @@ private fun InfiniteScrollHandlerInternal(
         derivedStateOf { shouldLoadMoreProvider() }
     }
 
-    LaunchedEffect(shouldLoadMore.value) {
+    LaunchedEffect(shouldLoadMore.value, isLoading, endReached) {
         if (shouldLoadMore.value && !isLoading && !endReached) {
             onLoadNextPage()
         }

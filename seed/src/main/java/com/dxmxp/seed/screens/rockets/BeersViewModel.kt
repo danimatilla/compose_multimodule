@@ -5,7 +5,6 @@ import com.dxmxp.domain.common.PaginationConfig.DEFAULT_PAGE_SIZE
 import com.dxmxp.domain.model.Beer
 import com.dxmxp.seed.use_case.GetBeersUseCase
 import com.dxmxp.ui.base.BaseViewModel
-import com.dxmxp.ui.common.debounce
 import com.dxmxp.ui.common.launchResultFlow
 import dagger.hilt.android.lifecycle.HiltViewModel
 import javax.inject.Inject
@@ -43,9 +42,7 @@ class BeersViewModel @Inject constructor(
             is Event.LoadBeers -> fetchBeers(shouldReset = true)
             is Event.LoadNextPage -> {
                 if (uiState.value.canLoadNextPage) {
-                    debounce<Unit> {
-                        fetchBeers(shouldReset = false)
-                    }
+                    fetchBeers(shouldReset = false)
                 }
             }
             is Event.Refresh -> fetchBeers(shouldReset = true, isRefreshing = true)
