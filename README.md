@@ -57,7 +57,16 @@ suspend fun getData() = networkHandler.safeCall { api.getData() }
 ```
 
 #### `Paginator` y `PaginationHandler`
-Abstracción genérica para control de claves y acumulación de listas.
+Abstracción genérica para control de claves y acumulación de listas. El `Paginator` permite una integración limpia con `NetworkHandler` evitando anidación excesiva mediante referencias a funciones:
+```kotlin
+// Implementación optimizada en DataSource
+override suspend fun fetchData(shouldReset: Boolean) = withContext(dispatcher) {
+    if (shouldReset) paginator.reset()
+    networkHandler.safeCall { 
+        paginator.fetchPaged(api::fetchFromRemote) 
+    }
+}
+```
 
 #### `pagingFlow` y `loadingFlow`
 Extensiones de `DataResult` para convertir llamadas suspendidas en flujos de estados.
@@ -108,28 +117,51 @@ Resolución dinámica de URIs y transiciones visuales.
 
 ## 🛠️ Ejemplos de Implementación Técnica Completa
 
-### 1. Implementación de un Repositorio Paginado
+### 1. Capa de Datos: Remote DataSource (Implementación Optimizada)
+Se utiliza el `NetworkHandler` para llamadas seguras y el `Paginator` para la lógica de claves. La anidación se reduce al mínimo mediante el uso de referencias a funciones (`api::fetchItems`).
+
+```kotlin
+class MyRemoteDataSourceImpl @Inject constructor(
+    private val api: MyApi,
+    private val networkHandler: NetworkHandler,
+    private val paginator: Paginator<Int, List<MyResponse>>,
+    @IoDispatcher private val dispatcher: CoroutineDispatcher
+) : MyRemoteDataSource {
+
+    override suspend fun fetchItems(shouldReset: Boolean): List<MyResponse>? = withContext(dispatcher) {
+        if (shouldReset) paginator.reset()
+        networkHandler.safeCall {
+            paginator.fetchPaged(api::fetchFromRemote)
+        }
+    }
+}
+```
+
+### 2. Capa de Datos: Repositorio con `pagingFlow`
+El repositorio orquestra el DataSource y el mapeo a dominio, utilizando `pagingFlow` para gestionar automáticamente la emisión de estados (`Loading`, `Success`, `Error`) y la acumulación de la lista (caché) a través del `PaginationHandler`.
+
 ```kotlin
 @Singleton
 class MyRepositoryImpl @Inject constructor(
     private val remoteDataSource: MyRemoteDataSource,
     @IoDispatcher private val ioDispatcher: CoroutineDispatcher,
-    paginationHandlerFactory: PaginationHandler.Factory
+    paginationHandlerFactory: PaginationHandler.Factory<MyDomainModel>
 ) : MyRepository {
-    private val paginationHandler = paginationHandlerFactory.create<MyItem>(pageSize = 20)
+    
+    private val paginationHandler = paginationHandlerFactory.create(pageSize = 20)
 
-    override fun getItems(shouldReset: Boolean): Flow<DataResult<List<MyItem>?>> =
+    override fun getItems(shouldReset: Boolean): Flow<DataResult<List<MyDomainModel>?>> =
         DataResult.pagingFlow(
             dispatcher = ioDispatcher,
             paginationHandler = paginationHandler,
             shouldReset = shouldReset
         ) {
-            remoteDataSource.fetchItems(shouldReset)
+            remoteDataSource.fetchItems(shouldReset)?.map { it.toDomain() }
         }
 }
 ```
 
-### 2. Implementación de un ViewModel (MVI) con Inicialización
+### 3. Implementación de un ViewModel (MVI) con Inicialización
 ```kotlin
 @HiltViewModel
 class DetailViewModel @Inject constructor(

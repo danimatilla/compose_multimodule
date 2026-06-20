@@ -21,19 +21,11 @@ class BeerRemoteDataSourceImpl @Inject constructor(
     @param:IoDispatcher private val dispatcher: CoroutineDispatcher
 ) : BeerRemoteDataSource {
 
-    override suspend fun fetchBeers(shouldReset: Boolean): List<BeerResponse>? {
-        return withContext(dispatcher) {
+    override suspend fun fetchBeers(shouldReset: Boolean): List<BeerResponse>? =
+        withContext(dispatcher) {
+            if (shouldReset) paginator.reset()
             networkHandler.safeCall {
-                if (shouldReset) {
-                    paginator.reset()
-                }
-                paginator.fetchPaged { key, limit ->
-                    api.fetchBeers(
-                        page = key,
-                        limit = limit
-                    )
-                }
+                paginator.fetchPaged(api::fetchBeers)
             }
         }
-    }
 }
