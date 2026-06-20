@@ -23,3 +23,22 @@ fun <T> DataResult.Companion.loadingFlow(
     val appException = e as? AppException ?: AppException.UnknownException(cause = e)
     emit(DataResult.Error(appException))
 }.flowOn(dispatcher)
+
+/**
+ * Specialized extension for handling paginated flows.
+ * It uses a [PaginationHandler] to manage the state of the list across emissions.
+ */
+fun <T> DataResult.Companion.pagingFlow(
+    dispatcher: CoroutineDispatcher,
+    paginationHandler: PaginationHandler<T>,
+    shouldReset: Boolean,
+    call: suspend () -> List<T>?
+): Flow<DataResult<List<T>?>> = flow {
+    emit(DataResult.Loading)
+    val newItems = call()
+    val result = paginationHandler.processResult(newItems, shouldReset)
+    emit(DataResult.Success(data = result, endReached = paginationHandler.isEndReached))
+}.catch { e ->
+    val appException = e as? AppException ?: AppException.UnknownException(cause = e)
+    emit(DataResult.Error(appException))
+}.flowOn(dispatcher)
