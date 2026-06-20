@@ -22,10 +22,10 @@ import javax.inject.Singleton
 class BeerRemoteRepositoryImpl @Inject constructor(
     private val remoteDataSource: BeerRemoteDataSource,
     @param:IoDispatcher private val ioDispatcher: CoroutineDispatcher,
-    paginationHandlerFactory: PaginationHandler.Factory
+    paginationHandlerFactory: PaginationHandler.Factory<Beer>
 ) : BeerRemoteRepository {
 
-    private val paginationHandler = paginationHandlerFactory.create<Beer>(pageSize = 20)
+    private val paginationHandler = paginationHandlerFactory.create(pageSize = 20)
 
     override fun getBeers(shouldReset: Boolean): Flow<DataResult<List<Beer>?>> =
         DataResult.pagingFlow(

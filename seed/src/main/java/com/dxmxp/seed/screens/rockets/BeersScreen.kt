@@ -43,7 +43,7 @@ fun BeersScreen(
     )
 
     Box(modifier = Modifier.fillMaxSize()) {
-        if (state.isLoading && state.beers.isEmpty()) {
+        if (state.isLoading && state.beers.isNullOrEmpty()) {
             CircularProgressIndicator(modifier = Modifier.align(Alignment.Center))
         }
 
@@ -65,7 +65,7 @@ fun BeersScreen(
                 modifier = Modifier.fillMaxSize(),
                 contentPadding = PaddingValues(16.dp)
             ) {
-                items(state.beers, key = { it.id }) { beer ->
+                items(state.beers.orEmpty(), key = { it.id }) { beer ->
                     BeerItem(
                         beer = beer,
                         onClick = { viewModel.setEvent(BeersViewModel.Event.OnBeerClicked(beer)) }
