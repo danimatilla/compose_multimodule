@@ -10,14 +10,24 @@ import kotlinx.coroutines.launch
 
 /**
  * Extension to launch a [Flow] from a [CoroutineScope] and update a state through a [setState] callback.
+ *
+ * @param flow The [Flow] to collect.
+ * @param launchIf An optional condition to check before launching the flow.
+ * @param setState A callback to update the state.
+ * @param onLoading An optional callback to handle loading state.
+ * @param onError An optional callback to handle error state.
+ * @param onSuccess A callback to handle success state.
  */
 fun <T, S> CoroutineScope.launchFlow(
     flow: Flow<T>,
     setState: (S.() -> S) -> Unit,
+    launchIf: Boolean = true,
     onLoading: (S.(Boolean) -> S)? = null,
     onError: (S.(String?) -> S)? = null,
     onSuccess: S.(T) -> S
 ) {
+    if (!launchIf) return
+
     this.launch {
         flow.onStart {
             setState {
@@ -46,14 +56,24 @@ fun <T, S> CoroutineScope.launchFlow(
 
 /**
  * Extension to launch a [Flow] of [DataResult] from a [CoroutineScope] and update a state.
+ *
+ * @param flow The [Flow] of [DataResult] to collect.
+ * @param launchIf An optional condition to check before launching the flow.
+ * @param setState A callback to update the state.
+ * @param onLoading An optional callback to handle loading state.
+ * @param onError An optional callback to handle error state.
+ * @param onSuccess A callback to handle success state.
  */
 fun <T, S> CoroutineScope.launchResultFlow(
     flow: Flow<DataResult<T>>,
     setState: (S.() -> S) -> Unit,
+    launchIf: Boolean = true,
     onLoading: (S.(isLoading: Boolean) -> S)? = null,
     onError: (S.(exception: AppException) -> S)? = null,
-    onSuccess: S.(T) -> S
+    onSuccess: S.(T, Boolean) -> S
 ) {
+    if (!launchIf) return
+
     this.launch {
         flow.collect { result ->
             setState {
@@ -63,7 +83,7 @@ fun <T, S> CoroutineScope.launchResultFlow(
                     }
                     is DataResult.Success -> {
                         val state = onLoading?.invoke(this, false) ?: this
-                        state.onSuccess(result.data)
+                        state.onSuccess(result.data, result.endReached)
                     }
                     is DataResult.Error -> {
                         val state = onLoading?.invoke(this, false) ?: this

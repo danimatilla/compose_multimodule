@@ -7,8 +7,11 @@ import com.dxmxp.domain.AppException
  * @param <T>
  */
 sealed class DataResult<out T> {
-    data class Success<out T>(val data: T) : DataResult<T>() {
-        override fun toString() = "DataResult::Success\n$data"
+    data class Success<out T>(
+        val data: T,
+        val endReached: Boolean = true
+    ) : DataResult<T>() {
+        override fun toString() = "DataResult::Success\n$data (endReached=$endReached)"
     }
     data class Error(val exception: AppException) : DataResult<Nothing>() {
         override fun toString() = "DataResult::Error\n${exception.message}"

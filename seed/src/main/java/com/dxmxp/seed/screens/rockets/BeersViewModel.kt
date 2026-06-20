@@ -1,7 +1,6 @@
 package com.dxmxp.seed.screens.rockets
 
 import androidx.lifecycle.viewModelScope
-import com.dxmxp.domain.common.PaginationConfig.DEFAULT_PAGE_SIZE
 import com.dxmxp.domain.model.Beer
 import com.dxmxp.seed.use_case.GetBeersUseCase
 import com.dxmxp.ui.base.BaseViewModel
@@ -15,13 +14,14 @@ class BeersViewModel @Inject constructor(
 ) : BaseViewModel<BeersViewModel.State, BeersViewModel.Effect, BeersViewModel.Event>() {
 
     data class State(
-        val beers: List<Beer> = emptyList(),
+        val beers: List<Beer>? = null,
         val isLoading: Boolean = false,
         val isRefreshing: Boolean = false,
         val error: String? = null,
         val endReached: Boolean = false
     ) {
         val canLoadNextPage: Boolean get() = !isLoading && !endReached
+        val launchIf: Boolean get() = !isLoading && !isRefreshing
     }
 
     sealed interface Event {
@@ -55,24 +55,21 @@ class BeersViewModel @Inject constructor(
     }
 
     private fun fetchBeers(shouldReset: Boolean, isRefreshing: Boolean = false) {
-        if (uiState.value.isLoading || uiState.value.isRefreshing) return
-
         viewModelScope.launchResultFlow(
             flow = getBeersUseCase(shouldReset),
-            setState = { setState(it) },
-            onLoading = { isLoading ->
+            launchIf = uiState.value.launchIf,
+            setState = ::setState,
+            onLoading = { loading ->
                 copy(
-                    isLoading = isLoading && !isRefreshing,
-                    isRefreshing = isLoading && isRefreshing
+                    isLoading = loading && !isRefreshing,
+                    isRefreshing = loading && isRefreshing
                 )
             },
             onError = { copy(error = it.message, isLoading = false, isRefreshing = false) },
-            onSuccess = { result ->
-                val newBeers = result ?: emptyList()
+            onSuccess = { items, endReached ->
                 copy(
-                    beers = if (shouldReset) newBeers else beers + newBeers,
-                    error = if (shouldReset && newBeers.isEmpty()) "No beers found" else null,
-                    endReached = newBeers.size < DEFAULT_PAGE_SIZE,
+                    beers = items,
+                    endReached = endReached,
                     isLoading = false,
                     isRefreshing = false
                 )
