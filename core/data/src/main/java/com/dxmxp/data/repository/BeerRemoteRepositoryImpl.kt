@@ -1,7 +1,6 @@
 package com.dxmxp.data.repository
 
 import android.util.Log
-import com.dxmxp.data.common.PaginationHandler
 import com.dxmxp.data.common.pagingFlow
 import com.dxmxp.data.data_source.BeerRemoteDataSource
 import com.dxmxp.data.repository.mapper.RocketMapper.toDomain
@@ -21,18 +20,11 @@ import javax.inject.Singleton
 @Singleton
 class BeerRemoteRepositoryImpl @Inject constructor(
     private val remoteDataSource: BeerRemoteDataSource,
-    @param:IoDispatcher private val ioDispatcher: CoroutineDispatcher,
-    paginationHandlerFactory: PaginationHandler.Factory<Beer>
+    @param:IoDispatcher private val ioDispatcher: CoroutineDispatcher
 ) : BeerRemoteRepository {
 
-    private val paginationHandler = paginationHandlerFactory.create(pageSize = 20)
-
     override fun getBeers(shouldReset: Boolean): Flow<DataResult<List<Beer>?>> =
-        DataResult.pagingFlow(
-            dispatcher = ioDispatcher,
-            paginationHandler = paginationHandler,
-            shouldReset = shouldReset
-        ) {
+        DataResult.pagingFlow(dispatcher = ioDispatcher) {
             remoteDataSource.fetchBeers(shouldReset)?.map { it.toDomain() }
         }.onEach {
             Log.d(TAG, "$it")

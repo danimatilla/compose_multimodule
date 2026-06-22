@@ -58,6 +58,8 @@ class BeersViewModel @Inject constructor(
         viewModelScope.launchResultFlow(
             flow = getBeersUseCase(shouldReset),
             launchIf = uiState.value.launchIf,
+            shouldReset = shouldReset,
+            currentList = { beers },
             setState = ::setState,
             onLoading = { loading ->
                 copy(

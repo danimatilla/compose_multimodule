@@ -94,3 +94,42 @@ fun <T, S> CoroutineScope.launchResultFlow(
         }
     }
 }
+
+/**
+ * Specialized extension for paginated results.
+ * It automatically manages list accumulation based on [shouldReset].
+ */
+fun <T, S> CoroutineScope.launchResultFlow(
+    flow: Flow<DataResult<List<T>?>>,
+    setState: (S.() -> S) -> Unit,
+    shouldReset: Boolean,
+    currentList: S.() -> List<T>?,
+    launchIf: Boolean = true,
+    onLoading: (S.(isLoading: Boolean) -> S)? = null,
+    onError: (S.(exception: AppException) -> S)? = null,
+    onSuccess: S.(List<T>, Boolean) -> S
+) {
+    if (!launchIf) return
+
+    this.launch {
+        flow.collect { result ->
+            setState {
+                when (result) {
+                    is DataResult.Loading -> {
+                        onLoading?.invoke(this, true) ?: this
+                    }
+                    is DataResult.Success -> {
+                        val state = onLoading?.invoke(this, false) ?: this
+                        val baseList = if (shouldReset) emptyList() else (state.currentList() ?: emptyList())
+                        val newList = baseList + (result.data ?: emptyList())
+                        state.onSuccess(newList, result.endReached)
+                    }
+                    is DataResult.Error -> {
+                        val state = onLoading?.invoke(this, false) ?: this
+                        onError?.invoke(state, result.exception) ?: state
+                    }
+                }
+            }
+        }
+    }
+}
