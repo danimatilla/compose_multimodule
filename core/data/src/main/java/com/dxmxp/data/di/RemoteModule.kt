@@ -2,6 +2,7 @@ package com.dxmxp.data.di
 
 import com.dxmxp.data.BuildConfig
 import com.dxmxp.data.remote.api.PunkapiApi
+import com.dxmxp.data.remote.interceptor.AuthInterceptor
 import com.dxmxp.data.remote.interceptor.ErrorInterceptor
 import dagger.Module
 import dagger.Provides
@@ -43,8 +44,10 @@ object RemoteModule {
     @Provides
     @Singleton
     fun provideOkHttpClient(
+        authInterceptor: AuthInterceptor,
         errorInterceptor: ErrorInterceptor
     ): OkHttpClient = OkHttpClient.Builder()
+        .addInterceptor(authInterceptor)
         .addInterceptor(errorInterceptor)
         .addInterceptor(
             HttpLoggingInterceptor()
