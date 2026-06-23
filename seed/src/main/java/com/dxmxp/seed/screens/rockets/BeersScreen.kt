@@ -21,9 +21,9 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.unit.dp
 import androidx.hilt.lifecycle.viewmodel.compose.hiltViewModel
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
-import com.dxmxp.domain.model.Beer
 import com.dxmxp.ui.common.InfiniteScrollHandler
 import com.dxmxp.ui.common.SeedPullRefresh
+import com.dxmxp.ui.model.BeerUiModel
 import com.dxmxp.ui.navigation.helpers.NavigationHandler
 
 @Composable
@@ -88,7 +88,7 @@ fun BeersScreen(
 
 @Composable
 private fun BeerItem(
-    beer: Beer,
+    beer: BeerUiModel,
     onClick: () -> Unit
 ) {
     Card(
@@ -97,9 +97,11 @@ private fun BeerItem(
             .padding(vertical = 8.dp)
             .clickable(onClick = onClick)
     ) {
-        Text(
-            text = beer.id,
-            modifier = Modifier.padding(16.dp)
-        )
+        Box(modifier = Modifier.padding(16.dp)) {
+            Text(
+                text = "${beer.name} (${beer.volumeText})",
+                style = MaterialTheme.typography.bodyLarge
+            )
+        }
     }
 }

@@ -1,4 +1,4 @@
-package com.dxmxp.data.remote.dto.rocket
+package com.dxmxp.data.remote.dto.beer
 
 import kotlinx.serialization.SerialName
 import kotlinx.serialization.Serializable

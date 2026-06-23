@@ -1,4 +1,4 @@
-package com.dxmxp.seed.use_case
+package com.dxmxp.domain.use_case
 
 import com.dxmxp.domain.base.BaseFlowUseCase
 import com.dxmxp.domain.common.DataResult
@@ -8,10 +8,8 @@ import kotlinx.coroutines.flow.Flow
 import javax.inject.Inject
 
 /**
- * Use case to retrieve the list of beers.
- *
- * @param input If true, it restarts pagination from the first page.
- * Default is false (loads next page).
+ * Use Case to retrieve the list of beers.
+ * Returns domain models ([Beer]).
  */
 class GetBeersUseCase @Inject constructor(
     private val repository: BeerRemoteRepository,

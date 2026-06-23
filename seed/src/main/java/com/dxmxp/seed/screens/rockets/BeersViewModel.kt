@@ -1,10 +1,12 @@
 package com.dxmxp.seed.screens.rockets
 
 import androidx.lifecycle.viewModelScope
-import com.dxmxp.domain.model.Beer
-import com.dxmxp.seed.use_case.GetBeersUseCase
+import com.dxmxp.domain.use_case.GetBeersUseCase
 import com.dxmxp.ui.base.BaseViewModel
 import com.dxmxp.ui.common.launchResultFlow
+import com.dxmxp.ui.common.mapListData
+import com.dxmxp.ui.model.BeerUiModel
+import com.dxmxp.ui.model.toUiModel
 import dagger.hilt.android.lifecycle.HiltViewModel
 import javax.inject.Inject
 
@@ -14,7 +16,7 @@ class BeersViewModel @Inject constructor(
 ) : BaseViewModel<BeersViewModel.State, BeersViewModel.Effect, BeersViewModel.Event>() {
 
     data class State(
-        val beers: List<Beer>? = null,
+        val beers: List<BeerUiModel>? = null,
         val isLoading: Boolean = false,
         val isRefreshing: Boolean = false,
         val error: String? = null,
@@ -28,7 +30,7 @@ class BeersViewModel @Inject constructor(
         data object LoadBeers : Event
         data object LoadNextPage : Event
         data object Refresh : Event
-        data class OnBeerClicked(val beer: Beer) : Event
+        data class OnBeerClicked(val beer: BeerUiModel) : Event
     }
 
     sealed interface Effect {
@@ -56,7 +58,7 @@ class BeersViewModel @Inject constructor(
 
     private fun fetchBeers(shouldReset: Boolean, isRefreshing: Boolean = false) {
         viewModelScope.launchResultFlow(
-            flow = getBeersUseCase(shouldReset),
+            flow = getBeersUseCase(shouldReset).mapListData { it.toUiModel() },
             launchIf = uiState.value.launchIf,
             shouldReset = shouldReset,
             currentList = { beers },

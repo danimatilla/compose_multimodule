@@ -3,7 +3,7 @@ package com.dxmxp.data.repository
 import android.util.Log
 import com.dxmxp.data.common.pagingFlow
 import com.dxmxp.data.data_source.BeerRemoteDataSource
-import com.dxmxp.data.repository.mapper.RocketMapper.toDomain
+import com.dxmxp.data.repository.mapper.BeerMapper.toDomain
 import com.dxmxp.domain.common.DataResult
 import com.dxmxp.domain.di.DispatchersModule.IoDispatcher
 import com.dxmxp.domain.model.Beer

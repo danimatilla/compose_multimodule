@@ -5,18 +5,35 @@ import com.dxmxp.domain.common.DataResult
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.catch
+import kotlinx.coroutines.flow.map
 import kotlinx.coroutines.flow.onStart
 import kotlinx.coroutines.launch
 
 /**
+ * Extension to map the data inside a [DataResult] flow.
+ * This operator is pure and runs on the context of the flow.
+ */
+fun <T, R> Flow<DataResult<T>>.mapData(
+    transform: (T) -> R
+): Flow<DataResult<R>> = map { result ->
+    when (result) {
+        is DataResult.Success -> DataResult.Success(transform(result.data), result.endReached)
+        is DataResult.Error -> result
+        is DataResult.Loading -> result
+    }
+}
+
+/**
+ * Extension to map the elements of a list inside a [DataResult] flow.
+ */
+fun <T, R> Flow<DataResult<List<T>?>>.mapListData(
+    transform: (T) -> R
+): Flow<DataResult<List<R>?>> = mapData { list ->
+    list?.map(transform)
+}
+
+/**
  * Extension to launch a [Flow] from a [CoroutineScope] and update a state through a [setState] callback.
- *
- * @param flow The [Flow] to collect.
- * @param launchIf An optional condition to check before launching the flow.
- * @param setState A callback to update the state.
- * @param onLoading An optional callback to handle loading state.
- * @param onError An optional callback to handle error state.
- * @param onSuccess A callback to handle success state.
  */
 fun <T, S> CoroutineScope.launchFlow(
     flow: Flow<T>,
@@ -56,13 +73,6 @@ fun <T, S> CoroutineScope.launchFlow(
 
 /**
  * Extension to launch a [Flow] of [DataResult] from a [CoroutineScope] and update a state.
- *
- * @param flow The [Flow] of [DataResult] to collect.
- * @param launchIf An optional condition to check before launching the flow.
- * @param setState A callback to update the state.
- * @param onLoading An optional callback to handle loading state.
- * @param onError An optional callback to handle error state.
- * @param onSuccess A callback to handle success state.
  */
 fun <T, S> CoroutineScope.launchResultFlow(
     flow: Flow<DataResult<T>>,

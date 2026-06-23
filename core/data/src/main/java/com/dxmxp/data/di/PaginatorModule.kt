@@ -1,7 +1,7 @@
 package com.dxmxp.data.di
 
 import com.dxmxp.data.common.Paginator
-import com.dxmxp.data.remote.dto.rocket.BeerResponse
+import com.dxmxp.data.remote.dto.beer.BeerResponse
 import com.dxmxp.data.remote.dto.story.StoryResponse
 import dagger.Module
 import dagger.Provides

@@ -4,7 +4,7 @@ import com.dxmxp.data.common.NetworkHandler
 import com.dxmxp.data.common.Paginator
 import com.dxmxp.data.di.PaginatorModule.PaginatorByPage
 import com.dxmxp.data.remote.api.PunkapiApi
-import com.dxmxp.data.remote.dto.rocket.BeerResponse
+import com.dxmxp.data.remote.dto.beer.BeerResponse
 import com.dxmxp.domain.di.DispatchersModule.IoDispatcher
 import kotlinx.coroutines.CoroutineDispatcher
 import kotlinx.coroutines.withContext

@@ -1,9 +1,12 @@
 package com.dxmxp.data.remote.api
 
-import com.dxmxp.data.remote.dto.rocket.BeerResponse
+import com.dxmxp.data.remote.dto.beer.BeerResponse
 import retrofit2.http.GET
 import retrofit2.http.Query
 
+/**
+ * [punkapi](https://github.com/alxiw/punkapi)
+ */
 sealed interface PunkapiApi {
 
     interface Beers : PunkapiApi {
