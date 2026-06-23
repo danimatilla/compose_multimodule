@@ -4,6 +4,8 @@ import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.material.icons.Icons
+import androidx.compose.material.icons.filled.BrokenImage
+import androidx.compose.material.icons.filled.Image
 import androidx.compose.material.icons.filled.Info
 import androidx.compose.material.icons.filled.Refresh
 import androidx.compose.material3.Icon
@@ -43,8 +45,8 @@ fun SeedImage(
     model: Any?,
     contentDescription: String?,
     modifier: Modifier = Modifier,
-    placeholder: Painter? = rememberVectorPainter(Icons.Default.Refresh),
-    error: Painter? = rememberVectorPainter(Icons.Default.Info),
+    placeholder: Painter? = rememberVectorPainter(Icons.Default.Image),
+    error: Painter? = rememberVectorPainter(Icons.Default.BrokenImage),
     contentScale: ContentScale = ContentScale.Fit,
     filterQuality: FilterQuality = FilterQuality.Low,
 ) {

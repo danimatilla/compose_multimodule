@@ -1,5 +1,6 @@
 package com.dxmxp.ui.mapper
 
+import com.dxmxp.domain.Constants.BASE_IMAGE_URL
 import com.dxmxp.domain.di.DispatchersModule.DefaultDispatcher
 import com.dxmxp.domain.model.Beer
 import com.dxmxp.ui.model.BeerUiModel
@@ -26,6 +27,6 @@ class BeerUiMapper @Inject constructor(
             id = id,
             name = name,
             volumeText = volumeValue?.let { "$volumeValue $volumeUnit" } ?: "N/A",
-            imageUrl = image
+            imageUrl = image.takeIf { it.isNotBlank() }?.let { "$BASE_IMAGE_URL$it" }
         )
 }

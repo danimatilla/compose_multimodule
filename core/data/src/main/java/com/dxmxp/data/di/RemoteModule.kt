@@ -4,6 +4,7 @@ import com.dxmxp.data.BuildConfig
 import com.dxmxp.data.remote.api.PunkapiApi
 import com.dxmxp.data.remote.interceptor.AuthInterceptor
 import com.dxmxp.data.remote.interceptor.ErrorInterceptor
+import com.dxmxp.domain.Constants.BASE_URL
 import dagger.Module
 import dagger.Provides
 import dagger.hilt.InstallIn
@@ -35,7 +36,7 @@ object RemoteModule {
     ): Retrofit {
         val json = Json { ignoreUnknownKeys = true }
         return Retrofit.Builder()
-            .baseUrl("https://punkapi-alxiw.amvera.io/v3/")
+            .baseUrl(BASE_URL)
             .client(okHttpClient)
             .addConverterFactory(json.asConverterFactory("application/json".toMediaType()))
             .build()
