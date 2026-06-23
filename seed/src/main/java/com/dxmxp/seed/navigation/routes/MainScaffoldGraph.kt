@@ -5,7 +5,7 @@ import androidx.navigation3.runtime.NavKey
 import com.dxmxp.seed.screens.HomeScreen
 import com.dxmxp.seed.screens.MenuScreen
 import com.dxmxp.seed.screens.SearchScreen
-import com.dxmxp.seed.screens.rockets.BeersScreen
+import com.dxmxp.seed.screens.beers.BeersScreen
 import com.dxmxp.ui.navigation.Graph
 import com.dxmxp.ui.navigation.Screen
 import com.dxmxp.ui.navigation.Screen.Companion.screenEntry

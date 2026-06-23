@@ -11,10 +11,10 @@ import kotlinx.coroutines.launch
 
 /**
  * Extension to map the data inside a [DataResult] flow.
- * This operator is pure and runs on the context of the flow.
+ * This operator is pure and supports suspend transformations.
  */
 fun <T, R> Flow<DataResult<T>>.mapData(
-    transform: (T) -> R
+    transform: suspend (T) -> R
 ): Flow<DataResult<R>> = map { result ->
     when (result) {
         is DataResult.Success -> DataResult.Success(transform(result.data), result.endReached)
@@ -25,11 +25,12 @@ fun <T, R> Flow<DataResult<T>>.mapData(
 
 /**
  * Extension to map the elements of a list inside a [DataResult] flow.
+ * This operator is pure and supports suspend transformations.
  */
 fun <T, R> Flow<DataResult<List<T>?>>.mapListData(
-    transform: (T) -> R
+    transform: suspend (T) -> R
 ): Flow<DataResult<List<R>?>> = mapData { list ->
-    list?.map(transform)
+    list?.map { transform(it) }
 }
 
 /**

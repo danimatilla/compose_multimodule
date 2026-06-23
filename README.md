@@ -86,10 +86,10 @@ abstract class BaseViewModel<STATE, EFFECT, EVENT> : ViewModel() {
 ```
 
 #### `launchResultFlow` y `launchFlow`
-Simplifican la recolección de flujos en el `viewModelScope` actualizando el estado de la UI.
+Simplifican la recolección de flujos en el `viewModelScope` actualizando el estado de la UI. Soporta transformaciones asíncronas mediante `mapData`.
 ```kotlin
 viewModelScope.launchResultFlow(
-    flow = useCase(params),
+    flow = useCase(params).mapData { mapper.map(it) },
     setState = { update -> setState { update() } },
     onSuccess = { data, endReached -> copy(items = data, endReached = endReached) }
 )

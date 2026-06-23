@@ -1,4 +1,4 @@
-package com.dxmxp.seed.screens.rockets
+package com.dxmxp.seed.screens.beers
 
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Box

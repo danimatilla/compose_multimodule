@@ -1,18 +1,19 @@
-package com.dxmxp.seed.screens.rockets
+package com.dxmxp.seed.screens.beers
 
 import androidx.lifecycle.viewModelScope
 import com.dxmxp.domain.use_case.GetBeersUseCase
 import com.dxmxp.ui.base.BaseViewModel
 import com.dxmxp.ui.common.launchResultFlow
-import com.dxmxp.ui.common.mapListData
+import com.dxmxp.ui.common.mapData
+import com.dxmxp.ui.mapper.BeerUiMapper
 import com.dxmxp.ui.model.BeerUiModel
-import com.dxmxp.ui.model.toUiModel
 import dagger.hilt.android.lifecycle.HiltViewModel
 import javax.inject.Inject
 
 @HiltViewModel
 class BeersViewModel @Inject constructor(
-    private val getBeersUseCase: GetBeersUseCase
+    private val getBeersUseCase: GetBeersUseCase,
+    private val beerUiMapper: BeerUiMapper
 ) : BaseViewModel<BeersViewModel.State, BeersViewModel.Effect, BeersViewModel.Event>() {
 
     data class State(
@@ -58,7 +59,7 @@ class BeersViewModel @Inject constructor(
 
     private fun fetchBeers(shouldReset: Boolean, isRefreshing: Boolean = false) {
         viewModelScope.launchResultFlow(
-            flow = getBeersUseCase(shouldReset).mapListData { it.toUiModel() },
+            flow = getBeersUseCase(shouldReset).mapData { beerUiMapper.toUiModel(it) },
             launchIf = uiState.value.launchIf,
             shouldReset = shouldReset,
             currentList = { beers },
