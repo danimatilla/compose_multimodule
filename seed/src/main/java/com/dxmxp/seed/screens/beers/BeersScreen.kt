@@ -44,14 +44,14 @@ fun BeersScreen(
 
     InfiniteScrollHandler(
         listState = listState,
-        isLoading = state.isLoading,
-        endReached = state.endReached,
+        isLoading = state.isLoading == true,
+        endReached = state.endReached == true,
         buffer = 5,
         onLoadNextPage = { viewModel.setEvent(BeersViewModel.Event.LoadNextPage) }
     )
 
     Box(modifier = Modifier.fillMaxSize()) {
-        if (state.isLoading && state.beers.isNullOrEmpty()) {
+        if (state.isLoading == true && state.beers.isNullOrEmpty()) {
             CircularProgressIndicator(modifier = Modifier.align(Alignment.Center))
         }
 
@@ -64,7 +64,7 @@ fun BeersScreen(
         }
 
         SeedPullRefresh(
-            isRefreshing = state.isRefreshing,
+            isRefreshing = state.isRefreshing == true,
             onRefresh = { viewModel.setEvent(BeersViewModel.Event.Refresh) },
             modifier = Modifier.fillMaxSize()
         ) {

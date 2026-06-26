@@ -18,23 +18,23 @@ class BeersViewModel @Inject constructor(
 
     data class State(
         val beers: List<BeerUiModel>? = null,
-        val isLoading: Boolean = false,
-        val isRefreshing: Boolean = false,
+        val isLoading: Boolean? = null,
+        val isRefreshing: Boolean? = null,
         val error: String? = null,
-        val endReached: Boolean = false
+        val endReached: Boolean? = null
     ) {
-        val canLoadNextPage: Boolean get() = !isLoading && !endReached
-        val launchIf: Boolean get() = !isLoading && !isRefreshing
+        val canLoadNextPage: Boolean get() = (isLoading != true) && (endReached != true)
+        val launchIf: Boolean get() = (isLoading != true) && (isRefreshing != true)
     }
 
-    sealed interface Event {
+    interface Event {
         data object LoadBeers : Event
         data object LoadNextPage : Event
         data object Refresh : Event
         data class OnBeerClicked(val beer: BeerUiModel) : Event
     }
 
-    sealed interface Effect {
+    interface Effect {
         data class NavigateToDetail(val rocketId: String) : Effect
     }
 
@@ -54,6 +54,7 @@ class BeersViewModel @Inject constructor(
     }
 
     init {
+        setState { copy(isLoading = false, isRefreshing = false, endReached = false) }
         setEvent(Event.LoadBeers)
     }
 

@@ -14,12 +14,18 @@ class StoryDetailViewModel @Inject constructor(
 ) : BaseViewModel<StoryDetailViewModel.State, StoryDetailViewModel.Effect, StoryDetailViewModel.Event>(),
     InitializableViewModel<StoriesScaffoldGraph.StoryDetail> {
 
-    override fun createInitialState(): State = State()
+    data class State(
+        val storyId: String? = null,
+        val story: Story? = null
+    )
 
-    override fun init(screen: StoriesScaffoldGraph.StoryDetail) {
-        val story = dataObserver.getLast<Story>()
-        setState { copy(storyId = screen.id, story = story) }
+    interface Event {
+        data class Init(val id: String) : Event
     }
+
+    interface Effect
+
+    override fun createInitialState(): State = State()
 
     override fun handleEvent(event: Event) {
         when (event) {
@@ -29,15 +35,8 @@ class StoryDetailViewModel @Inject constructor(
         }
     }
 
-    sealed interface Event {
-        data class Init(val id: String) : Event
+    override fun init(screen: StoriesScaffoldGraph.StoryDetail) {
+        val story = dataObserver.getLast<Story>()
+        setState { copy(storyId = screen.id, story = story) }
     }
-
-    data class State(
-        val storyId: String? = null,
-        val story: Story? = null
-    )
-
-    interface Effect
-
 }

@@ -13,24 +13,38 @@ import javax.inject.Inject
 class LoginViewModel @Inject constructor(
     private val loginUseCase: LoginUseCase,
     private val autoLoginUseCase: AutoLoginUseCase
-) : BaseViewModel<LoginContract.State, LoginContract.Effect, LoginContract.Event>() {
+) : BaseViewModel<LoginViewModel.State, LoginViewModel.Effect, LoginViewModel.Event>() {
 
-    init {
-        checkSession()
-    }
-
-    override fun createInitialState(): LoginContract.State = LoginContract.State(
-        username = "",
-        password = "",
-        isLoading = true // Start loading for auto-login check
+    data class State(
+        val username: String? = null,
+        val password: String? = null,
+        val isLoading: Boolean? = null
     )
 
-    override fun handleEvent(event: LoginContract.Event) {
+    interface Event {
+        data class OnUsernameChanged(val username: String) : Event
+        data class OnPasswordChanged(val password: String) : Event
+        data object OnLoginClick : Event
+    }
+
+    interface Effect {
+        data object NavigateToMain : Effect
+        data class ShowError(val message: String) : Effect
+    }
+
+    override fun createInitialState(): State = State()
+
+    override fun handleEvent(event: Event) {
         when (event) {
-            is LoginContract.Event.OnUsernameChanged -> setState { copy(username = event.username) }
-            is LoginContract.Event.OnPasswordChanged -> setState { copy(password = event.password) }
-            LoginContract.Event.OnLoginClick -> login()
+            is Event.OnUsernameChanged -> setState { copy(username = event.username) }
+            is Event.OnPasswordChanged -> setState { copy(password = event.password) }
+            Event.OnLoginClick -> login()
         }
+    }
+
+    init {
+        setState { copy(username = "", password = "", isLoading = true) }
+        checkSession()
     }
 
     private fun checkSession() {
@@ -38,16 +52,14 @@ class LoginViewModel @Inject constructor(
             autoLoginUseCase(Unit).collect { result ->
                 when (result) {
                     is DataResult.Loading -> {
-                        // Ensure we stay in loading state with empty fields during auto-login
                         setState { copy(isLoading = true, username = "", password = "") }
                     }
                     is DataResult.Success -> {
                         setState { copy(isLoading = false) }
-                        setEffect { LoginContract.Effect.NavigateToMain }
+                        setEffect { Effect.NavigateToMain }
                     }
                     is DataResult.Error -> {
                         setState { copy(isLoading = false, username = "emilys", password = "emilyspass") }
-                        // Silent error, stay on login
                     }
                 }
             }
@@ -59,19 +71,19 @@ class LoginViewModel @Inject constructor(
             val currentState = uiState.value
             loginUseCase(
                 LoginUseCase.Input(
-                    username = currentState.username,
-                    password = currentState.password
+                    username = currentState.username ?: "",
+                    password = currentState.password ?: ""
                 )
             ).collect { result ->
                 when (result) {
                     is DataResult.Loading -> setState { copy(isLoading = true) }
                     is DataResult.Success -> {
                         setState { copy(isLoading = false) }
-                        setEffect { LoginContract.Effect.NavigateToMain }
+                        setEffect { Effect.NavigateToMain }
                     }
                     is DataResult.Error -> {
                         setState { copy(isLoading = false) }
-                        setEffect { LoginContract.Effect.ShowError(result.exception.message ?: "Unknown Error") }
+                        setEffect { Effect.ShowError(result.exception.message ?: "Unknown Error") }
                     }
                 }
             }

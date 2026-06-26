@@ -9,24 +9,24 @@ import javax.inject.Inject
 class FeedViewModel @Inject constructor() :
     BaseViewModel<FeedViewModel.State, FeedViewModel.Effect, FeedViewModel.Event>() {
 
+    data class State(
+        val stories: List<Story>? = null
+    )
+
+    interface Event {
+        data class OpenDetail(val story: Story) : Event
+    }
+
+    interface Effect {
+        data class OpenDetail(val story: Story) : Effect
+    }
+
     override fun createInitialState(): State = State()
 
     override fun handleEvent(event: Event) {
         when (event) {
             is Event.OpenDetail -> openDetail(event.story)
         }
-    }
-
-    interface Event {
-        data class OpenDetail(val story: Story) : Event
-    }
-
-    data class State(
-        val stories: List<Story>? = null
-    )
-
-    interface Effect {
-        data class OpenDetail(val story: Story) : Effect
     }
 
     init {
