@@ -22,9 +22,26 @@ object LocalModule {
         context = context,
         klass = SeedDatabase::class.java,
         name = "seed_database"
-    ).build()
+    ).fallbackToDestructiveMigration(false).build()
 
     @Provides
     @Singleton
     fun provideBeerDao(database: SeedDatabase) = database.beerDao
+
+    @Provides
+    @Singleton
+    fun provideUserDao(database: SeedDatabase) = database.userDao
+
+    @Provides
+    @Singleton
+    fun provideCryptoManager(@ApplicationContext context: Context): com.dxmxp.data.local.datastore.CryptoManager =
+        com.dxmxp.data.local.datastore.CryptoManager(context)
+
+    @Provides
+    @Singleton
+    fun provideSessionDataStore(
+        @ApplicationContext context: Context,
+        cryptoManager: com.dxmxp.data.local.datastore.CryptoManager
+    ): com.dxmxp.data.local.datastore.SessionDataStore =
+        com.dxmxp.data.local.datastore.SessionDataStore(context, cryptoManager)
 }

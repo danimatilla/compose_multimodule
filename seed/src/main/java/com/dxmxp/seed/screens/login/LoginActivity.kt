@@ -52,12 +52,28 @@ class LoginActivity : ComponentActivity() {
         setContent {
             SeedTheme {
                 val state by viewModel.uiState.collectAsState()
-                LoginScreen(
-                    state = state,
-                    onUsernameChanged = { viewModel.setEvent(LoginContract.Event.OnUsernameChanged(it)) },
-                    onPasswordChanged = { viewModel.setEvent(LoginContract.Event.OnPasswordChanged(it)) },
-                    onLoginClick = { viewModel.setEvent(LoginContract.Event.OnLoginClick) }
-                )
+                
+                // We show the splash screen exclusively while isLoading is true 
+                // AND the fields are empty.
+                val showSplashScreen = state.isLoading && state.username.isEmpty() && state.password.isEmpty()
+
+                if (showSplashScreen) {
+                    Surface(
+                        modifier = Modifier.fillMaxSize(),
+                        color = MaterialTheme.colorScheme.background
+                    ) {
+                        Box(contentAlignment = Alignment.Center) {
+                            CircularProgressIndicator()
+                        }
+                    }
+                } else {
+                    LoginScreen(
+                        state = state,
+                        onUsernameChanged = { viewModel.setEvent(LoginContract.Event.OnUsernameChanged(it)) },
+                        onPasswordChanged = { viewModel.setEvent(LoginContract.Event.OnPasswordChanged(it)) },
+                        onLoginClick = { viewModel.setEvent(LoginContract.Event.OnLoginClick) }
+                    )
+                }
             }
         }
     }

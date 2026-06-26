@@ -7,6 +7,7 @@ import kotlinx.coroutines.flow.Flow
 
 interface AuthRepository {
     fun login(username: String, password: String): Flow<DataResult<AuthUser>>
-    fun logout()
+    suspend fun logout()
     fun getAccessToken(): String?
+    fun autoLogin(): Flow<DataResult<Unit>>
 }
