@@ -1,6 +1,7 @@
 package com.dxmxp.data.di
 
 import com.dxmxp.data.BuildConfig
+import com.dxmxp.data.remote.api.DummyJsonApi
 import com.dxmxp.data.remote.api.PunkapiApi
 import com.dxmxp.data.remote.interceptor.AuthInterceptor
 import com.dxmxp.data.remote.interceptor.ErrorInterceptor
@@ -30,6 +31,12 @@ object RemoteModule {
 
     @Provides
     @Singleton
+    fun provideDummyJsonApi(
+        @DummyJsonRetrofit retrofit: Retrofit
+    ): DummyJsonApi = retrofit.create(DummyJsonApi::class.java)
+
+    @Provides
+    @Singleton
     @PunkapiRetrofit
     fun provideRetrofit(
         okHttpClient: OkHttpClient
@@ -37,6 +44,20 @@ object RemoteModule {
         val json = Json { ignoreUnknownKeys = true }
         return Retrofit.Builder()
             .baseUrl(BASE_URL)
+            .client(okHttpClient)
+            .addConverterFactory(json.asConverterFactory("application/json".toMediaType()))
+            .build()
+    }
+
+    @Provides
+    @Singleton
+    @DummyJsonRetrofit
+    fun provideDummyJsonRetrofit(
+        okHttpClient: OkHttpClient
+    ): Retrofit {
+        val json = Json { ignoreUnknownKeys = true }
+        return Retrofit.Builder()
+            .baseUrl("https://dummyjson.com/")
             .client(okHttpClient)
             .addConverterFactory(json.asConverterFactory("application/json".toMediaType()))
             .build()
@@ -65,4 +86,8 @@ object RemoteModule {
     @Qualifier
     @Retention(AnnotationRetention.BINARY)
     annotation class PunkapiRetrofit
+
+    @Qualifier
+    @Retention(AnnotationRetention.BINARY)
+    annotation class DummyJsonRetrofit
 }

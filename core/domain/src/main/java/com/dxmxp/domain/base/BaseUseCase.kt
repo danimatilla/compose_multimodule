@@ -5,10 +5,10 @@ import kotlinx.coroutines.flow.Flow
 /**
  * Base class for all synchronous/one-shot Use Cases in the domain layer.
  *
- * @param P The input parameter type. Use [Unit] if no input is required.
- * @param R The return type.
+ * @param I The input parameter type. Use [Unit] if no input is required.
+ * @param O The return type.
  */
-abstract class BaseUseCase<in P, out R> {
+abstract class BaseUseCase<in I, out O> {
 
     /**
      * Executes the use case.
@@ -16,14 +16,14 @@ abstract class BaseUseCase<in P, out R> {
      * @param input The input parameters.
      * @return The result of the execution.
      */
-    suspend operator fun invoke(input: P): R {
+    suspend operator fun invoke(input: I): O {
         return launch(input)
     }
 
     /**
      * Business logic implementation for the use case.
      */
-    protected abstract suspend fun launch(params: P): R
+    protected abstract suspend fun launch(input: I): O
 }
 
 /**

@@ -1,9 +1,9 @@
 package com.dxmxp.data.repository
 
-import android.util.Log
 import com.dxmxp.data.common.pagingFlow
 import com.dxmxp.data.data_source.BeerRemoteDataSource
 import com.dxmxp.data.repository.mapper.BeerMapper.toDomain
+import com.dxmxp.domain.base.Logger
 import com.dxmxp.domain.common.DataResult
 import com.dxmxp.domain.di.DispatchersModule.IoDispatcher
 import com.dxmxp.domain.model.Beer
@@ -20,14 +20,19 @@ import javax.inject.Singleton
 @Singleton
 class BeerRemoteRepositoryImpl @Inject constructor(
     private val remoteDataSource: BeerRemoteDataSource,
+    private val logger: Logger,
     @param:IoDispatcher private val ioDispatcher: CoroutineDispatcher
 ) : BeerRemoteRepository {
 
     override fun getBeers(shouldReset: Boolean): Flow<DataResult<List<Beer>?>> =
         DataResult.pagingFlow(dispatcher = ioDispatcher) {
             remoteDataSource.fetchBeers(shouldReset)?.map { it.toDomain() }
-        }.onEach {
-            Log.d(TAG, "$it")
+        }.onEach {result ->
+            when (result) {
+                is DataResult.Success -> logger.d(TAG, "$result")
+                is DataResult.Error -> logger.e(TAG, "Error: ${result.exception}")
+                is DataResult.Loading -> logger.d(TAG, "Loading...")
+            }
         }
 
     companion object {
