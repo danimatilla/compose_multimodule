@@ -16,7 +16,7 @@ interface AuthRemoteDataSource {
 class AuthRemoteDataSourceImpl @Inject constructor(
     private val api: DummyJsonApi,
     private val networkHandler: NetworkHandler,
-    @IoDispatcher private val dispatcher: CoroutineDispatcher
+    @param:IoDispatcher private val dispatcher: CoroutineDispatcher
 ) : AuthRemoteDataSource {
 
     override suspend fun login(request: AuthRequest): AuthResponse =

@@ -35,7 +35,7 @@ class AuthRepositoryImpl @Inject constructor(
         }.onEach { result ->
             when (result) {
                 is DataResult.Success -> logger.d(TAG, "Login success: ${result.data}")
-                is DataResult.Error -> logger.e(TAG, "Login error: ${result.exception}")
+                is DataResult.Error -> logger.e(TAG, "Login error: ${result.exception.message}")
                 is DataResult.Loading -> logger.d(TAG, "Login loading...")
             }
         }
