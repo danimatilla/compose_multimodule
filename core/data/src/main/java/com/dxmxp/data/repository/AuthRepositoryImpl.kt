@@ -9,6 +9,7 @@ import com.dxmxp.data.remote.dto.auth.AuthRequest
 import com.dxmxp.data.remote.dto.auth.RefreshRequest
 import com.dxmxp.data.repository.mapper.AuthMapper.toDomain
 import com.dxmxp.data.repository.mapper.AuthMapper.toEntity
+import com.dxmxp.domain.AppException
 import com.dxmxp.domain.base.Logger
 import com.dxmxp.domain.common.DataResult
 import com.dxmxp.domain.di.DispatchersModule.IoDispatcher
@@ -48,30 +49,16 @@ class AuthRepositoryImpl @Inject constructor(
             sessionDataStore.saveTokens(response.accessToken, response.refreshToken)
             
             response.toDomain()
-        }.onEach { result ->
-            when (result) {
-                is DataResult.Success -> logger.d(TAG, "Login success: ${result.data}")
-                is DataResult.Error -> logger.e(TAG, "Login error: ${result.exception.message}")
-                is DataResult.Loading -> logger.d(TAG, "Login loading...")
-            }
         }
 
     override fun autoLogin(): Flow<DataResult<Unit>> =
         DataResult.loadingFlow(dispatcher = ioDispatcher) {
             val refreshToken = sessionDataStore.refreshToken.first()
-            if (refreshToken != null) {
-                val response = remoteDataSource.refresh(RefreshRequest(refreshToken))
+            refreshToken?.let {
+                val response = remoteDataSource.refresh(RefreshRequest(it))
                 sessionManager.saveToken(response.accessToken)
                 sessionDataStore.saveTokens(response.accessToken, response.refreshToken)
-            } else {
-                throw Exception("No session found")
-            }
-        }.onEach { result ->
-            when (result) {
-                is DataResult.Success -> logger.d(TAG, "Auto-login success")
-                is DataResult.Error -> logger.e(TAG, "Auto-login error: ${result.exception.message}")
-                is DataResult.Loading -> logger.d(TAG, "Auto-login loading...")
-            }
+            } ?: throw AppException.UnauthorizedException("Not session found")
         }
 
     override suspend fun logout() {

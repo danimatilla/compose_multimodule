@@ -19,7 +19,8 @@ class LoginViewModel @Inject constructor(
         val username: String = "emilys",
         val password: String = "emilyspass",
         val passwordVisible: Boolean = false,
-        val isLoading: Boolean = false
+        val isLoading: Boolean = false,
+        val isCheckingSession: Boolean = true
     )
 
     interface Event {
@@ -60,7 +61,10 @@ class LoginViewModel @Inject constructor(
                     setEffect { Effect.NavigateToMain }
                     null
                 },
-                onError = { null }
+                onError = { exception ->
+                    setEffect { Effect.ShowError(exception.message.orEmpty()) }
+                    copy(isCheckingSession = false)
+                }
             )
         }
     }
@@ -82,11 +86,11 @@ class LoginViewModel @Inject constructor(
                 onLoading = { copy(isLoading = it) },
                 onSuccess = { _, _ ->
                     setEffect { Effect.NavigateToMain }
-                    null
+                    copy(isLoading = false)
                 },
                 onError = { exception ->
                     setEffect { Effect.ShowError(exception.message.orEmpty()) }
-                    null
+                    copy(isLoading = false)
                 }
             )
         }
