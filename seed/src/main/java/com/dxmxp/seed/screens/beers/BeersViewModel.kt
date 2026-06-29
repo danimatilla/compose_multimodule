@@ -3,7 +3,7 @@ package com.dxmxp.seed.screens.beers
 import androidx.lifecycle.viewModelScope
 import com.dxmxp.domain.use_case.GetBeersUseCase
 import com.dxmxp.ui.base.BaseViewModel
-import com.dxmxp.ui.common.launchResultFlow
+import com.dxmxp.ui.common.collectPagingInto
 import com.dxmxp.ui.common.mapData
 import com.dxmxp.ui.mapper.BeerUiMapper
 import com.dxmxp.ui.model.BeerUiModel
@@ -59,27 +59,33 @@ class BeersViewModel @Inject constructor(
     }
 
     private fun fetchBeers(shouldReset: Boolean, isRefreshing: Boolean = false) {
-        viewModelScope.launchResultFlow(
-            flow = getBeersUseCase(shouldReset).mapData { beerUiMapper.toUiModel(it) },
-            launchIf = uiState.value.launchIf,
+        val flow = getBeersUseCase(shouldReset)
+            .mapData { beerUiMapper.toUiModel(it) }
+        
+        viewModelScope.collectPagingInto(
+            flow = flow,
+            setState = ::setState,
             shouldReset = shouldReset,
             currentList = { beers },
-            setState = ::setState,
-            onLoading = { loading ->
+            launchIf = uiState.value.launchIf
+        ) { combinedList, endReached, exception ->
+            if (exception != null) {
+                copy(error = exception.message, isLoading = false, isRefreshing = false)
+            } else if (combinedList.isEmpty() && !endReached) {
+                // Loading state (simplified mapping for this specific VM)
                 copy(
-                    isLoading = loading && !isRefreshing,
-                    isRefreshing = loading && isRefreshing
+                    isLoading = !isRefreshing,
+                    isRefreshing = isRefreshing
                 )
-            },
-            onError = { copy(error = it.message, isLoading = false, isRefreshing = false) },
-            onSuccess = { items, endReached ->
+            } else {
+                // Success state
                 copy(
-                    beers = items,
+                    beers = combinedList,
                     endReached = endReached,
                     isLoading = false,
                     isRefreshing = false
                 )
             }
-        )
+        }
     }
 }

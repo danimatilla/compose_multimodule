@@ -27,3 +27,32 @@ sealed class DataResult<out T> {
 
     companion object
 }
+
+/**
+ * Exhaustive fold for [DataResult] to ensure all states are handled.
+ */
+inline fun <T, R> DataResult<T>.fold(
+    onLoading: (Boolean) -> R,
+    onSuccess: (data: T, endReached: Boolean) -> R,
+    onError: (AppException) -> R
+): R = when (this) {
+    is DataResult.Loading -> onLoading(true)
+    is DataResult.Success -> onSuccess(data, endReached)
+    is DataResult.Error -> onError(exception)
+}
+
+inline fun <T> DataResult<T>.onSuccess(action: (data: T, endReached: Boolean) -> Unit): DataResult<T> {
+    if (this is DataResult.Success) action(data, endReached)
+    return this
+}
+
+inline fun <T> DataResult<T>.onError(action: (AppException) -> Unit): DataResult<T> {
+    if (this is DataResult.Error) action(exception)
+    return this
+}
+
+inline fun <T> DataResult<T>.onLoading(action: (Boolean) -> Unit): DataResult<T> {
+    if (this is DataResult.Loading) action(true)
+    else action(false)
+    return this
+}

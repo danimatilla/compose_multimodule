@@ -1,8 +1,22 @@
 package com.dxmxp.seed.screens.login
 
-import androidx.compose.foundation.layout.*
+import androidx.compose.foundation.layout.Arrangement
+import androidx.compose.foundation.layout.Column
+import androidx.compose.foundation.layout.fillMaxSize
+import androidx.compose.foundation.layout.fillMaxWidth
+import androidx.compose.foundation.layout.padding
+import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.text.KeyboardOptions
-import androidx.compose.material3.*
+import androidx.compose.material.icons.Icons
+import androidx.compose.material.icons.filled.Visibility
+import androidx.compose.material.icons.filled.VisibilityOff
+import androidx.compose.material3.Button
+import androidx.compose.material3.CircularProgressIndicator
+import androidx.compose.material3.Icon
+import androidx.compose.material3.IconButton
+import androidx.compose.material3.MaterialTheme
+import androidx.compose.material3.OutlinedTextField
+import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.collectAsState
@@ -11,15 +25,24 @@ import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.text.input.KeyboardType
 import androidx.compose.ui.text.input.PasswordVisualTransformation
+import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
-import androidx.hilt.navigation.compose.hiltViewModel
-import com.dxmxp.ui.navigation.helpers.NavigationHandler
+import androidx.hilt.lifecycle.viewmodel.compose.hiltViewModel
 import com.dxmxp.seed.navigation.routes.MainScaffoldGraph
+import com.dxmxp.ui.navigation.helpers.NavigationHandler
+import com.dxmxp.ui.theme.SeedTheme
 
 @Composable
-fun LoginScreen(onEvent: (NavigationHandler.NavigationEvent) -> Unit) {
-    val viewModel: LoginViewModel = hiltViewModel()
+fun LoginScreen(
+    onEvent: (NavigationHandler.NavigationEvent) -> Unit,
+    viewModel: LoginViewModel = hiltViewModel()
+) {
     val state by viewModel.uiState.collectAsState()
+
+    Content(
+        state = state,
+        onEvent = viewModel::setEvent
+    )
 
     LaunchedEffect(Unit) {
         viewModel.effect.collect { effect ->
@@ -27,74 +50,77 @@ fun LoginScreen(onEvent: (NavigationHandler.NavigationEvent) -> Unit) {
                 is LoginViewModel.Effect.NavigateToMain -> {
                     onEvent(NavigationHandler.NavigationEvent.SetRootScreen(MainScaffoldGraph))
                 }
+
                 is LoginViewModel.Effect.ShowError -> {
                     // TODO: Show error message
                 }
             }
         }
     }
+}
 
-    val username = state.username ?: ""
-    val password = state.password ?: ""
-    val isLoading = state.isLoading ?: false
-
-    val showSplashScreen = isLoading && username.isEmpty() && password.isEmpty()
-
-    if (showSplashScreen) {
-        Surface(
-            modifier = Modifier.fillMaxSize(),
-            color = MaterialTheme.colorScheme.background
-        ) {
-            Box(contentAlignment = Alignment.Center) {
-                CircularProgressIndicator()
-            }
-        }
-    } else {
+@Composable
+private fun Content(
+    state: LoginViewModel.State,
+    onEvent: (LoginViewModel.Event) -> Unit
+) {
+    with(state){
         Column(
+            horizontalAlignment = Alignment.CenterHorizontally,
+            verticalArrangement = Arrangement.spacedBy(16.dp, alignment = Alignment.CenterVertically),
             modifier = Modifier
                 .fillMaxSize()
-                .padding(16.dp),
-            horizontalAlignment = Alignment.CenterHorizontally,
-            verticalArrangement = Arrangement.Center
+                .padding(16.dp)
         ) {
             Text(text = "Seed App", style = MaterialTheme.typography.headlineLarge)
-            Spacer(modifier = Modifier.height(32.dp))
 
             OutlinedTextField(
-                value = username,
-                onValueChange = { viewModel.setEvent(LoginViewModel.Event.OnUsernameChanged(it)) },
+                value = username.orEmpty(),
+                onValueChange = { onEvent(LoginViewModel.Event.OnUsernameChanged(it)) },
                 label = { Text("Username") },
-                modifier = Modifier.fillMaxWidth(),
                 singleLine = true,
-                enabled = !isLoading
+                enabled = !isLoading,
+                modifier = Modifier.fillMaxWidth(),
             )
 
-            Spacer(modifier = Modifier.height(16.dp))
-
             OutlinedTextField(
-                value = password,
-                onValueChange = { viewModel.setEvent(LoginViewModel.Event.OnPasswordChanged(it)) },
+                value = password.orEmpty(),
+                onValueChange = { onEvent(LoginViewModel.Event.OnPasswordChanged(it)) },
                 label = { Text("Password") },
                 modifier = Modifier.fillMaxWidth(),
                 visualTransformation = PasswordVisualTransformation(),
                 keyboardOptions = KeyboardOptions(keyboardType = KeyboardType.Password),
                 singleLine = true,
-                enabled = !isLoading
+                enabled = !isLoading,
+                trailingIcon = {
+                    IconButton(onClick = { onEvent(LoginViewModel.Event.OnTogglePasswordVisibility) }) {
+                        val visible = passwordVisible
+                        val image = if (visible) Icons.Filled.VisibilityOff else Icons.Filled.Visibility
+                        val description = if (visible) "Hide password" else "Show password"
+                        Icon(imageVector = image, contentDescription = description)
+                    }
+                }
             )
 
-            Spacer(modifier = Modifier.height(32.dp))
-
-            if (isLoading) {
-                CircularProgressIndicator()
-            } else {
-                Button(
-                    onClick = { viewModel.setEvent(LoginViewModel.Event.OnLoginClick) },
-                    modifier = Modifier.fillMaxWidth(),
-                    enabled = username.isNotBlank() && password.isNotBlank()
-                ) {
-                    Text(text = "Login")
-                }
+            Button(
+                onClick = { onEvent(LoginViewModel.Event.OnLoginClick) },
+                enabled = username.isNotBlank() && password.isNotBlank(),
+                modifier = Modifier.fillMaxWidth(),
+            ) {
+                if (isLoading) CircularProgressIndicator(modifier = Modifier.size(24.dp))
+                else Text(text = "Login")
             }
         }
+    }
+}
+
+@Preview
+@Composable
+private fun LoginScreenPreview() {
+    SeedTheme {
+        Content(
+            state = LoginViewModel.State(),
+            onEvent = {}
+        )
     }
 }
