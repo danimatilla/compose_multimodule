@@ -19,20 +19,10 @@ import kotlinx.serialization.Serializable
 @InstallIn(SingletonComponent::class)
 object AuthGraph : Graph {
 
-    @Serializable
-    data object Login : Screen {
-        override val route: String
-            get() = "${this@AuthGraph.route}/login"
-        
-        override val showMainBottomBar: Boolean
-            get() = false
-    }
-
     override fun EntryProviderScope<NavKey>.registerEntries(
         onEvent: (NavigationHandler.NavigationEvent) -> Unit
     ) {
         screenEntry<AuthGraph> { LoginScreen(onEvent) }
-        screenEntry<Login> { LoginScreen(onEvent) }
     }
 
     override val route: String

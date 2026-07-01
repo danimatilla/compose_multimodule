@@ -22,6 +22,8 @@ import androidx.navigation3.ui.NavDisplay
 import com.dxmxp.seed.navigation.MainScaffold
 import com.dxmxp.seed.navigation.routes.AuthGraph
 import com.dxmxp.seed.navigation.routes.MainScaffoldGraph
+import com.dxmxp.seed.navigation.routes.MainScaffoldGraph.registerEntries
+import com.dxmxp.seed.screens.login.LoginScreen
 import com.dxmxp.stories.navigation.StoriesScaffold
 import com.dxmxp.stories.navigation.routes.StoriesScaffoldGraph
 import com.dxmxp.ui.common.DataObserver
@@ -69,8 +71,7 @@ class MainActivity : ComponentActivity() {
             val entryProvider = remember(onEvent) {
                 entryProvider {
                     // Auth entries
-                    AuthGraph.run { registerEntries(onEvent) }
-
+                    screenEntry<AuthGraph> { LoginScreen(onEvent) }
                     screenEntry<MainScaffoldGraph> { MainScaffold(onParentEvent = onEvent) }
                     // Include StoriesScaffoldGraph in entryProvider,
                     // allowing it to be displayed as a modal over the main scaffold.
