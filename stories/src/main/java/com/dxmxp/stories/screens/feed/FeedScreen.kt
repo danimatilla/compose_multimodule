@@ -22,37 +22,20 @@ import com.dxmxp.ui.navigation.helpers.NavigationHandler
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
 fun FeedScreen(
-    onEvent: (NavigationHandler.NavigationEvent) -> Unit,
     viewModel: FeedViewModel = hiltViewModel()
 ) {
     val state by viewModel.uiState.collectAsState()
 
     Content(
         state = state,
-        onEvent = viewModel::setEvent
+        handleEvent = viewModel::setEvent
     )
-
-    LaunchedEffect(Unit) {
-        viewModel.effect.collect { effect ->
-            when (effect) {
-                is FeedViewModel.Effect.OpenDetail -> {
-                    val story = effect.story
-                    onEvent(
-                        NavigationHandler.NavigationEvent.PushScreen(
-                            screen = StoriesScaffoldGraph.StoryDetail(story.id),
-                            data = story
-                        )
-                    )
-                }
-            }
-        }
-    }
 }
 
 @Composable
 private fun Content(
     state: FeedViewModel.State,
-    onEvent: (FeedViewModel.Event) -> Unit
+    handleEvent: (FeedViewModel.Event) -> Unit
 ) {
     state.stories?.let { stories ->
         val listState = rememberLazyListState()
@@ -64,7 +47,7 @@ private fun Content(
                     headlineContent = { Text(story.title) },
                     supportingContent = { Text(story.description) },
                     modifier = Modifier.clickable(
-                        onClick = { onEvent(FeedViewModel.Event.OpenDetail(story)) }
+                        onClick = { handleEvent(FeedViewModel.Event.OpenDetail(story)) }
                     )
                 )
 
@@ -89,6 +72,6 @@ private fun FeedScreenPreview() {
                 )
             }
         ),
-        onEvent = {}
+        handleEvent = {}
     )
 }

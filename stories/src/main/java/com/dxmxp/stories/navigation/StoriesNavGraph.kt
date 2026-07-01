@@ -16,14 +16,13 @@ import com.dxmxp.ui.navigation.helpers.NavigationHandler
 @Composable
 fun StoriesNavGraph(
     modifier: Modifier = Modifier,
-    backStack: NavBackStack<NavKey>,
-    onEvent: (NavigationHandler.NavigationEvent) -> Unit
+    backStack: NavBackStack<NavKey>
 ) {
-    val entryProvider = remember(onEvent) {
+    val entryProvider = remember {
         entryProvider {
             StoriesScaffoldGraph.run {
-                registerEntries(onEvent)
-                registerCommonEntries(onEvent)
+                registerEntries()
+                registerCommonEntries()
             }
         }
     }

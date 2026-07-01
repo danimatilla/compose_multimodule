@@ -11,7 +11,7 @@ import com.dxmxp.ui.navigation.helpers.NavigationHandler
 
 
 @Composable
-fun SearchScreen(onEvent: (NavigationHandler.NavigationEvent) -> Unit) {
+fun SearchScreen() {
     Column(
         modifier = Modifier.fillMaxSize(),
         verticalArrangement = Arrangement.Center,

@@ -18,16 +18,14 @@ internal object EventExtension {
 
     suspend fun NavigationEvent.PushScreen.pushScreen(
         backStack: NavBackStack<NavKey>,
-        dataObserver: DataObserver,
+        dataObserver: DataObserver?,
     ) {
         backStack.run {
             if (lastOrNull() != screen) {
                 add(screen)
             }
         }
-        data?.run {
-            dataObserver.emit(this)
-        }
+        data?.let { dataObserver?.emit(it) }
     }
 
 

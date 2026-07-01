@@ -1,5 +1,7 @@
 package com.dxmxp.ui.navigation
 
+import androidx.compose.runtime.Composable
+import androidx.compose.runtime.LaunchedEffect
 import androidx.navigation3.runtime.EntryProviderScope
 import androidx.navigation3.runtime.NavKey
 import com.dxmxp.ui.navigation.Screen.Companion.screenEntry
@@ -37,11 +39,51 @@ interface Graph : Screen, NavigationContributor {
             }
         }
 
-    fun EntryProviderScope<NavKey>.registerCommonEntries(onEvent: (NavigationHandler.NavigationEvent) -> Unit) {
-        screenEntry<WebView> { WebViewScreen(it, onEvent) }
+    fun EntryProviderScope<NavKey>.registerCommonEntries() {
+        screenEntry<WebView> { webView ->
+            WebViewScreen(screen = webView)
+        }
     }
 
-    fun EntryProviderScope<NavKey>.registerEntries(onEvent: (NavigationHandler.NavigationEvent) -> Unit)
+    fun EntryProviderScope<NavKey>.registerEntries()
+
+    companion object {
+        fun EntryProviderScope<NavKey>.registerGraphs(
+            graphs: Set<Graph>
+        ) {
+            graphs.firstOrNull()?.apply { registerCommonEntries() }
+
+            graphs.forEach { graph ->
+                with(graph) {
+                    registerEntries()
+                }
+            }
+        }
+
+        @Composable
+        fun HandleGraphEvents(
+            backStack: androidx.navigation3.runtime.NavBackStack<NavKey>,
+            graph: Graph,
+        ) {
+            val navigator = LocalNavigator.current
+            val dataObserver = LocalDataObserver.current
+            LaunchedEffect(backStack) {
+                navigator.events.collect { event ->
+                    val screen = when (event) {
+                        is NavigationHandler.NavigationEvent.PushScreen -> event.screen
+                        is NavigationHandler.NavigationEvent.SetRootScreen -> event.screen
+                        is NavigationHandler.NavigationEvent.PopScreen -> event.screen
+                    }
+
+                    if (screen != null && graph.contains(screen)) {
+                        NavigationHandler.handleEvent(backStack, event, dataObserver)
+                    } else if (event is NavigationHandler.NavigationEvent.PopScreen && event.screen == null && backStack.size > 1) {
+                        NavigationHandler.handleEvent(backStack, event, dataObserver)
+                    }
+                }
+            }
+        }
+    }
 }
 
 interface NavigationContributor {

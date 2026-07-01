@@ -7,13 +7,16 @@ import com.dxmxp.ui.common.launchResultFlow
 import com.dxmxp.ui.common.mapData
 import com.dxmxp.ui.mapper.BeerUiMapper
 import com.dxmxp.ui.model.BeerUiModel
+import com.dxmxp.ui.navigation.NavigationManager
+import com.dxmxp.ui.screens.WebView
 import dagger.hilt.android.lifecycle.HiltViewModel
 import javax.inject.Inject
 
 @HiltViewModel
 class BeersViewModel @Inject constructor(
     private val getBeersUseCase: GetBeersUseCase,
-    private val beerUiMapper: BeerUiMapper
+    private val beerUiMapper: BeerUiMapper,
+    private val navigationManager: NavigationManager
 ) : BaseViewModel<BeersViewModel.State, BeersViewModel.Effect, BeersViewModel.Event>() {
 
     data class State(
@@ -49,7 +52,9 @@ class BeersViewModel @Inject constructor(
                 }
             }
             is Event.Refresh -> fetchBeers(shouldReset = true, isRefreshing = true)
-            is Event.OnBeerClicked -> setEffect { Effect.NavigateToDetail(event.beer.id) }
+            is Event.OnBeerClicked -> {
+                navigationManager.push(WebView(url = "https://www.google.com/search?q=${event.beer.name}"))
+            }
         }
     }
 

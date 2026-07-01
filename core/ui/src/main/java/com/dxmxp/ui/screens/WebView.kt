@@ -26,6 +26,7 @@ import androidx.compose.runtime.setValue
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.viewinterop.AndroidView
+import com.dxmxp.ui.navigation.LocalNavigator
 import com.dxmxp.ui.navigation.helpers.NavigationHandler
 import com.dxmxp.ui.navigation.Screen
 import kotlinx.serialization.Serializable
@@ -45,9 +46,9 @@ data class WebView(val url: String, val title: String? = null) : Screen {
 @Composable
 fun WebViewScreen(
     screen: WebView,
-    onEvent: (NavigationHandler.NavigationEvent) -> Unit,
     modifier: Modifier = Modifier,
 ) {
+    val navigator = LocalNavigator.current
     var webViewInstance by remember { mutableStateOf<NativeWebView?>(null) }
     var canGoBack by remember { mutableStateOf(false) }
     val currentTitleState = remember { mutableStateOf(screen.title.orEmpty()) }
@@ -56,14 +57,14 @@ fun WebViewScreen(
         if (canGoBack) {
             webViewInstance?.goBack()
         } else {
-            onEvent(NavigationHandler.NavigationEvent.PopScreen())
+            navigator.pop()
         }
     }
 
     Column(
         modifier = modifier.fillMaxSize()
     ) {
-        TopAppBar(currentTitleState, canGoBack, webViewInstance, onEvent)
+        TopAppBar(currentTitleState, canGoBack, webViewInstance)
         AndroidView(
             modifier = Modifier
                 .fillMaxWidth()
@@ -133,8 +134,8 @@ private fun TopAppBar(
     currentTitleState: MutableState<String>,
     canGoBack: Boolean,
     webViewInstance: NativeWebView?,
-    onEvent: (NavigationHandler.NavigationEvent) -> Unit
 ) {
+    val navigator = LocalNavigator.current
     TopAppBar(
         title = {
             Text(
@@ -150,7 +151,7 @@ private fun TopAppBar(
                     if (canGoBack) {
                         webViewInstance?.goBack()
                     } else {
-                        onEvent(NavigationHandler.NavigationEvent.PopScreen())
+                        navigator.pop()
                     }
                 },
             ) {

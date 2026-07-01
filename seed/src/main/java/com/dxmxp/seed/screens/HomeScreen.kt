@@ -9,12 +9,15 @@ import androidx.compose.runtime.Composable
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import com.dxmxp.seed.navigation.routes.MainScaffoldGraph
+import com.dxmxp.ui.navigation.LocalNavigator
 import com.dxmxp.ui.navigation.helpers.NavigationHandler
 import com.dxmxp.ui.screens.WebView
 
 
 @Composable
-fun HomeScreen(onEvent: (NavigationHandler.NavigationEvent) -> Unit) {
+fun HomeScreen() {
+    val navigator = LocalNavigator.current
+
     Column(
         modifier = Modifier.fillMaxSize(),
         verticalArrangement = Arrangement.Center,
@@ -23,21 +26,13 @@ fun HomeScreen(onEvent: (NavigationHandler.NavigationEvent) -> Unit) {
         Text("Home Screen")
         Button(
             onClick = {
-                onEvent(
-                    NavigationHandler.NavigationEvent.PushScreen(
-                        WebView(url = "https://www.google.com")
-                    )
-                )
+                navigator.push(WebView(url = "https://www.google.com"))
             },
             content = { Text("WebView") }
         )
         Button(
             onClick = {
-                onEvent(
-                    NavigationHandler.NavigationEvent.PushScreen(
-                        MainScaffoldGraph.Beers
-                    )
-                )
+                navigator.push(MainScaffoldGraph.Beers)
             },
             content = { Text("Beers") }
         )

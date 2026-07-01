@@ -11,7 +11,7 @@ import com.dxmxp.ui.navigation.helpers.NavigationHandler
 
 
 @Composable
-fun SettingsScreen(onEvent: (NavigationHandler.NavigationEvent) -> Unit) {
+fun SettingsScreen() {
     Column(
         modifier = Modifier.fillMaxSize(),
         verticalArrangement = Arrangement.Center,

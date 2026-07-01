@@ -26,32 +26,27 @@ object StoriesScaffoldGraph : Graph {
         get() = true
 
     @Serializable
-    data class StoryDetail(val id: String) : Screen {
+    data object Feed : Screen {
         override val route: String
-            get() = "${this@StoriesScaffoldGraph.route}/story"
+            get() = "${this@StoriesScaffoldGraph.route}/feed"
     }
 
     @Serializable
-    data object Profile : Screen {
-        override val route: String
-            get() = "${this@StoriesScaffoldGraph.route}/profile"
-    }
+    data class StoryDetail(val id: String) : Screen
 
     @Serializable
-    data object Notifications : Screen {
-        override val route: String
-            get() = "${this@StoriesScaffoldGraph.route}/notifications"
-    }
+    data object Profile : Screen
 
-    override fun EntryProviderScope<NavKey>.registerEntries(
-        onEvent: (NavigationHandler.NavigationEvent) -> Unit,
-    ) {
-        screenEntry<StoriesScaffoldGraph> { FeedScreen(onEvent) }
+    @Serializable
+    data object Notifications : Screen
+
+    override fun EntryProviderScope<NavKey>.registerEntries() {
+        screenEntry<Feed> { FeedScreen() }
         screenEntry<StoryDetail, StoryDetailViewModel>(
             viewModelProvide = { hiltViewModel<StoryDetailViewModel>() },
-        ) { viewModel -> StoryDetailScreen(onEvent, viewModel) }
-        screenEntry<Profile> { /* ProfileScreen(onEvent) */ }
-        screenEntry<Notifications> { /* NotificationsScreen(onEvent) */ }
+        ) { viewModel -> StoryDetailScreen(viewModel) }
+        screenEntry<Profile> { /* ProfileScreen() */ }
+        screenEntry<Notifications> { /* NotificationsScreen() */ }
     }
 
     override val route: String

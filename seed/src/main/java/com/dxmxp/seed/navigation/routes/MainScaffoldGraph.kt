@@ -22,6 +22,15 @@ import kotlinx.serialization.Serializable
 @InstallIn(SingletonComponent::class)
 object MainScaffoldGraph : Graph {
 
+    override val children: List<Class<out Screen>>
+        get() = super.children + ProfileGraph::class.java
+
+    @Serializable
+    data object Home : Screen {
+        override val route: String
+            get() = "${this@MainScaffoldGraph.route}/home"
+    }
+
     @Serializable
     data object Search : Screen {
         override val route: String
@@ -40,16 +49,11 @@ object MainScaffoldGraph : Graph {
             get() = "${this@MainScaffoldGraph.route}/beers"
     }
 
-    override fun EntryProviderScope<NavKey>.registerEntries(
-        onEvent: (NavigationHandler.NavigationEvent) -> Unit
-    ) {
-        screenEntry<MainScaffoldGraph> { HomeScreen(onEvent) }
-        screenEntry<Search> { SearchScreen(onEvent) }
-        screenEntry<Menu> { MenuScreen(onEvent) }
-        screenEntry<Beers> { BeersScreen(onEvent) }
-
-        // Integrate the ProfileGraph entries into this graph.
-        ProfileGraph.run { registerEntries(onEvent) }
+    override fun EntryProviderScope<NavKey>.registerEntries() {
+        screenEntry<Home> { HomeScreen() }
+        screenEntry<Search> { SearchScreen() }
+        screenEntry<Menu> { MenuScreen() }
+        screenEntry<Beers> { BeersScreen() }
     }
 
     override val route: String

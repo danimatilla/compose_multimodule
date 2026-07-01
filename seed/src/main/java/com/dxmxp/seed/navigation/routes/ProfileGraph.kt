@@ -26,11 +26,9 @@ object ProfileGraph : Graph {
             get() = "${this@ProfileGraph.route}/settings"
     }
 
-    override fun EntryProviderScope<NavKey>.registerEntries(
-        onEvent: (NavigationHandler.NavigationEvent) -> Unit
-    ) {
-        screenEntry<ProfileGraph> { ProfileScreen(onEvent) }
-        screenEntry<Settings> { SettingsScreen(onEvent) }
+    override fun EntryProviderScope<NavKey>.registerEntries() {
+        screenEntry<ProfileGraph> { ProfileScreen() }
+        screenEntry<Settings> { SettingsScreen() }
     }
 
     override val route: String

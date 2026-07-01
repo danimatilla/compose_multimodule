@@ -20,10 +20,11 @@ import com.dxmxp.ui.screens.WebViewScreen
 interface Screen : NavKey {
 
     val route: String
+        get() = "/" + (this::class.simpleName ?: "").lowercase()
 
     val showMainBottomBar: Boolean get() = true
 
-    companion object{
+    companion object {
 
         /**
          * Enhanced entry that automatically handles ViewModel initialization.
@@ -62,6 +63,19 @@ interface Screen : NavKey {
             crossinline content: @Composable (K) -> Unit,
         ) {
             entry<K>(metadata = metadata) { screen -> content(screen) }
+        }
+
+        /**
+         * Entry for screens that use the [LocalNavigator] for events.
+         */
+        inline fun <reified K : Screen> EntryProviderScope<NavKey>.screenEntry(
+            metadata: Map<String, Any> = emptyMap(),
+            crossinline content: @Composable (K, Navigator) -> Unit,
+        ) {
+            entry<K>(metadata = metadata) { screen ->
+                val navigator = LocalNavigator.current
+                content(screen, navigator)
+            }
         }
     }
 }

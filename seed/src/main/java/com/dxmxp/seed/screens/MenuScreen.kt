@@ -11,7 +11,7 @@ import com.dxmxp.ui.navigation.helpers.NavigationHandler
 
 
 @Composable
-fun MenuScreen(onEvent: (NavigationHandler.NavigationEvent) -> Unit) {
+fun MenuScreen() {
     Column(
         modifier = Modifier.fillMaxSize(),
         verticalArrangement = Arrangement.Center,

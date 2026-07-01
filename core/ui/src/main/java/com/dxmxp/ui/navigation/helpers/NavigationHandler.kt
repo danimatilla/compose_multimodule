@@ -14,57 +14,31 @@ object NavigationHandler {
     suspend fun handleEvent(
         backStack: NavBackStack<NavKey>,
         event: NavigationEvent,
-        dataObserver: DataObserver
+        dataObserver: DataObserver? = null
     ) {
-        var eventString: String
         val initialBackStack = backStack.stackString()
 
         when (event) {
-            is NavigationEvent.PushScreen -> {
-                event.pushScreen(backStack, dataObserver)
-                eventString = event.toString()
-            }
-
-            is NavigationEvent.PopScreen -> {
-                event.popScreen(backStack)
-                eventString = event.toString()
-            }
-
-            is NavigationEvent.SetRootScreen -> {
-                event.setRootScreen(backStack)
-                eventString = event.toString()
-            }
+            is NavigationEvent.PushScreen -> event.pushScreen(backStack, dataObserver)
+            is NavigationEvent.PopScreen -> event.popScreen(backStack)
+            is NavigationEvent.SetRootScreen -> event.setRootScreen(backStack)
         }
 
-        val currentBackStack = backStack.stackString()
-        Log.d(TAG, "$eventString$initialBackStack > $currentBackStack")
+        Log.d(TAG, "${event.logString()} $initialBackStack > ${backStack.stackString()}")
+    }
+
+    private fun NavigationEvent.logString() = when (this) {
+        is NavigationEvent.PushScreen -> "🔻Push to ${screen.javaClass.simpleName}"
+        is NavigationEvent.PopScreen -> "🔺Pop${screen?.run { " to ${javaClass.simpleName}" }.orEmpty()}"
+        is NavigationEvent.SetRootScreen -> "🔻Set root to ${screen.javaClass.simpleName}"
     }
 
     sealed interface NavigationEvent {
-        /**
-         * Adds a new [screen] to the navigation stack.
-         */
-        data class PushScreen(val screen: Screen, val data: Any? = null) : NavigationEvent {
-            override fun toString(): String =
-                "🔻Push to ${screen.javaClass.simpleName} :: "
-        }
+        data class PushScreen(val screen: Screen, val data: Any? = null) : NavigationEvent
 
-        /**
-         * Returns to the previous screen.
-         * If a [screen] is provided, it will pop until that specific screen.
-         */
-        data class PopScreen(val screen: Screen? = null) : NavigationEvent {
-            override fun toString(): String =
-                "🔺Pop${screen?.run { " to ${javaClass.simpleName}" }.orEmpty()} :: "
-        }
+        data class PopScreen(val screen: Screen? = null) : NavigationEvent
 
-        /**
-         * Set specific screen as the root of the stack, clearing all previous screens.
-         */
-        data class SetRootScreen(val screen: Screen) : NavigationEvent {
-            override fun toString(): String =
-                "🔻Set root to ${screen.javaClass.simpleName} :: "
-        }
+        data class SetRootScreen(val screen: Screen) : NavigationEvent
     }
 
     private fun NavBackStack<NavKey>.stackString(): String =

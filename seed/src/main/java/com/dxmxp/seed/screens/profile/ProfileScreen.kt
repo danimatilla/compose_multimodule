@@ -11,7 +11,7 @@ import com.dxmxp.ui.navigation.helpers.NavigationHandler
 
 
 @Composable
-fun ProfileScreen(onEvent: (NavigationHandler.NavigationEvent) -> Unit) {
+fun ProfileScreen() {
     Column(
         modifier = Modifier.fillMaxSize(),
         verticalArrangement = Arrangement.Center,

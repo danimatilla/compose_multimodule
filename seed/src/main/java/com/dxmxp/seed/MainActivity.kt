@@ -26,6 +26,12 @@ import com.dxmxp.stories.navigation.StoriesScaffold
 import com.dxmxp.stories.navigation.routes.StoriesScaffoldGraph
 import com.dxmxp.ui.theme.SeedTheme
 import com.dxmxp.ui.common.DataObserver
+import com.dxmxp.ui.navigation.Graph
+import com.dxmxp.ui.navigation.Graph.Companion.registerGraphs
+import com.dxmxp.ui.navigation.LocalDataObserver
+import com.dxmxp.ui.navigation.LocalNavigator
+import com.dxmxp.ui.navigation.NavigationManager
+import com.dxmxp.ui.navigation.NavigationManagerBridge
 import com.dxmxp.ui.navigation.Screen.Companion.screenEntry
 import com.dxmxp.ui.navigation.helpers.NavigationHandler
 import com.dxmxp.ui.navigation.helpers.NavigationUtils.modalAnimation
@@ -42,6 +48,12 @@ class MainActivity : ComponentActivity() {
     @Inject
     lateinit var deepLinkHandler: DeepLinkHandler
 
+    @Inject
+    lateinit var navigationManager: NavigationManager
+
+    @Inject
+    lateinit var graphs: Set<@JvmSuppressWildcards Graph>
+
     override fun onCreate(savedInstanceState: Bundle?) {
         enableEdgeToEdge()
 
@@ -49,49 +61,63 @@ class MainActivity : ComponentActivity() {
         intentState = intent
 
         setContent {
-            val scope = rememberCoroutineScope()
             val backStack = rememberNavBackStack(MainScaffoldGraph)
 
-            val onEvent: (NavigationHandler.NavigationEvent) -> Unit = remember(backStack) {
-                { event ->
-                    scope.launch {
-                        NavigationHandler.handleEvent(
-                            backStack = backStack,
-                            event = event,
-                            dataObserver = dataObserver
-                        )
+            val navigator = remember {
+                NavigationManagerBridge(navigationManager)
+            }
+
+            LaunchedEffect(backStack) {
+                navigationManager.events.collect { event ->
+                    val screen = when (event) {
+                        is NavigationHandler.NavigationEvent.PushScreen -> event.screen
+                        is NavigationHandler.NavigationEvent.SetRootScreen -> event.screen
+                        is NavigationHandler.NavigationEvent.PopScreen -> event.screen
                     }
+
+                    val currentRoot = backStack.lastOrNull()
+                    if (currentRoot is Graph && screen != null && currentRoot.contains(screen)) {
+                        // Let the nested scaffold handle it
+                        return@collect
+                    }
+
+                    NavigationHandler.handleEvent(backStack, event, dataObserver)
                 }
             }
 
-            val entryProvider = remember(onEvent) {
+            val entryProvider = remember {
                 entryProvider {
-                    screenEntry<MainScaffoldGraph> { MainScaffold(onParentEvent = onEvent) }
-                    // Include StoriesScaffoldGraph in entryProvider, 
-                    // allowing it to be displayed as a modal over the main scaffold.
+                    screenEntry<MainScaffoldGraph> { MainScaffold() }
                     screenEntry<StoriesScaffoldGraph>(
                         metadata = metadata { modalAnimation() }
-                    ) { StoriesScaffold(onParentEvent = onEvent) }
+                    ) { StoriesScaffold() }
+
+                    registerGraphs(graphs)
                 }
             }
 
             LaunchedEffect(intentState) {
                 intentState?.data?.let { uri ->
                     deepLinkHandler.handle(uri)?.let { event ->
-                        onEvent(event)
+                        navigationManager.navigate(event)
                     }
                     intentState = null
                 }
             }
 
             SeedTheme {
-                NavDisplay(
-                    backStack = backStack,
-                    entryProvider = entryProvider,
-                    modifier = Modifier
-                        .fillMaxSize()
-                        .background(color = MaterialTheme.colorScheme.background)
-                )
+                androidx.compose.runtime.CompositionLocalProvider(
+                    LocalNavigator provides navigator,
+                    LocalDataObserver provides dataObserver
+                ) {
+                    NavDisplay(
+                        backStack = backStack,
+                        entryProvider = entryProvider,
+                        modifier = Modifier
+                            .fillMaxSize()
+                            .background(color = MaterialTheme.colorScheme.background)
+                    )
+                }
             }
         }
     }

@@ -12,46 +12,26 @@ import androidx.compose.material3.IconButton
 import androidx.compose.material3.TopAppBar
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.remember
-import androidx.compose.runtime.rememberCoroutineScope
 import androidx.compose.ui.Modifier
-import androidx.compose.ui.platform.LocalContext
 import androidx.navigation3.runtime.rememberNavBackStack
 import com.dxmxp.stories.navigation.routes.StoriesScaffoldGraph
-import com.dxmxp.ui.common.DataObserverEntryPoint
-import com.dxmxp.ui.navigation.helpers.NavigationHandler
+import com.dxmxp.ui.navigation.Graph
+import com.dxmxp.ui.navigation.LocalNavigator
 import com.dxmxp.ui.screens.BottomBar
 import com.dxmxp.ui.screens.SeedScaffold
 import dagger.hilt.android.EntryPointAccessors
-import kotlinx.coroutines.launch
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
-fun StoriesScaffold(
-    onParentEvent: (NavigationHandler.NavigationEvent) -> Unit
-) {
-    val context = LocalContext.current
-    val scope = rememberCoroutineScope()
-    val backStack = rememberNavBackStack(StoriesScaffoldGraph)
-    val dataObserver = remember {
-        EntryPointAccessors
-            .fromApplication(
-                context = context,
-                entryPoint = DataObserverEntryPoint::class.java
-            )
-            .dataObserver()
-    }
+fun StoriesScaffold() {
+    val backStack = rememberNavBackStack(StoriesScaffoldGraph.Feed)
+    val navigator = LocalNavigator.current
 
-    val onEvent: (NavigationHandler.NavigationEvent) -> Unit = remember(backStack, dataObserver) {
-        { event ->
-            scope.launch {
-                NavigationHandler.handleEvent(backStack, event, dataObserver)
-            }
-        }
-    }
+    Graph.HandleGraphEvents(backStack = backStack, graph = StoriesScaffoldGraph)
 
     val navigationBarItems = remember {
         listOf(
-            StoriesScaffoldGraph to Icons.Default.Home,
+            StoriesScaffoldGraph.Feed to Icons.Default.Home,
             StoriesScaffoldGraph.Notifications to Icons.Default.Notifications,
             StoriesScaffoldGraph.Profile to Icons.Default.Person,
         )
@@ -65,7 +45,7 @@ fun StoriesScaffold(
                 navigationIcon = {
                     IconButton(
                         content = { Icon(Icons.Default.Close, contentDescription = "Close") },
-                        onClick = { onParentEvent(NavigationHandler.NavigationEvent.PopScreen()) }
+                        onClick = { navigator.pop() }
                     )
                 }
             )
@@ -75,14 +55,13 @@ fun StoriesScaffold(
                 bottomBarItems = navigationBarItems,
                 currentDestination = currentDestination,
                 onClickItem = { screen ->
-                    onEvent(NavigationHandler.NavigationEvent.SetRootScreen(screen))
+                    navigator.setRoot(screen)
                 }
             )
         },
     ) { innerPadding ->
         StoriesNavGraph(
             backStack = backStack,
-            onEvent = onEvent,
             modifier = Modifier.padding(innerPadding),
         )
     }

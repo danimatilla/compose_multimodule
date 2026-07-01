@@ -36,7 +36,6 @@ import com.dxmxp.ui.navigation.helpers.NavigationHandler
 
 @Composable
 fun BeersScreen(
-    onNavigationEvent: (NavigationHandler.NavigationEvent) -> Unit,
     viewModel: BeersViewModel = hiltViewModel()
 ) {
     val state by viewModel.uiState.collectAsStateWithLifecycle()

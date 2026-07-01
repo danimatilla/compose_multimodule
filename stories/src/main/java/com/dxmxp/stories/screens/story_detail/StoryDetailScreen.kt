@@ -14,7 +14,6 @@ import com.dxmxp.ui.navigation.helpers.NavigationHandler
 
 @Composable
 fun StoryDetailScreen(
-    onEvent: (NavigationHandler.NavigationEvent) -> Unit,
     viewModel: StoryDetailViewModel
 ) {
     val state by viewModel.uiState.collectAsState()
