@@ -6,9 +6,9 @@ import com.dxmxp.seed.screens.HomeScreen
 import com.dxmxp.seed.screens.MenuScreen
 import com.dxmxp.seed.screens.SearchScreen
 import com.dxmxp.seed.screens.beers.BeersScreen
-import com.dxmxp.ui.navigation.Graph
-import com.dxmxp.ui.navigation.Screen
-import com.dxmxp.ui.navigation.Screen.Companion.screenEntry
+import com.dxmxp.ui.navigation.model.Graph
+import com.dxmxp.ui.navigation.model.Screen
+import com.dxmxp.ui.navigation.model.Screen.Companion.screenEntry
 import dagger.Module
 import dagger.Provides
 import dagger.hilt.InstallIn

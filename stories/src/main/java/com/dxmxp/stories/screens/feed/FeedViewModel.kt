@@ -3,7 +3,7 @@ package com.dxmxp.stories.screens.feed
 import com.dxmxp.domain.model.Story
 import com.dxmxp.stories.navigation.routes.StoriesScaffoldGraph
 import com.dxmxp.ui.base.BaseViewModel
-import com.dxmxp.ui.navigation.NavigationManager
+import com.dxmxp.ui.navigation.core.NavigationManager
 import dagger.hilt.android.lifecycle.HiltViewModel
 import javax.inject.Inject
 

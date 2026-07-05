@@ -1,8 +1,10 @@
-package com.dxmxp.ui.navigation
+package com.dxmxp.ui.navigation.core
 
 import android.net.Uri
 import android.util.Log
 import androidx.navigation3.runtime.NavKey
+import com.dxmxp.ui.navigation.model.Graph
+import com.dxmxp.ui.navigation.model.Screen
 import javax.inject.Inject
 import javax.inject.Singleton
 import kotlin.reflect.full.primaryConstructor

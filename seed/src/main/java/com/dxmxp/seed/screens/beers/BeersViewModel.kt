@@ -7,7 +7,7 @@ import com.dxmxp.ui.common.launchResultFlow
 import com.dxmxp.ui.common.mapData
 import com.dxmxp.ui.mapper.BeerUiMapper
 import com.dxmxp.ui.model.BeerUiModel
-import com.dxmxp.ui.navigation.NavigationManager
+import com.dxmxp.ui.navigation.core.NavigationManager
 import com.dxmxp.ui.screens.WebView
 import dagger.hilt.android.lifecycle.HiltViewModel
 import javax.inject.Inject

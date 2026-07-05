@@ -1,4 +1,4 @@
-package com.dxmxp.ui.navigation
+package com.dxmxp.ui.navigation.scaffold
 
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
@@ -8,6 +8,10 @@ import androidx.compose.runtime.State
 import androidx.navigation3.runtime.NavBackStack
 import androidx.navigation3.runtime.NavKey
 import androidx.navigation3.runtime.rememberNavBackStack
+import com.dxmxp.ui.navigation.core.NavigationEvent
+import com.dxmxp.ui.navigation.model.Graph
+import com.dxmxp.ui.navigation.model.Screen
+import com.dxmxp.ui.navigation.orchestration.NavigationOrchestrator
 
 /**
  * Generic controller for scaffold-level navigation.
@@ -56,7 +60,7 @@ class ScaffoldController(
     val isAtRoot: Boolean
         get() = backStack.size <= 1
 
-    suspend fun handleNavigationEvent(event: NavigationOrchestrator.NavigationEvent) {
+    suspend fun handleNavigationEvent(event: NavigationEvent) {
         val handled = orchestrator.handleEventForBackstack(backStack, event, targetGraph = graph)
         if (handled) {
             _currentDestination.value = backStack.lastOrNull()

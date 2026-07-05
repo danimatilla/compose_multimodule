@@ -1,10 +1,11 @@
-package com.dxmxp.ui.navigation
+package com.dxmxp.ui.navigation.scaffold
 
 import androidx.compose.runtime.Composable
 import androidx.lifecycle.ViewModel
 import androidx.navigation3.runtime.EntryProviderScope
 import androidx.navigation3.runtime.NavKey
-import com.dxmxp.ui.navigation.Screen.Companion.screenEntry
+import com.dxmxp.ui.navigation.model.Screen
+import com.dxmxp.ui.navigation.model.Screen.Companion.screenEntry
 
 /**
  * DSL builder to simplify graph entry registration.

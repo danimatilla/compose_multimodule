@@ -1,4 +1,4 @@
-package com.dxmxp.ui.navigation
+package com.dxmxp.ui.navigation.model
 
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
@@ -6,6 +6,8 @@ import androidx.lifecycle.ViewModel
 import androidx.navigation3.runtime.EntryProviderScope
 import androidx.navigation3.runtime.NavKey
 import com.dxmxp.ui.common.InitializableViewModel
+import com.dxmxp.ui.navigation.core.LocalNavigator
+import com.dxmxp.ui.navigation.core.Navigator
 import com.dxmxp.ui.screens.WebView
 import com.dxmxp.ui.screens.WebViewScreen
 

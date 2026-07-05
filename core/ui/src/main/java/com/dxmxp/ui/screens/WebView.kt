@@ -26,8 +26,8 @@ import androidx.compose.runtime.setValue
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.viewinterop.AndroidView
-import com.dxmxp.ui.navigation.LocalNavigator
-import com.dxmxp.ui.navigation.Screen
+import com.dxmxp.ui.navigation.core.LocalNavigator
+import com.dxmxp.ui.navigation.model.Screen
 import kotlinx.serialization.Serializable
 import android.webkit.WebView as NativeWebView
 

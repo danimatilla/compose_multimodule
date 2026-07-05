@@ -1,10 +1,12 @@
-package com.dxmxp.ui.navigation
+package com.dxmxp.ui.navigation.model
 
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
 import androidx.navigation3.runtime.EntryProviderScope
 import androidx.navigation3.runtime.NavKey
-import com.dxmxp.ui.navigation.Screen.Companion.screenEntry
+import com.dxmxp.ui.navigation.core.NavigationEvent
+import com.dxmxp.ui.navigation.orchestration.NavigationOrchestrator
+import com.dxmxp.ui.navigation.model.Screen.Companion.screenEntry
 import com.dxmxp.ui.screens.WebView
 import com.dxmxp.ui.screens.WebViewScreen
 
@@ -80,7 +82,7 @@ interface Graph : Screen, NavigationContributor {
 
                     if (screen != null && graph.contains(screen)) {
                         orchestrator.handleEventForBackstack(backStack, event, targetGraph = graph)
-                    } else if (event is NavigationOrchestrator.NavigationEvent.PopScreen && event.screen == null && backStack.size > 1) {
+                    } else if (event is NavigationEvent.PopScreen && event.screen == null && backStack.size > 1) {
                         orchestrator.handleEventForBackstack(backStack, event, targetGraph = graph)
                     }
                 }

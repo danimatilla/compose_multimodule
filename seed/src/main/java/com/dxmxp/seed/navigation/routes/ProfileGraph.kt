@@ -4,9 +4,9 @@ import androidx.navigation3.runtime.EntryProviderScope
 import androidx.navigation3.runtime.NavKey
 import com.dxmxp.seed.screens.profile.ProfileScreen
 import com.dxmxp.seed.screens.profile.SettingsScreen
-import com.dxmxp.ui.navigation.Graph
-import com.dxmxp.ui.navigation.Screen
-import com.dxmxp.ui.navigation.Screen.Companion.screenEntry
+import com.dxmxp.ui.navigation.model.Graph
+import com.dxmxp.ui.navigation.model.Screen
+import com.dxmxp.ui.navigation.model.Screen.Companion.screenEntry
 import dagger.Module
 import dagger.Provides
 import dagger.hilt.InstallIn

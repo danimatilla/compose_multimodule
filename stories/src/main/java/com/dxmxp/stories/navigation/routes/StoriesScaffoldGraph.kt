@@ -7,9 +7,9 @@ import com.dxmxp.domain.model.Story
 import com.dxmxp.stories.screens.feed.FeedScreen
 import com.dxmxp.stories.screens.story_detail.StoryDetailScreen
 import com.dxmxp.stories.screens.story_detail.StoryDetailViewModel
-import com.dxmxp.ui.navigation.Graph
-import com.dxmxp.ui.navigation.Screen
-import com.dxmxp.ui.navigation.Screen.Companion.screenEntry
+import com.dxmxp.ui.navigation.model.Graph
+import com.dxmxp.ui.navigation.model.Screen
+import com.dxmxp.ui.navigation.model.Screen.Companion.screenEntry
 import dagger.Module
 import dagger.Provides
 import dagger.hilt.InstallIn

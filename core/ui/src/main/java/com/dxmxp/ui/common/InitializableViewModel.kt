@@ -1,6 +1,6 @@
 package com.dxmxp.ui.common
 
-import com.dxmxp.ui.navigation.Screen
+import com.dxmxp.ui.navigation.model.Screen
 
 fun interface InitializableViewModel<S: Screen> {
     fun init(screen: S)

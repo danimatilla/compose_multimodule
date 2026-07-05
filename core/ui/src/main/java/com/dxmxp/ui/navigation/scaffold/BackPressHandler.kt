@@ -1,4 +1,4 @@
-package com.dxmxp.ui.navigation
+package com.dxmxp.ui.navigation.scaffold
 
 import androidx.compose.runtime.compositionLocalOf
 import androidx.compose.runtime.remember

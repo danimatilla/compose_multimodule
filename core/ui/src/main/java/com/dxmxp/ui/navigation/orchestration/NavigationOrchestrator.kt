@@ -1,12 +1,13 @@
-package com.dxmxp.ui.navigation
+package com.dxmxp.ui.navigation.orchestration
 
 import android.util.Log
 import androidx.navigation3.runtime.NavBackStack
 import androidx.navigation3.runtime.NavKey
-import com.dxmxp.ui.common.DataObserver
-import com.dxmxp.ui.navigation.helpers.EventExtension.popScreen
-import com.dxmxp.ui.navigation.helpers.EventExtension.pushScreen
-import com.dxmxp.ui.navigation.helpers.EventExtension.setRootScreen
+import com.dxmxp.ui.navigation.core.NavigationEvent
+import com.dxmxp.ui.navigation.core.NavigationManager
+import com.dxmxp.ui.navigation.core.RouteRegistry
+import com.dxmxp.ui.navigation.model.Graph
+import com.dxmxp.ui.navigation.model.Screen
 import kotlinx.coroutines.flow.Flow
 import javax.inject.Inject
 import javax.inject.Singleton
@@ -18,8 +19,7 @@ import javax.inject.Singleton
 @Singleton
 class NavigationOrchestrator @Inject constructor(
     private val navigationManager: NavigationManager,
-    private val routeRegistry: RouteRegistry,
-    private val dataObserver: DataObserver
+    private val routeRegistry: RouteRegistry
 ) {
     
     val events: Flow<NavigationEvent> = navigationManager.events
@@ -73,11 +73,7 @@ class NavigationOrchestrator @Inject constructor(
     ) {
         val initialBackStack = backStack.stackString()
 
-        when (event) {
-            is NavigationEvent.PushScreen -> event.pushScreen(backStack, dataObserver)
-            is NavigationEvent.PopScreen -> event.popScreen(backStack)
-            is NavigationEvent.SetRootScreen -> event.setRootScreen(backStack)
-        }
+        event.handle(backStack)
 
         Log.d(TAG, "${event.logString()} $initialBackStack > ${backStack.stackString()}")
     }
@@ -85,8 +81,8 @@ class NavigationOrchestrator @Inject constructor(
     /**
      * Navigates from a ViewModel or non-UI component.
      */
-    fun navigate(screen: Screen, data: Any? = null) {
-        navigationManager.push(screen, data)
+    fun navigate(screen: Screen) {
+        navigationManager.push(screen)
     }
 
     fun popTo(screen: Screen) {
@@ -109,18 +105,6 @@ class NavigationOrchestrator @Inject constructor(
 
     private fun NavBackStack<NavKey>.stackString(): String =
         "[ ${joinToString { it.javaClass.simpleName }} ]"
-
-    sealed interface NavigationEvent {
-        data class PushScreen(val screen: Screen, val data: Any? = null) : NavigationEvent
-        data class PopScreen(val screen: Screen? = null) : NavigationEvent
-        data class SetRootScreen(val screen: Screen) : NavigationEvent
-
-        fun screenOrNull(): Screen? = when (this) {
-            is PushScreen -> screen
-            is PopScreen -> screen
-            is SetRootScreen -> screen
-        }
-    }
 
     private companion object {
         const val TAG = "NavigationOrchestrator"

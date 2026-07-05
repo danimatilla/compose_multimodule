@@ -1,9 +1,9 @@
-package com.dxmxp.ui.navigation.helpers
+package com.dxmxp.ui.navigation.utils
 
 import android.net.Uri
 import android.util.Log
-import com.dxmxp.ui.navigation.NavigationOrchestrator
-import com.dxmxp.ui.navigation.RouteRegistry
+import com.dxmxp.ui.navigation.core.NavigationEvent
+import com.dxmxp.ui.navigation.core.RouteRegistry
 import javax.inject.Inject
 import javax.inject.Singleton
 
@@ -16,12 +16,12 @@ class DeepLinkHandler @Inject constructor(
     private val routeRegistry: RouteRegistry
 ) {
 
-    fun handle(uri: Uri): NavigationOrchestrator.NavigationEvent? {
+    fun handle(uri: Uri): NavigationEvent? {
         val screen = routeRegistry.createScreenFromUri(uri)
 
         return if (screen != null) {
             Log.d(TAG, "🔗 Deep link handled: ${uri.path} -> ${screen::class.simpleName}")
-            NavigationOrchestrator.NavigationEvent.PushScreen(screen)
+            NavigationEvent.PushScreen(screen)
         } else {
             Log.w(TAG, "⚠️ Deep link not recognized: ${uri.path}")
             null

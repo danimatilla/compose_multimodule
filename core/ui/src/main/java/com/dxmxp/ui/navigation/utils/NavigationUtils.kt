@@ -1,4 +1,4 @@
-package com.dxmxp.ui.navigation.helpers
+package com.dxmxp.ui.navigation.utils
 
 import androidx.compose.animation.EnterTransition
 import androidx.compose.animation.ExitTransition

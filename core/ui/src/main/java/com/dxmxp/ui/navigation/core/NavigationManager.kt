@@ -1,6 +1,6 @@
-package com.dxmxp.ui.navigation
+package com.dxmxp.ui.navigation.core
 
-import com.dxmxp.ui.navigation.NavigationOrchestrator.NavigationEvent
+import com.dxmxp.ui.navigation.model.Screen
 import kotlinx.coroutines.channels.BufferOverflow
 import kotlinx.coroutines.flow.MutableSharedFlow
 import kotlinx.coroutines.flow.asSharedFlow
@@ -25,8 +25,8 @@ class NavigationManager @Inject constructor() {
         _events.tryEmit(event)
     }
 
-    fun push(screen: Screen, data: Any? = null) {
-        navigate(NavigationEvent.PushScreen(screen, data))
+    fun push(screen: Screen) {
+        navigate(NavigationEvent.PushScreen(screen))
     }
 
     fun pop(screen: Screen? = null) {

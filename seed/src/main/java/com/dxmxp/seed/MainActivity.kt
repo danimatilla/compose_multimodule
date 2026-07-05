@@ -18,22 +18,21 @@ import androidx.navigation3.runtime.entryProvider
 import androidx.navigation3.runtime.metadata
 import androidx.navigation3.runtime.rememberNavBackStack
 import androidx.navigation3.ui.NavDisplay
-import com.dxmxp.ui.navigation.helpers.DeepLinkHandler
+import com.dxmxp.ui.navigation.utils.DeepLinkHandler
 import com.dxmxp.seed.navigation.MainScaffold
 import com.dxmxp.seed.navigation.routes.MainScaffoldGraph
 import com.dxmxp.stories.navigation.StoriesScaffold
 import com.dxmxp.stories.navigation.routes.StoriesScaffoldGraph
 import com.dxmxp.ui.theme.SeedTheme
-import com.dxmxp.ui.navigation.Graph
-import com.dxmxp.ui.navigation.Graph.Companion.registerGraphs
-import com.dxmxp.ui.navigation.LocalDataObserver
-import com.dxmxp.ui.navigation.LocalNavigator
-import com.dxmxp.ui.navigation.NavigationManager
-import com.dxmxp.ui.navigation.NavigationManagerBridge
-import com.dxmxp.ui.navigation.NavigationOrchestrator
-import com.dxmxp.ui.navigation.Screen.Companion.screenEntry
-import com.dxmxp.ui.navigation.helpers.NavigationUtils.modalAnimation
-import com.dxmxp.ui.common.DataObserver
+import com.dxmxp.ui.navigation.model.Graph
+import com.dxmxp.ui.navigation.model.Screen
+import com.dxmxp.ui.navigation.model.Graph.Companion.registerGraphs
+import com.dxmxp.ui.navigation.core.LocalNavigator
+import com.dxmxp.ui.navigation.core.NavigationManager
+import com.dxmxp.ui.navigation.core.NavigationManagerBridge
+import com.dxmxp.ui.navigation.orchestration.NavigationOrchestrator
+import com.dxmxp.ui.navigation.model.Screen.Companion.screenEntry
+import com.dxmxp.ui.navigation.utils.NavigationUtils.modalAnimation
 import dagger.hilt.android.AndroidEntryPoint
 import javax.inject.Inject
 
@@ -45,9 +44,6 @@ class MainActivity : ComponentActivity() {
 
     @Inject
     lateinit var navigationManager: NavigationManager
-
-    @Inject
-    lateinit var dataObserver: DataObserver
 
     @Inject
     lateinit var navigationOrchestrator: NavigationOrchestrator
@@ -105,7 +101,6 @@ class MainActivity : ComponentActivity() {
             SeedTheme {
                 androidx.compose.runtime.CompositionLocalProvider(
                     LocalNavigator provides navigator,
-                    LocalDataObserver provides dataObserver
                 ) {
                     NavDisplay(
                         backStack = backStack,

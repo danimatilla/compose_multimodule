@@ -9,7 +9,7 @@ import androidx.compose.runtime.Composable
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import com.dxmxp.seed.navigation.routes.MainScaffoldGraph
-import com.dxmxp.ui.navigation.LocalNavigator
+import com.dxmxp.ui.navigation.core.LocalNavigator
 import com.dxmxp.ui.screens.WebView
 
 

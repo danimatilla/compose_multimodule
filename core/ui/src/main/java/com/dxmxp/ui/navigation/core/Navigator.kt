@@ -1,23 +1,23 @@
-package com.dxmxp.ui.navigation
+package com.dxmxp.ui.navigation.core
 
 import androidx.compose.runtime.staticCompositionLocalOf
-import com.dxmxp.ui.common.DataObserver
+import com.dxmxp.ui.navigation.model.Screen
 import kotlinx.coroutines.flow.Flow
 
 interface Navigator {
-    val events: Flow<NavigationOrchestrator.NavigationEvent>
-    fun navigate(event: NavigationOrchestrator.NavigationEvent)
+    val events: Flow<NavigationEvent>
+    fun navigate(event: NavigationEvent)
 
-    fun push(screen: Screen, data: Any? = null) {
-        navigate(NavigationOrchestrator.NavigationEvent.PushScreen(screen, data))
+    fun push(screen: Screen) {
+        navigate(NavigationEvent.PushScreen(screen))
     }
 
     fun pop(screen: Screen? = null) {
-        navigate(NavigationOrchestrator.NavigationEvent.PopScreen(screen))
+        navigate(NavigationEvent.PopScreen(screen))
     }
 
     fun setRoot(screen: Screen) {
-        navigate(NavigationOrchestrator.NavigationEvent.SetRootScreen(screen))
+        navigate(NavigationEvent.SetRootScreen(screen))
     }
 }
 
@@ -27,16 +27,12 @@ interface Navigator {
  */
 class NavigationManagerBridge(private val navigationManager: NavigationManager) : Navigator {
     override val events = navigationManager.events
-    override fun navigate(event: NavigationOrchestrator.NavigationEvent) {
+    override fun navigate(event: NavigationEvent) {
         navigationManager.navigate(event)
     }
 }
 
 val LocalNavigator = staticCompositionLocalOf<Navigator> {
     error("No Navigator provided")
-}
-
-val LocalDataObserver = staticCompositionLocalOf<DataObserver> {
-    error("No DataObserver provided")
 }
 
