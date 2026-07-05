@@ -9,7 +9,6 @@ import com.dxmxp.seed.screens.beers.BeersScreen
 import com.dxmxp.ui.navigation.Graph
 import com.dxmxp.ui.navigation.Screen
 import com.dxmxp.ui.navigation.Screen.Companion.screenEntry
-import com.dxmxp.ui.navigation.helpers.NavigationHandler
 import dagger.Module
 import dagger.Provides
 import dagger.hilt.InstallIn
@@ -22,8 +21,17 @@ import kotlinx.serialization.Serializable
 @InstallIn(SingletonComponent::class)
 object MainScaffoldGraph : Graph {
 
+    override val screens: List<Class<out Screen>>
+        get() = listOf(
+            Home::class.java,
+            Search::class.java,
+            Menu::class.java,
+            Beers::class.java,
+            ProfileGraph::class.java
+        )
+
     override val children: List<Class<out Screen>>
-        get() = super.children + ProfileGraph::class.java
+        get() = super.children
 
     @Serializable
     data object Home : Screen {

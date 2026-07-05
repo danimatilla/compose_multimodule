@@ -32,7 +32,6 @@ import com.dxmxp.ui.common.InfiniteScrollHandler
 import com.dxmxp.ui.common.SeedImage
 import com.dxmxp.ui.common.SeedPullRefresh
 import com.dxmxp.ui.model.BeerUiModel
-import com.dxmxp.ui.navigation.helpers.NavigationHandler
 
 @Composable
 fun BeersScreen(

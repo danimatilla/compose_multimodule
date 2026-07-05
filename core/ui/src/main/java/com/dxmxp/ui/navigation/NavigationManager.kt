@@ -1,6 +1,6 @@
 package com.dxmxp.ui.navigation
 
-import com.dxmxp.ui.navigation.helpers.NavigationHandler.NavigationEvent
+import com.dxmxp.ui.navigation.NavigationOrchestrator.NavigationEvent
 import kotlinx.coroutines.channels.BufferOverflow
 import kotlinx.coroutines.flow.MutableSharedFlow
 import kotlinx.coroutines.flow.asSharedFlow

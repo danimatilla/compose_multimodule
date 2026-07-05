@@ -8,26 +8,37 @@ import androidx.compose.material.icons.filled.Menu
 import androidx.compose.material.icons.filled.Person
 import androidx.compose.material.icons.filled.Search
 import androidx.compose.runtime.Composable
-import androidx.compose.runtime.remember
-import androidx.compose.runtime.rememberCoroutineScope
+import androidx.compose.runtime.getValue
 import androidx.compose.ui.Modifier
-import androidx.navigation3.runtime.rememberNavBackStack
+import androidx.hilt.navigation.compose.hiltViewModel
+import androidx.lifecycle.ViewModel
 import com.dxmxp.seed.navigation.routes.MainScaffoldGraph
 import com.dxmxp.seed.navigation.routes.ProfileGraph
 import com.dxmxp.stories.navigation.routes.StoriesScaffoldGraph
-import com.dxmxp.ui.navigation.Graph
 import com.dxmxp.ui.navigation.LocalNavigator
+import com.dxmxp.ui.navigation.NavigationOrchestrator
 import com.dxmxp.ui.navigation.Screen
+import com.dxmxp.ui.navigation.rememberScaffoldController
 import com.dxmxp.ui.screens.BottomBar
 import com.dxmxp.ui.screens.SeedScaffold
-import dagger.hilt.android.EntryPointAccessors
+import dagger.hilt.android.lifecycle.HiltViewModel
+import javax.inject.Inject
+
+@HiltViewModel
+class MainScaffoldViewModel @Inject constructor(
+    val orchestrator: NavigationOrchestrator
+) : ViewModel()
 
 @Composable
 fun MainScaffold() {
-    val backStack = rememberNavBackStack(MainScaffoldGraph.Home)
     val navigator = LocalNavigator.current
+    val scaffoldViewModel: MainScaffoldViewModel = hiltViewModel()
 
-    Graph.HandleGraphEvents(backStack = backStack, graph = MainScaffoldGraph)
+    val controller = rememberScaffoldController(
+        initialScreen = MainScaffoldGraph.Home,
+        graph = MainScaffoldGraph,
+        orchestrator = scaffoldViewModel.orchestrator
+    )
 
     val bottomBarItems = listOf(
         MainScaffoldGraph.Home to Icons.Default.Home,
@@ -36,7 +47,8 @@ fun MainScaffold() {
         StoriesScaffoldGraph to Icons.Default.AutoStories,
         ProfileGraph to Icons.Default.Person
     )
-    val currentDestination = backStack.lastOrNull()
+    
+    val currentDestination = controller.currentDestination
     val shouldShowBottomBar = (currentDestination as? Screen)?.showMainBottomBar != false
 
     SeedScaffold(
@@ -56,7 +68,7 @@ fun MainScaffold() {
         }
     ) { innerPaddings ->
         MainNavGraph(
-            backStack = backStack,
+            backStack = controller.backStack,
             modifier = Modifier.padding(innerPaddings)
         )
     }

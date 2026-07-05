@@ -13,21 +13,33 @@ import androidx.compose.material3.TopAppBar
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.remember
 import androidx.compose.ui.Modifier
-import androidx.navigation3.runtime.rememberNavBackStack
+import androidx.hilt.navigation.compose.hiltViewModel
+import androidx.lifecycle.ViewModel
 import com.dxmxp.stories.navigation.routes.StoriesScaffoldGraph
-import com.dxmxp.ui.navigation.Graph
 import com.dxmxp.ui.navigation.LocalNavigator
+import com.dxmxp.ui.navigation.NavigationOrchestrator
+import com.dxmxp.ui.navigation.rememberScaffoldController
 import com.dxmxp.ui.screens.BottomBar
 import com.dxmxp.ui.screens.SeedScaffold
-import dagger.hilt.android.EntryPointAccessors
+import dagger.hilt.android.lifecycle.HiltViewModel
+import javax.inject.Inject
+
+@HiltViewModel
+class StoriesScaffoldViewModel @Inject constructor(
+    val orchestrator: NavigationOrchestrator
+) : ViewModel()
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
 fun StoriesScaffold() {
-    val backStack = rememberNavBackStack(StoriesScaffoldGraph.Feed)
     val navigator = LocalNavigator.current
+    val scaffoldViewModel: StoriesScaffoldViewModel = hiltViewModel()
 
-    Graph.HandleGraphEvents(backStack = backStack, graph = StoriesScaffoldGraph)
+    val controller = rememberScaffoldController(
+        initialScreen = StoriesScaffoldGraph.Feed,
+        graph = StoriesScaffoldGraph,
+        orchestrator = scaffoldViewModel.orchestrator
+    )
 
     val navigationBarItems = remember {
         listOf(
@@ -36,7 +48,8 @@ fun StoriesScaffold() {
             StoriesScaffoldGraph.Profile to Icons.Default.Person,
         )
     }
-    val currentDestination = backStack.lastOrNull()
+    
+    val currentDestination = controller.currentDestination
 
     SeedScaffold(
         topBar = {
@@ -61,7 +74,7 @@ fun StoriesScaffold() {
         },
     ) { innerPadding ->
         StoriesNavGraph(
-            backStack = backStack,
+            backStack = controller.backStack,
             modifier = Modifier.padding(innerPadding),
         )
     }

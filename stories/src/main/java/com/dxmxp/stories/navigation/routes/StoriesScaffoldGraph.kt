@@ -3,13 +3,13 @@ package com.dxmxp.stories.navigation.routes
 import androidx.hilt.lifecycle.viewmodel.compose.hiltViewModel
 import androidx.navigation3.runtime.EntryProviderScope
 import androidx.navigation3.runtime.NavKey
+import com.dxmxp.domain.model.Story
 import com.dxmxp.stories.screens.feed.FeedScreen
 import com.dxmxp.stories.screens.story_detail.StoryDetailScreen
 import com.dxmxp.stories.screens.story_detail.StoryDetailViewModel
 import com.dxmxp.ui.navigation.Graph
 import com.dxmxp.ui.navigation.Screen
 import com.dxmxp.ui.navigation.Screen.Companion.screenEntry
-import com.dxmxp.ui.navigation.helpers.NavigationHandler
 import dagger.Module
 import dagger.Provides
 import dagger.hilt.InstallIn
@@ -25,6 +25,14 @@ object StoriesScaffoldGraph : Graph {
     override val isModal: Boolean
         get() = true
 
+    override val screens: List<Class<out Screen>>
+        get() = listOf(
+            Feed::class.java,
+            StoryDetail::class.java,
+            Profile::class.java,
+            Notifications::class.java
+        )
+
     @Serializable
     data object Feed : Screen {
         override val route: String
@@ -32,7 +40,7 @@ object StoriesScaffoldGraph : Graph {
     }
 
     @Serializable
-    data class StoryDetail(val id: String) : Screen
+    data class StoryDetail(val id: String, val story: Story? = null) : Screen
 
     @Serializable
     data object Profile : Screen

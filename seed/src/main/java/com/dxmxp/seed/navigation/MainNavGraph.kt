@@ -11,7 +11,6 @@ import androidx.navigation3.runtime.entryProvider
 import androidx.navigation3.ui.NavDisplay
 import com.dxmxp.seed.navigation.routes.MainScaffoldGraph
 import com.dxmxp.seed.navigation.routes.ProfileGraph
-import com.dxmxp.ui.navigation.helpers.NavigationHandler
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable

@@ -1,6 +1,7 @@
 plugins {
     id("java-library")
     alias(libs.plugins.jetbrains.kotlin.jvm)
+    alias(libs.plugins.kotlin.serialization)
 }
 java {
     sourceCompatibility = JavaVersion.VERSION_11
@@ -15,6 +16,7 @@ kotlin {
 dependencies {
     api(libs.kotlin.coroutines)
     api(libs.kotlin.reflect)
+    api(libs.kotlinx.serialization.json)
 
     // javax.inject:1 is the JSR-330 standard for Dependency Injection in Java.
     // We use 'compileOnly' to provide access to @Inject annotations in UseCases

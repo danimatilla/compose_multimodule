@@ -1,93 +1,34 @@
 package com.dxmxp.ui.navigation.helpers
 
 import android.net.Uri
-import com.dxmxp.ui.navigation.Graph
-import com.dxmxp.ui.navigation.Screen
+import android.util.Log
+import com.dxmxp.ui.navigation.NavigationOrchestrator
+import com.dxmxp.ui.navigation.RouteRegistry
 import javax.inject.Inject
-import kotlin.reflect.full.primaryConstructor
+import javax.inject.Singleton
 
+/**
+ * Handles deep link resolution using the centralized RouteRegistry.
+ * No more reflection - routes are pre-registered and validated at startup.
+ */
+@Singleton
 class DeepLinkHandler @Inject constructor(
-    private val graphs: Set<@JvmSuppressWildcards Graph>
+    private val routeRegistry: RouteRegistry
 ) {
 
-    fun handle(uri: Uri): NavigationHandler.NavigationEvent? {
-        val path = uri.path ?: return null
-        
-        // Try exact match first (objects)
-        routesMap[path]?.let { return NavigationHandler.NavigationEvent.PushScreen(it) }
+    fun handle(uri: Uri): NavigationOrchestrator.NavigationEvent? {
+        val screen = routeRegistry.createScreenFromUri(uri)
 
-        // Try to match with parameters
-        val entry = parameterizedRoutes.entries.find { path.startsWith(it.key) } ?: return null
-        val screenClass = entry.value
-        
-        return try {
-            val queryParams = uri.queryParameterNames.associateWith { uri.getQueryParameter(it) }
-            val screen = if (queryParams.isEmpty()) {
-                screenClass.getDeclaredConstructor().newInstance()
-            } else {
-                val constructor = screenClass.kotlin.primaryConstructor ?: return null
-                val args = constructor.parameters.associateWith { param ->
-                    val value = queryParams[param.name]
-                    when (param.type.classifier) {
-                        String::class -> value
-                        Int::class -> value?.toIntOrNull()
-                        else -> null
-                    }
-                }
-                constructor.callBy(args)
-            }
-            NavigationHandler.NavigationEvent.PushScreen(screen as Screen)
-        } catch (_: Exception) {
+        return if (screen != null) {
+            Log.d(TAG, "🔗 Deep link handled: ${uri.path} -> ${screen::class.simpleName}")
+            NavigationOrchestrator.NavigationEvent.PushScreen(screen)
+        } else {
+            Log.w(TAG, "⚠️ Deep link not recognized: ${uri.path}")
             null
         }
     }
 
-    private val routesMap: Map<String, Screen> by lazy {
-        val registeredScreens = mutableMapOf<String, Screen>()
-
-        fun register(screen: Screen) {
-            registeredScreens[screen.route] = screen
-            if (screen is Graph) {
-                screen.children.forEach { clazz ->
-                    try {
-                        val instance = clazz.getField("INSTANCE").get(null) as? Screen
-                        if (instance != null) register(instance)
-                    } catch (_: Exception) {
-                        // Probably a data class, skip for objects map
-                    }
-                }
-            }
-        }
-
-        graphs.forEach { register(it) }
-        registeredScreens
-    }
-
-    private val parameterizedRoutes: Map<String, Class<out Screen>> by lazy {
-        val registered = mutableMapOf<String, Class<out Screen>>()
-
-        fun register(screen: Screen) {
-            if (screen is Graph) {
-                screen.children.forEach { clazz ->
-                    if (clazz.declaredFields.none { it.name == "INSTANCE" }) {
-                        // It's a class (data class likely), get a temporary instance to know its base route
-                        try {
-                            // This is a hack, in a real app we'd use a better way to map routes to classes
-                            val dummyRoute = "/" + clazz.simpleName.lowercase()
-                            registered[dummyRoute] = clazz
-                        } catch (_: Exception) {}
-                    }
-                    
-                    // Recursive for subgraphs
-                    try {
-                        val instance = clazz.getField("INSTANCE").get(null) as? Graph
-                        if (instance != null) register(instance)
-                    } catch (_: Exception) {}
-                }
-            }
-        }
-
-        graphs.forEach { register(it) }
-        registered
+    private companion object {
+        const val TAG = "DeepLinkHandler"
     }
 }

@@ -5,7 +5,6 @@ import androidx.compose.runtime.LaunchedEffect
 import androidx.navigation3.runtime.EntryProviderScope
 import androidx.navigation3.runtime.NavKey
 import com.dxmxp.ui.navigation.Screen.Companion.screenEntry
-import com.dxmxp.ui.navigation.helpers.NavigationHandler
 import com.dxmxp.ui.screens.WebView
 import com.dxmxp.ui.screens.WebViewScreen
 
@@ -19,15 +18,20 @@ interface Graph : Screen, NavigationContributor {
     val isModal: Boolean
         get() = false
 
+    val screens: List<Class<out Screen>>
+        get() = emptyList()
+
     val children: List<Class<out Screen>>
-        get() = javaClass.declaredClasses
-            .asSequence()
-            .filter { Screen::class.java.isAssignableFrom(it) }
-            .map {
-                @Suppress("UNCHECKED_CAST")
-                it as Class<out Screen>
-            }
-            .toList()
+        get() = screens.ifEmpty {
+            javaClass.declaredClasses
+                .asSequence()
+                .filter { Screen::class.java.isAssignableFrom(it) }
+                .map {
+                    @Suppress("UNCHECKED_CAST")
+                    it as Class<out Screen>
+                }
+                .toList()
+        }
 
     fun contains(key: NavKey): Boolean =
         children.any { clazz ->
@@ -64,21 +68,16 @@ interface Graph : Screen, NavigationContributor {
         fun HandleGraphEvents(
             backStack: androidx.navigation3.runtime.NavBackStack<NavKey>,
             graph: Graph,
+            orchestrator: NavigationOrchestrator
         ) {
-            val navigator = LocalNavigator.current
-            val dataObserver = LocalDataObserver.current
-            LaunchedEffect(backStack) {
-                navigator.events.collect { event ->
-                    val screen = when (event) {
-                        is NavigationHandler.NavigationEvent.PushScreen -> event.screen
-                        is NavigationHandler.NavigationEvent.SetRootScreen -> event.screen
-                        is NavigationHandler.NavigationEvent.PopScreen -> event.screen
-                    }
+            LaunchedEffect(Unit) {
+                orchestrator.events.collect { event ->
+                    val screen = event.screenOrNull()
 
                     if (screen != null && graph.contains(screen)) {
-                        NavigationHandler.handleEvent(backStack, event, dataObserver)
-                    } else if (event is NavigationHandler.NavigationEvent.PopScreen && event.screen == null && backStack.size > 1) {
-                        NavigationHandler.handleEvent(backStack, event, dataObserver)
+                        orchestrator.handleEventForBackstack(backStack, event, targetGraph = graph)
+                    } else if (event is NavigationOrchestrator.NavigationEvent.PopScreen && event.screen == null && backStack.size > 1) {
+                        orchestrator.handleEventForBackstack(backStack, event, targetGraph = graph)
                     }
                 }
             }
