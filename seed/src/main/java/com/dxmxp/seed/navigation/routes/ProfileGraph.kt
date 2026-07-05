@@ -40,5 +40,5 @@ object ProfileGraph : Graph {
 
     @Provides
     @IntoSet
-    override fun provideGraph(): Graph = ProfileGraph
+    fun provideProfileGraph(): Graph = ProfileGraph
 }

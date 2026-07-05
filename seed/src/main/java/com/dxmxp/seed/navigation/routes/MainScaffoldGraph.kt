@@ -30,9 +30,6 @@ object MainScaffoldGraph : Graph {
             ProfileGraph::class.java
         )
 
-    override val children: List<Class<out Screen>>
-        get() = super.children
-
     @Serializable
     data object Home : Screen {
         override val route: String
@@ -69,5 +66,5 @@ object MainScaffoldGraph : Graph {
 
     @Provides
     @IntoSet
-    override fun provideGraph(): Graph = MainScaffoldGraph
+    fun provideMainScaffoldGraph(): Graph = MainScaffoldGraph
 }

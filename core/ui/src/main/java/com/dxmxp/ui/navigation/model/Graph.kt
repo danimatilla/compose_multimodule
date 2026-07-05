@@ -15,7 +15,7 @@ import com.dxmxp.ui.screens.WebViewScreen
  * In a common backstack architecture, a Graph provides the entries (EntryProvider) for its
  * screens, allowing the root to integrate them into a single navigation stack.
  */
-interface Graph : Screen, NavigationContributor {
+interface Graph : Screen {
 
     val isModal: Boolean
         get() = false
@@ -23,20 +23,8 @@ interface Graph : Screen, NavigationContributor {
     val screens: List<Class<out Screen>>
         get() = emptyList()
 
-    val children: List<Class<out Screen>>
-        get() = screens.ifEmpty {
-            javaClass.declaredClasses
-                .asSequence()
-                .filter { Screen::class.java.isAssignableFrom(it) }
-                .map {
-                    @Suppress("UNCHECKED_CAST")
-                    it as Class<out Screen>
-                }
-                .toList()
-        }
-
     fun contains(key: NavKey): Boolean =
-        javaClass.isInstance(key) || children.any { clazz ->
+        javaClass.isInstance(key) || screens.any { clazz ->
             clazz.isInstance(key) || try {
                 val instance = clazz.getField("INSTANCE")[null] as? Graph
                 if (instance != null && instance !== this) {
@@ -89,8 +77,4 @@ interface Graph : Screen, NavigationContributor {
             }
         }
     }
-}
-
-fun interface NavigationContributor {
-    fun provideGraph(): Graph
 }

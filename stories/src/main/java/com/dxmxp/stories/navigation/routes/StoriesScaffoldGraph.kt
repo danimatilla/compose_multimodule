@@ -62,5 +62,5 @@ object StoriesScaffoldGraph : Graph {
 
     @Provides
     @IntoSet
-    override fun provideGraph(): Graph = StoriesScaffoldGraph
+    fun provideStoriesScaffoldGraph(): Graph = StoriesScaffoldGraph
 }

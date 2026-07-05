@@ -33,7 +33,7 @@ class RouteRegistry @Inject constructor(
     private fun registerGraph(graph: Graph) {
         graphRegistry[graph.route] = graph
         
-        graph.children.forEach { screenClass ->
+        graph.screens.forEach { screenClass ->
             if (screenClass == graph::class.java) {
                 // Register the graph itself as a singleton if it's also a screen
                 screenRegistry[graph.route] = ScreenRouteEntry.Singleton(graph)
@@ -134,29 +134,9 @@ class RouteRegistry @Inject constructor(
     }
 
     /**
-     * Checks if a screen belongs to a graph.
-     */
-    fun isScreenInGraph(screen: Screen, graph: Graph): Boolean {
-        if (graph.contains(screen)) return true
-        return graphRegistry.values
-            .filter { it.isModal }
-            .any { it.contains(screen) }
-    }
-
-    /**
      * Gets all registered graphs.
      */
     fun getAllGraphs(): Set<Graph> = graphRegistry.values.toSet()
-
-    /**
-     * Gets all screens for a specific graph.
-     */
-    fun getScreensForGraph(graph: Graph): List<Screen> {
-        return screenRegistry.values
-            .filterIsInstance<ScreenRouteEntry.Singleton>()
-            .map { it.screen }
-            .filter { graph.contains(it) }
-    }
 
     sealed interface ScreenRouteEntry {
         data class Singleton(val screen: Screen) : ScreenRouteEntry
