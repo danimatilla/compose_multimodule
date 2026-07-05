@@ -102,16 +102,20 @@ InfiniteScrollHandler(listState, isLoading, endReached) { viewModel.setEvent(Eve
 SeedPullRefresh(isLoading, onRefresh = { viewModel.setEvent(Event.Refresh) }) { /* Content */ }
 ```
 
-#### `DataObserver` y `debounce`
-Comunicación entre pantallas y optimización de eventos (ej. búsquedas).
+#### `debounce`
+Optimización de eventos de UI (ej. búsquedas).
 
 ### 4. Navegación Avanzada (`:core:ui:navigation`)
 
-#### `NavigationHandler` y `screenEntry`
-Sistema de navegación desacoplado basado en eventos y registro automático de pantallas.
+#### `NavigationOrchestrator` y `ScaffoldController`
+Sistema de navegación centralizado y reactivo. Gestiona automáticamente los eventos de navegación y el estado del backstack.
 
-#### `DeepLinkHandler` y `modalAnimation`
-Resolución dinámica de URIs y transiciones visuales.
+#### `RouteRegistry` y `DeepLinkHandler`
+Mapeo O(1) de rutas y resolución dinámica de URIs sin reflexión excesiva.
+
+---
+
+Para más detalles sobre la implementación de navegación, consulta la [**Guía Definitiva de Navegación**](DEVELOPER_GUIDE.md).
 
 ---
 

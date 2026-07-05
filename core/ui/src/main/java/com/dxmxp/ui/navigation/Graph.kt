@@ -34,10 +34,14 @@ interface Graph : Screen, NavigationContributor {
         }
 
     fun contains(key: NavKey): Boolean =
-        children.any { clazz ->
+        javaClass.isInstance(key) || children.any { clazz ->
             clazz.isInstance(key) || try {
                 val instance = clazz.getField("INSTANCE")[null] as? Graph
-                instance?.contains(key) == true
+                if (instance != null && instance !== this) {
+                    instance.contains(key)
+                } else {
+                    false
+                }
             } catch (_: Exception) {
                 false
             }
@@ -85,6 +89,6 @@ interface Graph : Screen, NavigationContributor {
     }
 }
 
-interface NavigationContributor {
+fun interface NavigationContributor {
     fun provideGraph(): Graph
 }

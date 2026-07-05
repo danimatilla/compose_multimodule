@@ -21,7 +21,6 @@ object ProfileGraph : Graph {
 
     override val screens: List<Class<out Screen>>
         get() = listOf(
-            ProfileGraph::class.java,
             Settings::class.java
         )
 
