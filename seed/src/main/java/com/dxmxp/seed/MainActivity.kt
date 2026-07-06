@@ -5,6 +5,10 @@ import android.os.Bundle
 import androidx.activity.ComponentActivity
 import androidx.activity.compose.setContent
 import androidx.activity.enableEdgeToEdge
+import androidx.compose.animation.fadeIn
+import androidx.compose.animation.fadeOut
+import androidx.compose.animation.core.tween
+import androidx.compose.animation.togetherWith
 import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.material3.MaterialTheme
@@ -105,6 +109,8 @@ class MainActivity : ComponentActivity() {
                     NavDisplay(
                         backStack = backStack,
                         entryProvider = entryProvider,
+                        transitionSpec = { fadeIn(tween(500)) togetherWith fadeOut(tween(500)) },
+                        popTransitionSpec = { fadeIn(tween(500)) togetherWith fadeOut(tween(500)) },
                         modifier = Modifier
                             .fillMaxSize()
                             .background(color = MaterialTheme.colorScheme.background)
