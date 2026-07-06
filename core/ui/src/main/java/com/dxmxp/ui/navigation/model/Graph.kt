@@ -1,11 +1,7 @@
 package com.dxmxp.ui.navigation.model
 
-import androidx.compose.runtime.Composable
-import androidx.compose.runtime.LaunchedEffect
 import androidx.navigation3.runtime.EntryProviderScope
 import androidx.navigation3.runtime.NavKey
-import com.dxmxp.ui.navigation.core.NavigationEvent
-import com.dxmxp.ui.navigation.orchestration.NavigationOrchestrator
 import com.dxmxp.ui.navigation.model.Screen.Companion.screenEntry
 import com.dxmxp.ui.screens.WebView
 import com.dxmxp.ui.screens.WebViewScreen
@@ -54,25 +50,6 @@ interface Graph : Screen {
             graphs.forEach { graph ->
                 with(graph) {
                     registerEntries()
-                }
-            }
-        }
-
-        @Composable
-        fun HandleGraphEvents(
-            backStack: androidx.navigation3.runtime.NavBackStack<NavKey>,
-            graph: Graph,
-            orchestrator: NavigationOrchestrator
-        ) {
-            LaunchedEffect(Unit) {
-                orchestrator.events.collect { event ->
-                    val screen = event.screenOrNull()
-
-                    if (screen != null && graph.contains(screen)) {
-                        orchestrator.handleEventForBackstack(backStack, event, targetGraph = graph)
-                    } else if (event is NavigationEvent.PopScreen && event.screen == null && backStack.size > 1) {
-                        orchestrator.handleEventForBackstack(backStack, event, targetGraph = graph)
-                    }
                 }
             }
         }

@@ -65,18 +65,5 @@ interface Screen : NavKey {
         ) {
             entry<K>(metadata = metadata) { screen -> content(screen) }
         }
-
-        /**
-         * Entry for screens that use the [LocalNavigator] for events.
-         */
-        inline fun <reified K : Screen> EntryProviderScope<NavKey>.screenEntry(
-            metadata: Map<String, Any> = emptyMap(),
-            crossinline content: @Composable (K, Navigator) -> Unit,
-        ) {
-            entry<K>(metadata = metadata) { screen ->
-                val navigator = LocalNavigator.current
-                content(screen, navigator)
-            }
-        }
     }
 }
