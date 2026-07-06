@@ -138,6 +138,16 @@ class RouteRegistry @Inject constructor(
      */
     fun getAllGraphs(): Set<Graph> = graphRegistry.values.toSet()
 
+    /**
+     * Gets all screens for a specific graph.
+     */
+    fun getScreensForGraph(graph: Graph): List<Screen> {
+        return screenRegistry.values
+            .filterIsInstance<ScreenRouteEntry.Singleton>()
+            .map { it.screen }
+            .filter { graph.contains(it) }
+    }
+
     sealed interface ScreenRouteEntry {
         data class Singleton(val screen: Screen) : ScreenRouteEntry
         data class Parameterized(val screenClass: Class<out Screen>) : ScreenRouteEntry {

@@ -9,6 +9,7 @@ import androidx.compose.material.icons.filled.Person
 import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.Icon
 import androidx.compose.material3.IconButton
+import androidx.compose.material3.Scaffold
 import androidx.compose.material3.TopAppBar
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.remember
@@ -20,7 +21,6 @@ import com.dxmxp.ui.navigation.core.LocalNavigator
 import com.dxmxp.ui.navigation.orchestration.NavigationOrchestrator
 import com.dxmxp.ui.navigation.scaffold.rememberScaffoldController
 import com.dxmxp.ui.screens.BottomBar
-import com.dxmxp.ui.screens.SeedScaffold
 import dagger.hilt.android.lifecycle.HiltViewModel
 import javax.inject.Inject
 
@@ -51,7 +51,7 @@ fun StoriesScaffold() {
     
     val currentDestination = controller.currentDestination
 
-    SeedScaffold(
+    Scaffold(
         topBar = {
             TopAppBar(
                 title = { },

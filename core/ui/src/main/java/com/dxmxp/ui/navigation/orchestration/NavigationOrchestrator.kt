@@ -78,6 +78,25 @@ class NavigationOrchestrator @Inject constructor(
         Log.d(TAG, "${event.logString()} $initialBackStack > ${backStack.stackString()}")
     }
 
+    /**
+     * Navigates from a ViewModel or non-UI component.
+     */
+    fun navigate(screen: Screen) {
+        navigationManager.push(screen)
+    }
+
+    fun popTo(screen: Screen) {
+        navigationManager.pop(screen)
+    }
+
+    fun pop() {
+        navigationManager.pop()
+    }
+
+    fun setRoot(screen: Screen) {
+        navigationManager.setRoot(screen)
+    }
+
     private fun NavigationEvent.logString() = when (this) {
         is NavigationEvent.PushScreen -> "🔻Push to ${screen.javaClass.simpleName}"
         is NavigationEvent.PopScreen -> "🔺Pop${screen?.run { " to ${javaClass.simpleName}" }.orEmpty()}"

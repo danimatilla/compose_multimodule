@@ -30,7 +30,6 @@ class NetworkHandler @Inject constructor(
             throw AppException.UnknownException("Error parsing server response", e)
         } catch (e: Exception) {
             // Any other unexpected error (NPE, etc.)
-            // You could add centralized logging like Sentry or Firebase here
             throw AppException.UnknownException(cause = e)
         }
 

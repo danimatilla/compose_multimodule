@@ -66,5 +66,26 @@ class ScaffoldController(
             _currentDestination.value = backStack.lastOrNull()
         }
     }
+
+    /**
+     * Check if a screen is the current destination.
+     */
+    fun isCurrentDestination(screen: Screen): Boolean {
+        return currentDestination == screen
+    }
+
+    /**
+     * Get all screens in the current back stack.
+     */
+    fun getBackStack(): List<NavKey> = backStack.toList()
+
+    /**
+     * Clear and reset to initial screen.
+     */
+    fun reset(initialScreen: Screen) {
+        backStack.clear()
+        backStack.add(initialScreen)
+        _currentDestination.value = initialScreen
+    }
 }
 

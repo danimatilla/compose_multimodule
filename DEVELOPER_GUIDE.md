@@ -1,192 +1,107 @@
-# 🧭 Guía Definitiva de Navegación para Desarrolladores (v2.0)
+# 🧭 Ultimate Navigation Guide (v3.0)
 
-Esta guía centraliza toda la información necesaria para trabajar con el sistema de navegación del proyecto.
+This guide provides the technical details for working with the project's navigation system.
 
----
+## 1. Core Principles
 
-## 1. Visión General y Arquitectura
-
-El sistema de navegación está basado en **Navigation3** y ha sido optimizado para eliminar la duplicación de código y el uso excesivo de reflexión.
-
-### Flujo de Navegación
-```
-┌─────────────────────────┐      ┌─────────────────────────┐      ┌─────────────────────────┐
-│  Acción en UI           │      │  NavigationManager      │      │  NavigationOrchestrator │
-│  (Navigator.push, etc)  ├─────►│  (Emite Evento)         ├─────►│  (Recibe y Delega)      │
-└─────────────────────────┘      └─────────────────────────┘      └────────────┬────────────┘
-                                                                               │
-                                                                               ▼
-                                                                  ┌────────────┴────────────┐
-                                                                  │ ¿Dónde se aplica?       │
-                                                                  ├─────────────────────────┤
-                                                                  │ ► Root (MainActivity)   │
-                                                                  │ ► Graph (Scaffolds)     │
-                                                                  └─────────────────────────┘
-```
+The architecture is built on three pillars:
+1.  **Single Source of Truth**: The `Screen` object contains both the route and the data.
+2.  **Decoupling**: ViewModels don't know about Compose; they use `NavigationManager`.
+3.  **Orchestration**: `NavigationOrchestrator` decides which backstack handles an event, preventing "navigation leaks" between nested scaffolds.
 
 ---
 
-## 2. Definición de Pantallas (`Screen`)
+## 2. Components Reference
 
-Cada destino es un `object` o `data class` marcado con `@Serializable`.
+| Component | Responsibility |
+| :--- | :--- |
+| `Screen` | A serializable destination. Defines visibility (e.g., `showMainBottomBar`). |
+| `Graph` | A collection of `Screen`s. Must be registered in Hilt as a `Set<Graph>`. |
+| `NavigationManager` | Singleton service to trigger events from anywhere (Business Logic). |
+| `Navigator` | UI-layer interface (`LocalNavigator`). Bridges to `NavigationManager`. |
+| `NavigationOrchestrator` | The "brain" that delegates events to the correct `NavBackStack`. |
+| `RouteRegistry` | Central index of all routes for O(1) lookups and Deep Link resolution. |
+| `ScaffoldController` | Manages local state (current tab, local backstack) for a Scaffold. |
+
+---
+
+## 3. Step-by-Step: Adding a New Feature
+
+### Step 1: Define Screens
+Create your screens in your feature module. Always use `@Serializable`.
 
 ```kotlin
-// Pantalla sin parámetros
 @Serializable
-data object HomeScreen : Screen
+data object ProductList : Screen
 
-// Pantalla con parámetros (Data Class)
 @Serializable
-data class DetailScreen(
-    val id: String, 
-    val title: String,
-    val story: Story? = null // Paso de datos directo (Serializable)
-) : Screen {
-    override val showMainBottomBar: Boolean = false // Control de visibilidad de UI
-}
+data class ProductDetail(val productId: Int) : Screen
 ```
 
----
-
-## 3. Registro de Grafos (`Graph`)
-
-Los grafos agrupan pantallas relacionadas. Registra las pantallas explícitamente en `screens` para optimizar el rendimiento.
+### Step 2: Create the Graph
+Implement the `Graph` interface. Use `@Module` and `@Provides` to let the system discover it.
 
 ```kotlin
 @Serializable
 @Module
 @InstallIn(SingletonComponent::class)
-object FeatureGraph : Graph {
-    override val route: String = "/feature"
-    override val isModal: Boolean = false // Si es true, se maneja como flujo independiente (ej. Stories)
-
-    // RECOMENDADO: Listado explícito para evitar reflexión lenta
-    override val screens = listOf(
-        Home::class.java,
-        Detail::class.java
-    )
+object ProductGraph : Graph {
+    override val route = "/products"
+    override val screens = listOf(ProductList::class.java, ProductDetail::class.java)
 
     override fun EntryProviderScope<NavKey>.registerEntries() {
-        // Registro simple
-        screenEntry<Home> { HomeScreen() }
-        
-        // Registro con ViewModel e inicialización automática
-        screenEntry<Detail, DetailViewModel>(
+        screenEntry<ProductList> { ProductListScreen() }
+        screenEntry<ProductDetail, ProductDetailViewModel>(
             viewModelProvide = { hiltViewModel() }
-        ) { vm -> DetailScreen(vm) }
+        ) { vm -> ProductDetailScreen(vm) }
     }
 
     @Provides @IntoSet
-    override fun provideGraph(): Graph = FeatureGraph
+    fun provideGraph(): Graph = ProductGraph
 }
 ```
 
----
-
-## 4. Cómo Navegar
-
-### Desde un Composable
-Usa `LocalNavigator.current`.
-
-```kotlin
-val navigator = LocalNavigator.current
-Button(onClick = { 
-    navigator.push(DetailScreen(id = "1", title = "Ejemplo")) 
-}) {
-    Text("Ir al Detalle")
-}
-```
-
-### Desde un ViewModel
-Inyecta `NavigationManager` para disparar eventos desde la lógica de negocio.
+### Step 3: Handle Parameters in ViewModel
+Implement `InitializableViewModel` to receive data without extra boilerplate.
 
 ```kotlin
 @HiltViewModel
-class MyViewModel @Inject constructor(
-    private val navigationManager: NavigationManager
-) : ViewModel() {
-    fun onActionComplete() {
-        navigationManager.push(HomeScreen)
+class ProductDetailViewModel @Inject constructor() : ViewModel(), InitializableViewModel<ProductDetail> {
+    override fun init(screen: ProductDetail) {
+        val id = screen.productId
+        // Fetch product data...
     }
 }
 ```
 
 ---
 
-## 5. Gestión de Datos y ViewModels
-
-### Implementar `InitializableViewModel`
-Si tu pantalla tiene parámetros, implementa esta interfaz para recibirlos automáticamente al entrar a la pantalla.
-
-```kotlin
-@HiltViewModel
-class DetailViewModel @Inject constructor() : ViewModel(), InitializableViewModel<DetailScreen> {
-    
-    override fun init(screen: DetailScreen) {
-        // Los datos llegan directamente aquí sin necesidad de DataObserver
-        val id = screen.id
-        val story = screen.story
-    }
-}
-```
-
----
-
-## 6. Implementación de Scaffolds
-
-Para flujos complejos con su propio backstack y barra inferior, usa `rememberScaffoldController`.
+## 4. Advanced: Nested Scaffolds
+If your feature has its own Bottom Bar or local backstack, use `rememberScaffoldController`.
 
 ```kotlin
 @Composable
-fun FeatureScaffold() {
+fun MyFeatureScaffold() {
     val orchestrator = hiltViewModel<ScaffoldViewModel>().orchestrator
-    
     val controller = rememberScaffoldController(
-        initialScreen = FeatureGraph.Home,
-        graph = FeatureGraph,
+        initialScreen = ProductList,
+        graph = ProductGraph,
         orchestrator = orchestrator
     )
 
-    SeedScaffold(
-        bottomBar = {
-            BottomBar(
-                currentDestination = controller.currentDestination,
-                // Los ítems se sincronizan automáticamente con el controller
-            )
-        }
+    Scaffold(
+        bottomBar = { MyBottomBar(controller.currentDestination) }
     ) { padding ->
-        FeatureNavGraph(
-            backStack = controller.backStack,
-            modifier = Modifier.padding(padding)
-        )
+        MyNavGraph(backStack = controller.backStack, modifier = Modifier.padding(padding))
     }
 }
 ```
 
 ---
 
-## 7. Preguntas Frecuentes (FAQ)
-
-**P: ¿Cómo manejo el botón "Atrás" del sistema?**
-R: Usa `BackPressHandler` para validaciones personalizadas (ej. "¿Desea guardar cambios?").
-
-**P: ¿Cómo funcionan los Deep Links?**
-R: `RouteRegistry` mapea URIs a `Screen` automáticamente. Solo asegúrate de que la pantalla esté registrada en un `Graph`.
-
-**P: ¿Cómo paso datos pesados?**
-R: Siempre que el objeto sea `@Serializable`, puedes pasarlo directamente en el constructor de la `Screen`.
-
-**P: ¿Dónde se definen las animaciones?**
-R: En `registerEntries()` usando `metadata { modalAnimation() }`.
-
----
-
-## 8. Resumen de Componentes
-
-| Componente | Responsabilidad |
-| :--- | :--- |
-| `NavigationManager` | Singleton para disparar eventos (Push, Pop, SetRoot). |
-| `NavigationOrchestrator` | El "cerebro" que decide qué backstack debe procesar el evento. |
-| `ScaffoldController` | Gestiona el estado reactivo local de un Scaffold. |
-| `RouteRegistry` | Índice central de todas las rutas registradas (O(1) lookups). |
-| `Screen` | Representación serializable de un destino. |
+## 5. Deep Linking
+Deep links are resolved via `RouteRegistry`. A link like `myapp://products/productdetail?productId=42` will:
+1. Be captured by `MainActivity`.
+2. Passed to `DeepLinkHandler`.
+3. `RouteRegistry` will find `ProductDetail`, see it requires an `Int`, extract `42`, and create the `ProductDetail(42)` object.
+4. A `PushScreen` event will be triggered automatically.

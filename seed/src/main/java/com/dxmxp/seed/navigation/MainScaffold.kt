@@ -7,6 +7,7 @@ import androidx.compose.material.icons.filled.Home
 import androidx.compose.material.icons.filled.Menu
 import androidx.compose.material.icons.filled.Person
 import androidx.compose.material.icons.filled.Search
+import androidx.compose.material3.Scaffold
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.getValue
 import androidx.compose.ui.Modifier
@@ -20,7 +21,6 @@ import com.dxmxp.ui.navigation.orchestration.NavigationOrchestrator
 import com.dxmxp.ui.navigation.model.Screen
 import com.dxmxp.ui.navigation.scaffold.rememberScaffoldController
 import com.dxmxp.ui.screens.BottomBar
-import com.dxmxp.ui.screens.SeedScaffold
 import dagger.hilt.android.lifecycle.HiltViewModel
 import javax.inject.Inject
 
@@ -51,7 +51,7 @@ fun MainScaffold() {
     val currentDestination = controller.currentDestination
     val shouldShowBottomBar = (currentDestination as? Screen)?.showMainBottomBar != false
 
-    SeedScaffold(
+    Scaffold(
         bottomBar = {
             BottomBar(
                 shouldShowBottomBar = shouldShowBottomBar,

@@ -18,6 +18,7 @@ import androidx.compose.material3.Card
 import androidx.compose.material3.CircularProgressIndicator
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Text
+import androidx.compose.material3.pulltorefresh.PullToRefreshBox
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.getValue
@@ -30,7 +31,6 @@ import androidx.hilt.lifecycle.viewmodel.compose.hiltViewModel
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import com.dxmxp.ui.common.InfiniteScrollHandler
 import com.dxmxp.ui.common.SeedImage
-import com.dxmxp.ui.common.SeedPullRefresh
 import com.dxmxp.ui.model.BeerUiModel
 
 @Composable
@@ -61,7 +61,7 @@ fun BeersScreen(
             )
         }
 
-        SeedPullRefresh(
+        PullToRefreshBox(
             isRefreshing = state.isRefreshing,
             onRefresh = { viewModel.setEvent(BeersViewModel.Event.Refresh) },
             modifier = Modifier.fillMaxSize()
