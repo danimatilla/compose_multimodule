@@ -5,13 +5,13 @@ import android.os.Bundle
 import androidx.activity.ComponentActivity
 import androidx.activity.compose.setContent
 import androidx.activity.enableEdgeToEdge
-import androidx.compose.animation.fadeIn
-import androidx.compose.animation.fadeOut
 import androidx.compose.animation.core.tween
+import androidx.compose.animation.fadeIn
 import androidx.compose.animation.togetherWith
 import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.material3.MaterialTheme
+import androidx.compose.runtime.CompositionLocalProvider
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
@@ -22,21 +22,20 @@ import androidx.navigation3.runtime.entryProvider
 import androidx.navigation3.runtime.metadata
 import androidx.navigation3.runtime.rememberNavBackStack
 import androidx.navigation3.ui.NavDisplay
-import com.dxmxp.ui.navigation.utils.DeepLinkHandler
 import com.dxmxp.seed.navigation.MainScaffold
 import com.dxmxp.seed.navigation.routes.MainScaffoldGraph
 import com.dxmxp.stories.navigation.StoriesScaffold
 import com.dxmxp.stories.navigation.routes.StoriesScaffoldGraph
-import com.dxmxp.ui.theme.SeedTheme
-import com.dxmxp.ui.navigation.model.Graph
-import com.dxmxp.ui.navigation.model.Screen
-import com.dxmxp.ui.navigation.model.Graph.Companion.registerGraphs
 import com.dxmxp.ui.navigation.core.LocalNavigator
 import com.dxmxp.ui.navigation.core.NavigationManager
 import com.dxmxp.ui.navigation.core.NavigationManagerBridge
-import com.dxmxp.ui.navigation.orchestration.NavigationOrchestrator
+import com.dxmxp.ui.navigation.model.Graph
+import com.dxmxp.ui.navigation.model.Graph.Companion.registerGraphs
 import com.dxmxp.ui.navigation.model.Screen.Companion.screenEntry
+import com.dxmxp.ui.navigation.orchestration.NavigationOrchestrator
+import com.dxmxp.ui.navigation.utils.DeepLinkHandler
 import com.dxmxp.ui.navigation.utils.NavigationUtils.modalAnimation
+import com.dxmxp.ui.theme.SeedTheme
 import dagger.hilt.android.AndroidEntryPoint
 import javax.inject.Inject
 
@@ -84,6 +83,8 @@ class MainActivity : ComponentActivity() {
 
             val entryProvider = remember {
                 entryProvider {
+                    // Auth entries
+                    screenEntry<AuthGraph> { LoginScreen() }
                     screenEntry<MainScaffoldGraph> { MainScaffold() }
                     screenEntry<StoriesScaffoldGraph>(
                         metadata = metadata { modalAnimation() }
@@ -103,7 +104,7 @@ class MainActivity : ComponentActivity() {
             }
 
             SeedTheme {
-                androidx.compose.runtime.CompositionLocalProvider(
+                CompositionLocalProvider(
                     LocalNavigator provides navigator,
                 ) {
                     NavDisplay(
@@ -111,7 +112,7 @@ class MainActivity : ComponentActivity() {
                         entryProvider = entryProvider,
                         transitionSpec = { fadeIn(tween(500)) togetherWith fadeOut(tween(500)) },
                         popTransitionSpec = { fadeIn(tween(500)) togetherWith fadeOut(tween(500)) },
-                        modifier = Modifier
+                        modifier = Modifier.Companion
                             .fillMaxSize()
                             .background(color = MaterialTheme.colorScheme.background)
                     )

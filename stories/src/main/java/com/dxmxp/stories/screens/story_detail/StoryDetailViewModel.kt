@@ -8,9 +8,20 @@ import dagger.hilt.android.lifecycle.HiltViewModel
 import javax.inject.Inject
 
 @HiltViewModel
-class StoryDetailViewModel @Inject constructor() : 
+class StoryDetailViewModel @Inject constructor() :
     BaseViewModel<StoryDetailViewModel.State, StoryDetailViewModel.Effect, StoryDetailViewModel.Event>(),
     InitializableViewModel<StoriesScaffoldGraph.StoryDetail> {
+
+    data class State(
+        val storyId: String? = null,
+        val story: Story? = null
+    )
+
+    interface Event {
+        data class Init(val id: String) : Event
+    }
+
+    interface Effect
 
     override fun createInitialState(): State = State()
 
@@ -25,16 +36,4 @@ class StoryDetailViewModel @Inject constructor() :
             }
         }
     }
-
-    sealed interface Event {
-        data class Init(val id: String) : Event
-    }
-
-    data class State(
-        val storyId: String? = null,
-        val story: Story? = null
-    )
-
-    interface Effect
-
 }

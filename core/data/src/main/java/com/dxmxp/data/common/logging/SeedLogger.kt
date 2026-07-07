@@ -1,0 +1,29 @@
+package com.dxmxp.data.common.logging
+
+import android.util.Log
+import com.dxmxp.data.BuildConfig
+import com.dxmxp.domain.base.Logger
+import javax.inject.Inject
+import javax.inject.Singleton
+
+@Singleton
+class SeedLogger @Inject constructor() : Logger {
+
+    override fun d(tag: String, message: String) {
+        if (BuildConfig.DEBUG) {
+            Log.d(tag, message)
+        }
+    }
+
+    override fun e(tag: String, message: String, throwable: Throwable?) {
+        Log.e(tag, message, throwable)
+    }
+
+    override fun i(tag: String, message: String) {
+        Log.i(tag, message)
+    }
+
+    override fun w(tag: String, message: String) {
+        Log.w(tag, message)
+    }
+}

@@ -10,6 +10,9 @@ sealed class AppException(message: String? = null, cause: Throwable? = null) : I
     // Authorization Errors (401)
     class UnauthorizedException(message: String = "Unauthorized access") : AppException(message)
 
+    // Bad Request (400)
+    class BadRequestException(message: String = "Bad Request") : AppException(message)
+
     // Resource not found (404)
     class NotFoundException(message: String = "Resource not found") : AppException(message)
 

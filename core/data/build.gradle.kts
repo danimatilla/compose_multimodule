@@ -59,5 +59,8 @@ dependencies {
     implementation(libs.androidx.appcompat)
     implementation(libs.material)
 
+    implementation(libs.androidx.datastore.preferences)
+    implementation(libs.tink.android)
+
     testImplementation(libs.bundles.unit.test)
 }

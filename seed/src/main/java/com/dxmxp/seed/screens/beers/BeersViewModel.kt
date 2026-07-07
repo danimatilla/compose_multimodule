@@ -3,7 +3,7 @@ package com.dxmxp.seed.screens.beers
 import androidx.lifecycle.viewModelScope
 import com.dxmxp.domain.use_case.GetBeersUseCase
 import com.dxmxp.ui.base.BaseViewModel
-import com.dxmxp.ui.common.launchResultFlow
+import com.dxmxp.ui.common.collectPagingInto
 import com.dxmxp.ui.common.mapData
 import com.dxmxp.ui.mapper.BeerUiMapper
 import com.dxmxp.ui.model.BeerUiModel
@@ -21,23 +21,23 @@ class BeersViewModel @Inject constructor(
 
     data class State(
         val beers: List<BeerUiModel>? = null,
-        val isLoading: Boolean = false,
-        val isRefreshing: Boolean = false,
+        val isLoading: Boolean? = null,
+        val isRefreshing: Boolean? = null,
         val error: String? = null,
-        val endReached: Boolean = false
+        val endReached: Boolean? = null
     ) {
-        val canLoadNextPage: Boolean get() = !isLoading && !endReached
-        val launchIf: Boolean get() = !isLoading && !isRefreshing
+        val canLoadNextPage: Boolean get() = (isLoading != true) && (endReached != true)
+        val launchIf: Boolean get() = (isLoading != true) && (isRefreshing != true)
     }
 
-    sealed interface Event {
+    interface Event {
         data object LoadBeers : Event
         data object LoadNextPage : Event
         data object Refresh : Event
         data class OnBeerClicked(val beer: BeerUiModel) : Event
     }
 
-    sealed interface Effect {
+    interface Effect {
         data class NavigateToDetail(val rocketId: String) : Effect
     }
 
@@ -59,31 +59,38 @@ class BeersViewModel @Inject constructor(
     }
 
     init {
+        setState { copy(isLoading = false, isRefreshing = false, endReached = false) }
         setEvent(Event.LoadBeers)
     }
 
     private fun fetchBeers(shouldReset: Boolean, isRefreshing: Boolean = false) {
-        viewModelScope.launchResultFlow(
-            flow = getBeersUseCase(shouldReset).mapData { beerUiMapper.toUiModel(it) },
-            launchIf = uiState.value.launchIf,
+        val flow = getBeersUseCase(shouldReset)
+            .mapData { beerUiMapper.toUiModel(it) }
+        
+        viewModelScope.collectPagingInto(
+            flow = flow,
+            setState = ::setState,
             shouldReset = shouldReset,
             currentList = { beers },
-            setState = ::setState,
-            onLoading = { loading ->
+            launchIf = uiState.value.launchIf
+        ) { combinedList, endReached, exception ->
+            if (exception != null) {
+                copy(error = exception.message, isLoading = false, isRefreshing = false)
+            } else if (combinedList.isEmpty() && !endReached) {
+                // Loading state (simplified mapping for this specific VM)
                 copy(
-                    isLoading = loading && !isRefreshing,
-                    isRefreshing = loading && isRefreshing
+                    isLoading = !isRefreshing,
+                    isRefreshing = isRefreshing
                 )
-            },
-            onError = { copy(error = it.message, isLoading = false, isRefreshing = false) },
-            onSuccess = { items, endReached ->
+            } else {
+                // Success state
                 copy(
-                    beers = items,
+                    beers = combinedList,
                     endReached = endReached,
                     isLoading = false,
                     isRefreshing = false
                 )
             }
-        )
+        }
     }
 }
