@@ -2,6 +2,7 @@ package com.dxmxp.seed.navigation.routes
 
 import androidx.navigation3.runtime.EntryProviderScope
 import androidx.navigation3.runtime.NavKey
+import com.dxmxp.seed.navigation.MainScaffold
 import com.dxmxp.seed.screens.HomeScreen
 import com.dxmxp.seed.screens.MenuScreen
 import com.dxmxp.seed.screens.SearchScreen
@@ -55,6 +56,7 @@ object MainScaffoldGraph : Graph {
     }
 
     override fun EntryProviderScope<NavKey>.registerEntries() {
+        screenEntry<MainScaffoldGraph> { MainScaffold() }
         screenEntry<Home> { HomeScreen() }
         screenEntry<Search> { SearchScreen() }
         screenEntry<Menu> { MenuScreen() }
@@ -66,5 +68,5 @@ object MainScaffoldGraph : Graph {
 
     @Provides
     @IntoSet
-    fun provideMainScaffoldGraph(): Graph = MainScaffoldGraph
+    override fun provideGraph(): Graph = MainScaffoldGraph
 }

@@ -3,8 +3,11 @@ package com.dxmxp.stories.navigation.routes
 import androidx.hilt.lifecycle.viewmodel.compose.hiltViewModel
 import androidx.navigation3.runtime.EntryProviderScope
 import androidx.navigation3.runtime.NavKey
+import androidx.navigation3.runtime.metadata
 import com.dxmxp.domain.model.Story
+import com.dxmxp.stories.navigation.StoriesScaffold
 import com.dxmxp.stories.screens.feed.FeedScreen
+import com.dxmxp.ui.navigation.utils.NavigationUtils.modalAnimation
 import com.dxmxp.stories.screens.story_detail.StoryDetailScreen
 import com.dxmxp.stories.screens.story_detail.StoryDetailViewModel
 import com.dxmxp.ui.navigation.model.Graph
@@ -49,6 +52,9 @@ object StoriesScaffoldGraph : Graph {
     data object Notifications : Screen
 
     override fun EntryProviderScope<NavKey>.registerEntries() {
+        screenEntry<StoriesScaffoldGraph>(
+            metadata = metadata { modalAnimation() }
+        ) { StoriesScaffold() }
         screenEntry<Feed> { FeedScreen() }
         screenEntry<StoryDetail, StoryDetailViewModel>(
             viewModelProvide = { hiltViewModel<StoryDetailViewModel>() },
@@ -62,5 +68,5 @@ object StoriesScaffoldGraph : Graph {
 
     @Provides
     @IntoSet
-    fun provideStoriesScaffoldGraph(): Graph = StoriesScaffoldGraph
+    override fun provideGraph(): Graph = StoriesScaffoldGraph
 }

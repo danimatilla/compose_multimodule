@@ -21,10 +21,10 @@ class BeersViewModel @Inject constructor(
 
     data class State(
         val beers: List<BeerUiModel>? = null,
-        val isLoading: Boolean? = null,
-        val isRefreshing: Boolean? = null,
+        val isLoading: Boolean = false,
+        val isRefreshing: Boolean = false,
         val error: String? = null,
-        val endReached: Boolean? = null
+        val endReached: Boolean = false
     ) {
         val canLoadNextPage: Boolean get() = (isLoading != true) && (endReached != true)
         val launchIf: Boolean get() = (isLoading != true) && (isRefreshing != true)

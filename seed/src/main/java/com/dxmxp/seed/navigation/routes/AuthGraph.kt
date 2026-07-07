@@ -3,10 +3,9 @@ package com.dxmxp.seed.navigation.routes
 import androidx.navigation3.runtime.EntryProviderScope
 import androidx.navigation3.runtime.NavKey
 import com.dxmxp.seed.screens.login.LoginScreen
-import com.dxmxp.ui.navigation.Graph
-import com.dxmxp.ui.navigation.Screen
-import com.dxmxp.ui.navigation.Screen.Companion.screenEntry
-import com.dxmxp.ui.navigation.helpers.NavigationHandler
+import com.dxmxp.ui.navigation.model.Graph
+import com.dxmxp.ui.navigation.model.Screen
+import com.dxmxp.ui.navigation.model.Screen.Companion.screenEntry
 import dagger.Module
 import dagger.Provides
 import dagger.hilt.InstallIn
@@ -19,19 +18,25 @@ import kotlinx.serialization.Serializable
 @InstallIn(SingletonComponent::class)
 object AuthGraph : Graph {
 
-    override fun EntryProviderScope<NavKey>.registerEntries(
-        onEvent: (NavigationHandler.NavigationEvent) -> Unit
-    ) {
-        screenEntry<AuthGraph> { LoginScreen(onEvent) }
+    override val screens: List<Class<out Screen>>
+        get() = listOf(
+            Login::class.java
+        )
+
+    @Serializable
+    data object Login: Screen {
+        override val route: String
+            get() = "${this@AuthGraph.route}/login"
     }
 
-    override val route: String
-        get() = "/auth"
-
-    override val showMainBottomBar: Boolean
-        get() = false
+    override fun EntryProviderScope<NavKey>.registerEntries() {
+        screenEntry<AuthGraph> { LoginScreen() }
+    }
 
     @Provides
     @IntoSet
     override fun provideGraph(): Graph = AuthGraph
+
+    override val route: String
+        get() = "/auth"
 }

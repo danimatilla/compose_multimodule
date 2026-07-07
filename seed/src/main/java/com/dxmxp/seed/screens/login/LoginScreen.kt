@@ -1,8 +1,6 @@
 package com.dxmxp.seed.screens.login
 
 import android.widget.Toast
-import androidx.compose.foundation.layout.Box
-import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.fillMaxSize
@@ -32,13 +30,10 @@ import androidx.compose.ui.text.input.PasswordVisualTransformation
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import androidx.hilt.lifecycle.viewmodel.compose.hiltViewModel
-import com.dxmxp.seed.navigation.routes.MainScaffoldGraph
-import com.dxmxp.ui.navigation.helpers.NavigationHandler
 import com.dxmxp.ui.theme.SeedTheme
 
 @Composable
 fun LoginScreen(
-    onEvent: (NavigationHandler.NavigationEvent) -> Unit,
     viewModel: LoginViewModel = hiltViewModel()
 ) {
     val state by viewModel.uiState.collectAsState()
@@ -52,10 +47,6 @@ fun LoginScreen(
     LaunchedEffect(Unit) {
         viewModel.effect.collect { effect ->
             when (effect) {
-                is LoginViewModel.Effect.NavigateToMain -> {
-                    onEvent(NavigationHandler.NavigationEvent.SetRootScreen(MainScaffoldGraph))
-                }
-
                 is LoginViewModel.Effect.ShowError -> {
                     Toast.makeText(context, effect.message, Toast.LENGTH_SHORT).show()
                 }

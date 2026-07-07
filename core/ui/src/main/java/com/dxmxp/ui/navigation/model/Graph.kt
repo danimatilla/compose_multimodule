@@ -5,6 +5,8 @@ import androidx.navigation3.runtime.NavKey
 import com.dxmxp.ui.navigation.model.Screen.Companion.screenEntry
 import com.dxmxp.ui.screens.WebView
 import com.dxmxp.ui.screens.WebViewScreen
+import dagger.Provides
+import dagger.multibindings.IntoSet
 
 /**
  * A Graph is a collection of related screens that share a common navigation context.
@@ -17,7 +19,6 @@ interface Graph : Screen {
         get() = false
 
     val screens: List<Class<out Screen>>
-        get() = emptyList()
 
     fun contains(key: NavKey): Boolean =
         javaClass.isInstance(key) || screens.any { clazz ->
@@ -40,6 +41,8 @@ interface Graph : Screen {
     }
 
     fun EntryProviderScope<NavKey>.registerEntries()
+
+    fun provideGraph(): Graph
 
     companion object {
         fun EntryProviderScope<NavKey>.registerGraphs(

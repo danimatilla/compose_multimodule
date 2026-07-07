@@ -30,11 +30,7 @@ fun ProfileScreen(
 
     LaunchedEffect(Unit) {
         viewModel.effect.collect { effect ->
-            when (effect) {
-                is ProfileViewModel.Effect.NavigateToAuth -> {
-                    onEvent(NavigationHandler.NavigationEvent.SetRootScreen(AuthGraph))
-                }
-            }
+            // TODO: Handle events here.
         }
     }
 }
