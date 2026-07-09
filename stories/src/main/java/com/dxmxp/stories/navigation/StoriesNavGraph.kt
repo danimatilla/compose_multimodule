@@ -21,7 +21,6 @@ fun StoriesNavGraph(
         entryProvider {
             StoriesScaffoldGraph.run {
                 registerEntries()
-                registerCommonEntries()
             }
         }
     }

@@ -9,6 +9,7 @@ import androidx.navigation3.runtime.NavBackStack
 import androidx.navigation3.runtime.NavKey
 import androidx.navigation3.runtime.entryProvider
 import androidx.navigation3.ui.NavDisplay
+import com.dxmxp.seed.navigation.routes.AuthGraph
 import com.dxmxp.seed.navigation.routes.MainScaffoldGraph
 import com.dxmxp.seed.navigation.routes.ProfileGraph
 
@@ -20,13 +21,9 @@ fun MainNavGraph(
 ) {
     val entryProvider = remember {
         entryProvider {
-            MainScaffoldGraph.run {
-                registerEntries()
-                registerCommonEntries()
-            }
-            ProfileGraph.run {
-                registerEntries()
-            }
+            AuthGraph.run { registerEntries() }
+            MainScaffoldGraph.run { registerEntries() }
+            ProfileGraph.run { registerEntries() }
         }
     }
 

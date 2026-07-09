@@ -20,16 +20,24 @@ import androidx.compose.runtime.remember
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Modifier
 import androidx.navigation3.runtime.entryProvider
+import androidx.navigation3.runtime.metadata
 import androidx.navigation3.runtime.rememberNavBackStack
 import androidx.navigation3.ui.NavDisplay
+import com.dxmxp.seed.navigation.MainScaffold
+import com.dxmxp.seed.navigation.routes.AuthGraph
 import com.dxmxp.seed.navigation.routes.MainScaffoldGraph
+import com.dxmxp.seed.screens.login.LoginScreen
+import com.dxmxp.stories.navigation.StoriesScaffold
+import com.dxmxp.stories.navigation.routes.StoriesScaffoldGraph
 import com.dxmxp.ui.navigation.core.LocalNavigator
 import com.dxmxp.ui.navigation.core.NavigationManager
 import com.dxmxp.ui.navigation.core.NavigationManagerBridge
 import com.dxmxp.ui.navigation.model.Graph
 import com.dxmxp.ui.navigation.model.Graph.Companion.registerGraphs
+import com.dxmxp.ui.navigation.model.Screen.Companion.screenEntry
 import com.dxmxp.ui.navigation.orchestration.NavigationOrchestrator
 import com.dxmxp.ui.navigation.utils.DeepLinkHandler
+import com.dxmxp.ui.navigation.utils.NavigationUtils.modalAnimation
 import com.dxmxp.ui.theme.SeedTheme
 import dagger.hilt.android.AndroidEntryPoint
 import javax.inject.Inject
@@ -56,7 +64,7 @@ class MainActivity : ComponentActivity() {
         intentState = intent
 
         setContent {
-            val backStack = rememberNavBackStack(MainScaffoldGraph)
+            val backStack = rememberNavBackStack(AuthGraph)
 
             val navigator = remember {
                 NavigationManagerBridge(navigationManager)
@@ -77,7 +85,9 @@ class MainActivity : ComponentActivity() {
             }
 
             val entryProvider = remember {
-                entryProvider { registerGraphs(graphs) }
+                entryProvider {
+                    registerGraphs(graphs)
+                }
             }
 
             LaunchedEffect(intentState) {

@@ -19,15 +19,7 @@ import kotlinx.serialization.Serializable
 object AuthGraph : Graph {
 
     override val screens: List<Class<out Screen>>
-        get() = listOf(
-            Login::class.java
-        )
-
-    @Serializable
-    data object Login: Screen {
-        override val route: String
-            get() = "${this@AuthGraph.route}/login"
-    }
+        get() = emptyList()
 
     override fun EntryProviderScope<NavKey>.registerEntries() {
         screenEntry<AuthGraph> { LoginScreen() }
