@@ -28,7 +28,7 @@ The architecture is built on three pillars:
 ## 3. Step-by-Step: Adding a New Feature
 
 ### Step 1: Define Screens
-Create your screens in your feature module. Always use `@Serializable`.
+Create your screens in your module (e.g., `:stories` or a new library module). Always use `@Serializable`.
 
 ```kotlin
 @Serializable
@@ -62,7 +62,7 @@ object ProductGraph : Graph {
 ```
 
 ### Step 3: Handle Parameters in ViewModel
-Implement `InitializableViewModel` to receive data without extra boilerplate.
+If your screen is a `data class` (parameterized), your ViewModel **must** implement `InitializableViewModel<S>` to receive the data. This is enforced at runtime by `screenEntry`.
 
 ```kotlin
 @HiltViewModel
@@ -103,5 +103,41 @@ fun MyFeatureScaffold() {
 Deep links are resolved via `RouteRegistry`. A link like `myapp://products/productdetail?productId=42` will:
 1. Be captured by `MainActivity`.
 2. Passed to `DeepLinkHandler`.
-3. `RouteRegistry` will find `ProductDetail`, see it requires an `Int`, extract `42`, and create the `ProductDetail(42)` object.
-4. A `PushScreen` event will be triggered automatically.
+3. `RouteRegistry` will find the matching `Screen` class, extract parameters from the URI query, and instantiate the screen using reflection (optimized).
+4. A `PushScreen` event is triggered via `NavigationManager`.
+
+> **Note**: For deep links to work, the `Screen` data class must have a primary constructor where parameter names match the URL query keys.
+
+---
+
+## 6. Modal Navigation & Delegation
+The system supports "Modal" graphs (e.g., Full-screen overlays like Stories).
+- Set `override val isModal = true` in your `Graph`.
+- When a `PushScreen` event occurs, the `NavigationOrchestrator` checks if the target screen belongs to a modal graph.
+- If the current local backstack is NOT modal, it will **delegate** the event to the parent backstack (Root).
+- This ensures that modals always cover the entire UI regardless of where the event was triggered.
+
+---
+
+## 7. Custom Animations
+You can use `NavigationUtils.modalAnimation()` inside your `registerEntries` to apply standardized transitions.
+
+---
+
+## 8. Back Press Handling
+Use `LocalBackPressHandler` to intercept back events at the screen level (e.g., to show a confirmation dialog).
+
+```kotlin
+val backPressHandler = rememberBackPressHandler {
+    if (hasUnsavedChanges) {
+        showExitDialog = true
+        false // Prevent back
+    } else {
+        true // Allow back
+    }
+}
+
+CompositionLocalProvider(LocalBackPressHandler provides backPressHandler) {
+    Content(...)
+}
+```
