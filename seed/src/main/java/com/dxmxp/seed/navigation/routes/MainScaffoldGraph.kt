@@ -3,6 +3,7 @@ package com.dxmxp.seed.navigation.routes
 import androidx.navigation3.runtime.EntryProviderScope
 import androidx.navigation3.runtime.NavKey
 import com.dxmxp.seed.navigation.MainScaffold
+import com.dxmxp.seed.navigation.routes.CatalogGraph
 import com.dxmxp.seed.screens.HomeScreen
 import com.dxmxp.seed.screens.MenuScreen
 import com.dxmxp.seed.screens.SearchScreen
@@ -25,6 +26,8 @@ object MainScaffoldGraph : Graph {
     override val screens: List<Class<out Screen>>
         get() = listOf(
             Home::class.java,
+            CatalogGraph.ProductList::class.java,
+            CatalogGraph.ProductDetail::class.java,
             Search::class.java,
             Menu::class.java,
             Beers::class.java,
