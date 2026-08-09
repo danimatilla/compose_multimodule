@@ -8,6 +8,7 @@ A robust, type-safe, and scalable navigation architecture for Jetpack Compose ba
 - **Multi-Module Support**: Decoupled navigation logic allowing features to be developed in isolation.
 - **Orchestrated Backstacks**: Intelligent handling of multiple backstacks (e.g., Root, Main Tab Bar, Nested Scaffolds).
 - **Zero-Boilerplate Data Passing**: Pass data directly through Screen constructors with automatic ViewModel initialization.
+- **Large Data & Results Support**: `NavigationStore` for passing heavy models and receiving optional results without bloating routes.
 - **Reflection-Optimized Routing**: Fast route resolution and deep link handling via a centralized `RouteRegistry` that maps URLs to `@Serializable` screen instances.
 - **Common Screens Library**: Built-in support for reusable screens like `WebView` across all modules.
 - **Strict Architecture**: Enforced patterns via custom Konsist tests to ensure consistent navigation implementation.
@@ -33,7 +34,7 @@ graph LR
 
 ### 2. Package Structure (`core:ui`)
 - `navigation.model`: Core entities (`Screen`, `Graph`).
-- `navigation.core`: Infrastructure (`Navigator`, `NavigationManager`, `RouteRegistry`, `NavigationEvent`).
+- `navigation.core`: Infrastructure (`Navigator`, `NavigationManager`, `NavigationStore`, `RouteRegistry`, `NavigationEvent`).
 - `navigation.orchestration`: Coordination logic (`NavigationOrchestrator`).
 - `navigation.scaffold`: UI controllers and helpers (`ScaffoldController`, `BackPressHandler`).
 - `navigation.utils`: Utilities (`DeepLinkHandler`, `NavigationUtils`).
@@ -112,6 +113,18 @@ Inject `NavigationManager`:
 class MyViewModel @Inject constructor(private val navManager: NavigationManager) : ViewModel() {
     fun onComplete() = navManager.setRoot(HomeScreen)
 }
+```
+
+#### Passing Large Data & Results
+Use `NavigationStore` to pass models without bloating the route.
+
+```kotlin
+// Source
+navigationStore.pushData(id, myLargeModel)
+navManager.push(DetailScreen(id))
+
+// Destination
+val model = navigationStore.getData<MyModel>(screen.id)
 ```
 
 ### 5. Using Common Screens

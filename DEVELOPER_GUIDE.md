@@ -22,6 +22,7 @@ The architecture is built on three pillars:
 | `NavigationOrchestrator` | The "brain" that delegates events to the correct `NavBackStack`. |
 | `RouteRegistry` | Central index of all routes for O(1) lookups and Deep Link resolution. |
 | `ScaffoldController` | Manages local state (current tab, local backstack) for a Scaffold. |
+| `NavigationStore` | Temporal store for large models and cross-screen results. |
 
 ---
 
@@ -122,9 +123,61 @@ The system supports "Modal" graphs (e.g., Full-screen overlays like Stories).
 ## 7. Custom Animations
 You can use `NavigationUtils.modalAnimation()` inside your `registerEntries` to apply standardized transitions.
 
+```kotlin
+override fun EntryProviderScope<NavKey>.registerEntries() {
+    screenEntry<MyScreen>(
+        metadata = metadata { modalAnimation() }
+    ) { ... }
+}
+```
+
 ---
 
-## 8. Back Press Handling
+## 8. Passing Large Data & Results
+To avoid `TransactionTooLargeException` and keep `Screen` classes clean, use `NavigationStore`. This allows sending models between screens and receiving **optional** results back.
+
+### Step 1: Push data from Origen
+```kotlin
+// In SourceViewModel
+fun onEditProduct(product: Product) {
+    // 1. Push the heavy model
+    navigationStore.pushData(product.id, product)
+
+    // 2. Observe for an optional result
+    viewModelScope.launch {
+        navigationStore.observeResult<Product>(product.id)
+            .take(1)
+            .collect { updatedProduct ->
+                updateProductList(updatedProduct)
+            }
+    }
+
+    navManager.push(ProductDetail(productId = product.id))
+}
+```
+
+### Step 2: Consume and Emit from Destination
+```kotlin
+// In DestinationViewModel
+override fun init(screen: ProductDetail) {
+    val cached: Product? = navigationStore.getData(screen.productId)
+    if (cached != null) {
+        setState { copy(product = cached) }
+    } else {
+        loadFromDb(screen.productId)
+    }
+}
+
+fun onSave() {
+    val updated = uiState.value.product
+    navigationStore.emitResult(updated.id, updated)
+    navManager.pop()
+}
+```
+
+---
+
+## 9. Back Press Handling
 Use `LocalBackPressHandler` to intercept back events at the screen level (e.g., to show a confirmation dialog).
 
 ```kotlin
