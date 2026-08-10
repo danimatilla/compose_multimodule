@@ -88,15 +88,14 @@ private fun Content(
                 onValueChange = { onEvent(LoginViewModel.Event.OnPasswordChanged(it)) },
                 label = { Text("Password") },
                 modifier = Modifier.fillMaxWidth(),
-                visualTransformation = if (passwordVisible) PasswordVisualTransformation() else VisualTransformation.None,
+                visualTransformation = if (passwordVisible) VisualTransformation.None else PasswordVisualTransformation(),
                 keyboardOptions = KeyboardOptions(keyboardType = KeyboardType.Password),
                 singleLine = true,
                 enabled = !isLoading,
                 trailingIcon = {
                     IconButton(onClick = { onEvent(LoginViewModel.Event.OnTogglePasswordVisibility) }) {
-                        val image = if (passwordVisible) Icons.Filled.VisibilityOff else Icons.Filled.Visibility
-                        val description = if (passwordVisible) "Hide password" else "Show password"
-                        Icon(imageVector = image, contentDescription = description)
+                        val image = if (passwordVisible) Icons.Filled.Visibility else Icons.Filled.VisibilityOff
+                        Icon(imageVector = image, contentDescription = null)
                     }
                 }
             )

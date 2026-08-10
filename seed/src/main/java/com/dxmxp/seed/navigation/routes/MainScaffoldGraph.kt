@@ -30,22 +30,13 @@ object MainScaffoldGraph : Graph {
         )
 
     @Serializable
-    data object Home : Screen {
-        override val route: String
-            get() = "${this@MainScaffoldGraph.route}/home"
-    }
+    data object Home : Screen
 
     @Serializable
-    data object Search : Screen {
-        override val route: String
-            get() = "${this@MainScaffoldGraph.route}/search"
-    }
+    data object Search : Screen
 
     @Serializable
-    data object Menu : Screen {
-        override val route: String
-            get() = "${this@MainScaffoldGraph.route}/menu"
-    }
+    data object Menu : Screen
 
     override fun EntryProviderScope<NavKey>.registerEntries() {
         screenEntry<MainScaffoldGraph> { MainScaffold() }

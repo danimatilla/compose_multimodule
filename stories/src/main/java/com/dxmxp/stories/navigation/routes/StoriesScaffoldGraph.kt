@@ -37,10 +37,7 @@ object StoriesScaffoldGraph : Graph {
         )
 
     @Serializable
-    data object Feed : Screen {
-        override val route: String
-            get() = "${this@StoriesScaffoldGraph.route}/feed"
-    }
+    data object Feed : Screen
 
     @Serializable
     data class StoryDetail(val id: String, val story: Story? = null) : Screen

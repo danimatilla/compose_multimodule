@@ -25,10 +25,7 @@ object ProfileGraph : Graph {
         )
 
     @Serializable
-    data object Settings : Screen {
-        override val route: String
-            get() = "${this@ProfileGraph.route}/settings"
-    }
+    data object Settings : Screen
 
     override fun EntryProviderScope<NavKey>.registerEntries() {
         screenEntry<ProfileGraph> { ProfileScreen() }
@@ -36,7 +33,7 @@ object ProfileGraph : Graph {
     }
 
     override val route: String
-        get() = "${MainScaffoldGraph.route}/profile"
+        get() = "/profile"
 
     @Provides
     @IntoSet
