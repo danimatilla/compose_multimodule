@@ -24,7 +24,6 @@ object MainScaffoldGraph : Graph {
     override val screens: List<Class<out Screen>>
         get() = listOf(
             Home::class.java,
-            CatalogGraph::class.java,
             Search::class.java,
             Menu::class.java,
             ProfileGraph::class.java

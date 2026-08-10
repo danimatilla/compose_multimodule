@@ -10,7 +10,6 @@ import androidx.navigation3.runtime.NavKey
 import androidx.navigation3.runtime.entryProvider
 import androidx.navigation3.ui.NavDisplay
 import com.dxmxp.seed.navigation.routes.AuthGraph
-import com.dxmxp.seed.navigation.routes.CatalogGraph
 import com.dxmxp.seed.navigation.routes.MainScaffoldGraph
 import com.dxmxp.seed.navigation.routes.ProfileGraph
 
@@ -24,7 +23,6 @@ fun MainNavGraph(
         entryProvider {
             AuthGraph.run { registerEntries() }
             MainScaffoldGraph.run { registerEntries() }
-            CatalogGraph.run { registerEntries() }
             ProfileGraph.run { registerEntries() }
         }
     }

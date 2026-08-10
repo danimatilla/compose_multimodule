@@ -12,7 +12,6 @@ import androidx.compose.runtime.Composable
 import androidx.compose.ui.Modifier
 import androidx.hilt.lifecycle.viewmodel.compose.hiltViewModel
 import androidx.lifecycle.ViewModel
-import com.dxmxp.seed.navigation.routes.CatalogGraph
 import com.dxmxp.seed.navigation.routes.MainScaffoldGraph
 import com.dxmxp.seed.navigation.routes.ProfileGraph
 import com.dxmxp.stories.navigation.routes.StoriesScaffoldGraph
@@ -43,7 +42,6 @@ fun MainScaffold() {
 
     val bottomBarItems = listOf(
         MainScaffoldGraph.Home to Icons.Default.Home,
-        CatalogGraph.ProductList to Icons.Default.ShoppingCart,
         MainScaffoldGraph.Search to Icons.Default.Search,
         MainScaffoldGraph.Menu to Icons.Default.Menu,
         StoriesScaffoldGraph to Icons.Default.AutoStories,
