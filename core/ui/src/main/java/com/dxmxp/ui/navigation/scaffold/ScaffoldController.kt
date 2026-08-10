@@ -10,6 +10,7 @@ import androidx.navigation3.runtime.NavKey
 import androidx.navigation3.runtime.rememberNavBackStack
 import com.dxmxp.ui.navigation.core.NavigationEvent
 import com.dxmxp.ui.navigation.model.Graph
+import com.dxmxp.ui.navigation.model.Route
 import com.dxmxp.ui.navigation.model.Screen
 import com.dxmxp.ui.navigation.orchestration.NavigationOrchestrator
 
@@ -20,11 +21,11 @@ import com.dxmxp.ui.navigation.orchestration.NavigationOrchestrator
  */
 @Composable
 fun rememberScaffoldController(
-    initialScreen: Screen,
+    initialRoute: Route,
     graph: Graph,
     orchestrator: NavigationOrchestrator
 ): ScaffoldController {
-    val backStack = rememberNavBackStack(initialScreen)
+    val backStack = rememberNavBackStack(initialRoute)
     
     return remember(backStack, graph, orchestrator) {
         ScaffoldController(
@@ -68,24 +69,24 @@ class ScaffoldController(
     }
 
     /**
-     * Check if a screen is the current destination.
+     * Check if a route is the current destination.
      */
-    fun isCurrentDestination(screen: Screen): Boolean {
-        return currentDestination == screen
+    fun isCurrentDestination(route: Route): Boolean {
+        return currentDestination == route
     }
 
     /**
-     * Get all screens in the current back stack.
+     * Get all routes in the current back stack.
      */
     fun getBackStack(): List<NavKey> = backStack.toList()
 
     /**
-     * Clear and reset to initial screen.
+     * Clear and reset to initial route.
      */
-    fun reset(initialScreen: Screen) {
+    fun reset(initialRoute: Route) {
         backStack.clear()
-        backStack.add(initialScreen)
-        _currentDestination.value = initialScreen
+        backStack.add(initialRoute)
+        _currentDestination.value = initialRoute
     }
 }
 

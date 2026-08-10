@@ -73,9 +73,9 @@ class MainActivity : ComponentActivity() {
             LaunchedEffect(Unit) {
                 navigationOrchestrator.events.collect { event ->
                     val currentRoot = backStack.lastOrNull()
-                    val screen = event.screenOrNull()
+                    val route = event.routeOrNull()
 
-                    if (currentRoot is Graph && screen != null && currentRoot.contains(screen)) {
+                    if (currentRoot is Graph && route != null && currentRoot.contains(route)) {
                         // Let the nested scaffold handle it
                         return@collect
                     }

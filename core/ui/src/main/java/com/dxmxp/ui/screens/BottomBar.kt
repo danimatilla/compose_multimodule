@@ -12,15 +12,16 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.vector.ImageVector
 import androidx.navigation3.runtime.NavKey
 import com.dxmxp.ui.navigation.model.Graph
+import com.dxmxp.ui.navigation.model.Route
 import com.dxmxp.ui.navigation.model.Screen
 
 @Composable
 fun BottomBar(
     modifier: Modifier = Modifier,
     shouldShowBottomBar: Boolean = true,
-    bottomBarItems: List<Pair<Screen, ImageVector>>,
+    bottomBarItems: List<Pair<Route, ImageVector>>,
     currentDestination: NavKey?,
-    onClickItem: (Screen) -> Unit
+    onClickItem: (Route) -> Unit
 ) {
     AnimatedVisibility(
         visible = shouldShowBottomBar,
@@ -28,9 +29,9 @@ fun BottomBar(
         exit = shrinkVertically()
     ) {
         // Find the most specific match in the navigationBarItems list
-        val selectedItem = bottomBarItems.map { it.first }.findLast { screen ->
-            screen == currentDestination || (screen is Graph && currentDestination?.let {
-                screen.contains(
+        val selectedItem = bottomBarItems.map { it.first }.findLast { route ->
+            route == currentDestination || (route is Graph && currentDestination?.let {
+                route.contains(
                     it
                 )
             } == true)

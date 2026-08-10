@@ -4,6 +4,7 @@ import android.net.Uri
 import android.util.Log
 import androidx.navigation3.runtime.NavKey
 import com.dxmxp.ui.navigation.model.Graph
+import com.dxmxp.ui.navigation.model.Route
 import com.dxmxp.ui.navigation.model.Screen
 import javax.inject.Inject
 import javax.inject.Singleton
@@ -17,14 +18,14 @@ import kotlin.reflect.full.primaryConstructor
 class RouteRegistry @Inject constructor(
     graphs: Set<@JvmSuppressWildcards Graph>
 ) {
-    private val screenRegistry = mutableMapOf<String, ScreenRouteEntry>()
+    private val routeRegistry = mutableMapOf<String, RouteEntry>()
     private val graphRegistry = mutableMapOf<String, Graph>()
     
     init {
         graphs.forEach { graph ->
             registerGraph(graph)
         }
-        Log.d(TAG, "✅ RouteRegistry initialized with ${screenRegistry.size} routes")
+        Log.d(TAG, "✅ RouteRegistry initialized with ${routeRegistry.size} routes")
     }
 
     /**
@@ -33,35 +34,39 @@ class RouteRegistry @Inject constructor(
     private fun registerGraph(graph: Graph) {
         graphRegistry[graph.route] = graph
         
-        graph.screens.forEach { screenClass ->
-            if (screenClass == graph::class.java) {
-                // Register the graph itself as a singleton if it's also a screen
-                screenRegistry[graph.route] = ScreenRouteEntry.Singleton(graph)
-                Log.d(TAG, "  📍 Registered graph screen: ${graph.route}")
+        graph.screens.forEach { routeClass ->
+            if (routeClass == graph::class.java) {
+                // Register the graph itself as a singleton
+                routeRegistry[graph.route] = RouteEntry.Singleton(graph)
+                Log.d(TAG, "  📍 Registered graph: ${graph.route}")
                 return@forEach
             }
 
             try {
                 // Try to get singleton instance (data object)
                 val instance = try {
-                    screenClass.getField("INSTANCE").get(null) as? Screen
+                    routeClass.getField("INSTANCE").get(null) as? Route
                 } catch (_: Exception) {
                     null
                 }
 
                 if (instance != null) {
-                    screenRegistry[instance.route] = ScreenRouteEntry.Singleton(instance)
+                    routeRegistry[instance.route] = RouteEntry.Singleton(instance)
                     Log.d(TAG, "  📍 Registered singleton: ${instance.route}")
                     // Also register subgraphs
                     if (instance is Graph) {
                         registerGraph(instance)
                     }
                 } else {
-                    // It's a parameterized screen (data class)
-                    registerParameterizedScreen(screenClass)
+                    // It's a parameterized route (data class)
+                    // We check if it's a Screen class
+                    @Suppress("UNCHECKED_CAST")
+                    if (Screen::class.java.isAssignableFrom(routeClass)) {
+                        registerParameterizedScreen(routeClass as Class<out Screen>)
+                    }
                 }
             } catch (e: Exception) {
-                Log.w(TAG, "Failed to register screen ${screenClass.simpleName}: ${e.message}")
+                Log.w(TAG, "Failed to register route ${routeClass.simpleName}: ${e.message}")
             }
         }
     }
@@ -71,29 +76,29 @@ class RouteRegistry @Inject constructor(
      */
     private fun registerParameterizedScreen(screenClass: Class<out Screen>) {
         val baseRoute = "/" + screenClass.simpleName.lowercase()
-        screenRegistry[baseRoute] = ScreenRouteEntry.Parameterized(screenClass)
+        routeRegistry[baseRoute] = RouteEntry.Parameterized(screenClass)
         Log.d(TAG, "  📦 Registered parameterized: $baseRoute (${screenClass.simpleName})")
     }
 
     /**
-     * Finds a screen by exact route match.
+     * Finds a route by exact route match.
      */
-    fun getScreenByRoute(route: String): Screen? {
-        return (screenRegistry[route] as? ScreenRouteEntry.Singleton)?.screen
+    fun getRouteByRoute(route: String): Route? {
+        return (routeRegistry[route] as? RouteEntry.Singleton)?.route
     }
 
     /**
-     * Creates a screen instance from a deep link URI.
+     * Creates a route instance from a deep link URI.
      */
-    fun createScreenFromUri(uri: Uri): Screen? {
+    fun createRouteFromUri(uri: Uri): Route? {
         val path = uri.path ?: return null
         
         // Try exact match first
-        getScreenByRoute(path)?.let { return it }
+        getRouteByRoute(path)?.let { return it }
         
         // Try parameterized route
-        val entry = screenRegistry.values
-            .filterIsInstance<ScreenRouteEntry.Parameterized>()
+        val entry = routeRegistry.values
+            .filterIsInstance<RouteEntry.Parameterized>()
             .firstOrNull { path.startsWith(it.baseRoute) }
             ?: return null
 
@@ -106,7 +111,7 @@ class RouteRegistry @Inject constructor(
     private fun createScreenWithParams(
         screenClass: Class<out Screen>,
         uri: Uri
-    ): Screen? {
+    ): Route? {
         return try {
             val queryParams = uri.queryParameterNames.associateWith { uri.getQueryParameter(it) }
             
@@ -126,7 +131,7 @@ class RouteRegistry @Inject constructor(
                 }
             }
             
-            constructor.callBy(args) as? Screen
+            constructor.callBy(args) as? Route
         } catch (e: Exception) {
             Log.w(TAG, "Failed to create screen from params: ${e.message}")
             null
@@ -139,18 +144,18 @@ class RouteRegistry @Inject constructor(
     fun getAllGraphs(): Set<Graph> = graphRegistry.values.toSet()
 
     /**
-     * Gets all screens for a specific graph.
+     * Gets all routes for a specific graph.
      */
-    fun getScreensForGraph(graph: Graph): List<Screen> {
-        return screenRegistry.values
-            .filterIsInstance<ScreenRouteEntry.Singleton>()
-            .map { it.screen }
+    fun getRoutesForGraph(graph: Graph): List<Route> {
+        return routeRegistry.values
+            .filterIsInstance<RouteEntry.Singleton>()
+            .map { it.route }
             .filter { graph.contains(it) }
     }
 
-    sealed interface ScreenRouteEntry {
-        data class Singleton(val screen: Screen) : ScreenRouteEntry
-        data class Parameterized(val screenClass: Class<out Screen>) : ScreenRouteEntry {
+    sealed interface RouteEntry {
+        data class Singleton(val route: Route) : RouteEntry
+        data class Parameterized(val screenClass: Class<out Screen>) : RouteEntry {
             val baseRoute: String = "/" + screenClass.simpleName.lowercase()
         }
     }

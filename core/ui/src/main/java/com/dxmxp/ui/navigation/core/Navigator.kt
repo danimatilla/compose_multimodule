@@ -1,6 +1,7 @@
 package com.dxmxp.ui.navigation.core
 
 import androidx.compose.runtime.staticCompositionLocalOf
+import com.dxmxp.ui.navigation.model.Route
 import com.dxmxp.ui.navigation.model.Screen
 import kotlinx.coroutines.flow.Flow
 
@@ -8,16 +9,16 @@ interface Navigator {
     val events: Flow<NavigationEvent>
     fun navigate(event: NavigationEvent)
 
-    fun push(screen: Screen) {
-        navigate(NavigationEvent.PushScreen(screen))
+    fun push(route: Route) {
+        navigate(NavigationEvent.PushScreen(route))
     }
 
-    fun pop(screen: Screen? = null) {
-        navigate(NavigationEvent.PopScreen(screen))
+    fun pop(route: Route? = null) {
+        navigate(NavigationEvent.PopScreen(route))
     }
 
-    fun setRoot(screen: Screen) {
-        navigate(NavigationEvent.SetRootScreen(screen))
+    fun setRoot(route: Route) {
+        navigate(NavigationEvent.SetRootScreen(route))
     }
 }
 

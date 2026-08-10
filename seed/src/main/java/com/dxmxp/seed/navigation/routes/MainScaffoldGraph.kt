@@ -7,6 +7,7 @@ import com.dxmxp.seed.screens.HomeScreen
 import com.dxmxp.seed.screens.MenuScreen
 import com.dxmxp.seed.screens.SearchScreen
 import com.dxmxp.ui.navigation.model.Graph
+import com.dxmxp.ui.navigation.model.Route
 import com.dxmxp.ui.navigation.model.Screen
 import com.dxmxp.ui.navigation.model.Screen.Companion.screenEntry
 import dagger.Module
@@ -21,7 +22,7 @@ import kotlinx.serialization.Serializable
 @InstallIn(SingletonComponent::class)
 object MainScaffoldGraph : Graph {
 
-    override val screens: List<Class<out Screen>>
+    override val screens: List<Class<out Route>>
         get() = listOf(
             Home::class.java,
             Search::class.java,

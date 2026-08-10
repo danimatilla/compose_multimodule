@@ -17,11 +17,11 @@ class DeepLinkHandler @Inject constructor(
 ) {
 
     fun handle(uri: Uri): NavigationEvent? {
-        val screen = routeRegistry.createScreenFromUri(uri)
+        val route = routeRegistry.createRouteFromUri(uri)
 
-        return if (screen != null) {
-            Log.d(TAG, "🔗 Deep link handled: ${uri.path} -> ${screen::class.simpleName}")
-            NavigationEvent.PushScreen(screen)
+        return if (route != null) {
+            Log.d(TAG, "🔗 Deep link handled: ${uri.path} -> ${route::class.simpleName}")
+            NavigationEvent.PushScreen(route)
         } else {
             Log.w(TAG, "⚠️ Deep link not recognized: ${uri.path}")
             null

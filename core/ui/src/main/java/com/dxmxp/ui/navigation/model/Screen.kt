@@ -18,38 +18,38 @@ import com.dxmxp.ui.screens.WebViewScreen
  * organization of navigation into logical sections. When navigating to a screen, it's added to the backStack,
  * and when popping, it returns to the previous screen.
  */
-interface Screen : NavKey {
+interface Screen : Route {
 
-    val route: String
+    override val route: String
         get() = "/" + (this::class.simpleName ?: "").lowercase()
 
-    val showMainBottomBar: Boolean get() = true
+    override val showMainBottomBar: Boolean get() = true
 
     companion object {
 
         /**
          * Enhanced entry that automatically handles ViewModel initialization.
          *
-         * If the [Screen] type [K] has parameters (data class), it forces the [VM] to implement
+         * If the [Route] type [K] has parameters (data class), it forces the [VM] to implement
          * [InitializableViewModel] and calls its [InitializableViewModel.init] method.
          */
         @Suppress("UNCHECKED_CAST")
-        inline fun <reified K : Screen, reified VM : ViewModel> EntryProviderScope<NavKey>.screenEntry(
+        inline fun <reified K : Route, reified VM : ViewModel> EntryProviderScope<NavKey>.screenEntry(
             metadata: Map<String, Any> = emptyMap(),
             crossinline viewModelProvide: @Composable () -> VM,
             crossinline content: @Composable (VM) -> Unit,
         ) {
             val isSingleton = K::class.java.declaredFields.any { it.name == "INSTANCE" }
 
-            entry<K>(metadata = metadata) { screen ->
+            entry<K>(metadata = metadata) { route ->
                 val viewModel = viewModelProvide()
 
-                LaunchedEffect(screen) {
-                    (viewModel as? InitializableViewModel<K>)?.init(screen)
+                LaunchedEffect(route) {
+                    (viewModel as? InitializableViewModel<K>)?.init(route)
                 }
 
                 if (viewModel !is InitializableViewModel<*> && (!isSingleton)) {
-                    error("Screen ${K::class.simpleName} has parameters but ViewModel ${VM::class.simpleName} does not implement InitializableViewModel")
+                    error("Route ${K::class.simpleName} has parameters but ViewModel ${VM::class.simpleName} does not implement InitializableViewModel")
                 }
 
                 content(viewModel)
@@ -57,13 +57,13 @@ interface Screen : NavKey {
         }
 
         /**
-         * Simple entry for screens that don't need a ViewModel or complex initialization.
+         * Simple entry for routes that don't need a ViewModel or complex initialization.
          */
-        inline fun <reified K : Screen> EntryProviderScope<NavKey>.screenEntry(
+        inline fun <reified K : Route> EntryProviderScope<NavKey>.screenEntry(
             metadata: Map<String, Any> = emptyMap(),
             crossinline content: @Composable (K) -> Unit,
         ) {
-            entry<K>(metadata = metadata) { screen -> content(screen) }
+            entry<K>(metadata = metadata) { route -> content(route) }
         }
     }
 }

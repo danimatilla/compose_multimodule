@@ -19,6 +19,7 @@ import androidx.lifecycle.ViewModel
 import com.dxmxp.stories.navigation.routes.StoriesScaffoldGraph
 import com.dxmxp.ui.navigation.core.LocalNavigator
 import com.dxmxp.ui.navigation.orchestration.NavigationOrchestrator
+import com.dxmxp.ui.navigation.model.Route
 import com.dxmxp.ui.navigation.scaffold.rememberScaffoldController
 import com.dxmxp.ui.screens.BottomBar
 import dagger.hilt.android.lifecycle.HiltViewModel
@@ -36,7 +37,7 @@ fun StoriesScaffold() {
     val scaffoldViewModel: StoriesScaffoldViewModel = hiltViewModel()
 
     val controller = rememberScaffoldController(
-        initialScreen = StoriesScaffoldGraph.Feed,
+        initialRoute = StoriesScaffoldGraph.Feed,
         graph = StoriesScaffoldGraph,
         orchestrator = scaffoldViewModel.orchestrator
     )
@@ -67,8 +68,8 @@ fun StoriesScaffold() {
             BottomBar(
                 bottomBarItems = navigationBarItems,
                 currentDestination = currentDestination,
-                onClickItem = { screen ->
-                    navigator.setRoot(screen)
+                onClickItem = { route ->
+                    navigator.setRoot(route)
                 }
             )
         },

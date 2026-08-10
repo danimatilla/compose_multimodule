@@ -11,12 +11,17 @@ import com.dxmxp.ui.screens.WebViewScreen
  * In a common backstack architecture, a Graph provides the entries (EntryProvider) for its
  * screens, allowing the root to integrate them into a single navigation stack.
  */
-interface Graph : Screen {
+interface Graph : Route {
+
+    override val route: String
+        get() = "/" + (this::class.simpleName ?: "").lowercase()
+
+    override val showMainBottomBar: Boolean get() = true
 
     val isModal: Boolean
         get() = false
 
-    val screens: List<Class<out Screen>>
+    val screens: List<Class<out Route>>
 
     fun contains(key: NavKey): Boolean =
         javaClass.isInstance(key) || screens.any { clazz ->

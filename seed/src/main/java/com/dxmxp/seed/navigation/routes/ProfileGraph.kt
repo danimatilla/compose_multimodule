@@ -5,6 +5,7 @@ import androidx.navigation3.runtime.NavKey
 import com.dxmxp.seed.screens.profile.ProfileScreen
 import com.dxmxp.seed.screens.profile.SettingsScreen
 import com.dxmxp.ui.navigation.model.Graph
+import com.dxmxp.ui.navigation.model.Route
 import com.dxmxp.ui.navigation.model.Screen
 import com.dxmxp.ui.navigation.model.Screen.Companion.screenEntry
 import dagger.Module
@@ -19,7 +20,7 @@ import kotlinx.serialization.Serializable
 @InstallIn(SingletonComponent::class)
 object ProfileGraph : Graph {
 
-    override val screens: List<Class<out Screen>>
+    override val screens: List<Class<out Route>>
         get() = listOf(
             Settings::class.java
         )

@@ -11,6 +11,7 @@ import com.dxmxp.ui.navigation.utils.NavigationUtils.modalAnimation
 import com.dxmxp.stories.screens.story_detail.StoryDetailScreen
 import com.dxmxp.stories.screens.story_detail.StoryDetailViewModel
 import com.dxmxp.ui.navigation.model.Graph
+import com.dxmxp.ui.navigation.model.Route
 import com.dxmxp.ui.navigation.model.Screen
 import com.dxmxp.ui.navigation.model.Screen.Companion.screenEntry
 import dagger.Module
@@ -28,7 +29,7 @@ object StoriesScaffoldGraph : Graph {
     override val isModal: Boolean
         get() = true
 
-    override val screens: List<Class<out Screen>>
+    override val screens: List<Class<out Route>>
         get() = listOf(
             Feed::class.java,
             StoryDetail::class.java,

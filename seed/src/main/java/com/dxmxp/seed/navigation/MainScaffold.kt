@@ -17,6 +17,7 @@ import com.dxmxp.seed.navigation.routes.ProfileGraph
 import com.dxmxp.stories.navigation.routes.StoriesScaffoldGraph
 import com.dxmxp.ui.navigation.core.LocalNavigator
 import com.dxmxp.ui.navigation.orchestration.NavigationOrchestrator
+import com.dxmxp.ui.navigation.model.Route
 import com.dxmxp.ui.navigation.model.Screen
 import com.dxmxp.ui.navigation.scaffold.rememberScaffoldController
 import com.dxmxp.ui.screens.BottomBar
@@ -35,7 +36,7 @@ fun MainScaffold() {
     val scaffoldViewModel: MainScaffoldViewModel = hiltViewModel()
 
     val controller = rememberScaffoldController(
-        initialScreen = MainScaffoldGraph.Home,
+        initialRoute = MainScaffoldGraph.Home,
         graph = MainScaffoldGraph,
         orchestrator = scaffoldViewModel.orchestrator
     )
@@ -49,7 +50,7 @@ fun MainScaffold() {
     )
     
     val currentDestination = controller.currentDestination
-    val shouldShowBottomBar = (currentDestination as? Screen)?.showMainBottomBar != false
+    val shouldShowBottomBar = (currentDestination as? Route)?.showMainBottomBar != false
 
     Scaffold(
         bottomBar = {
@@ -57,11 +58,11 @@ fun MainScaffold() {
                 shouldShowBottomBar = shouldShowBottomBar,
                 bottomBarItems = bottomBarItems,
                 currentDestination = currentDestination,
-                onClickItem = { screen ->
-                    if (screen == StoriesScaffoldGraph) {
-                        navigator.push(screen)
+                onClickItem = { route ->
+                    if (route == StoriesScaffoldGraph) {
+                        navigator.push(route)
                     } else {
-                        navigator.setRoot(screen)
+                        navigator.setRoot(route)
                     }
                 }
             )

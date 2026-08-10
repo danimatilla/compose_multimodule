@@ -7,6 +7,7 @@ import com.dxmxp.ui.navigation.core.NavigationEvent
 import com.dxmxp.ui.navigation.core.NavigationManager
 import com.dxmxp.ui.navigation.core.RouteRegistry
 import com.dxmxp.ui.navigation.model.Graph
+import com.dxmxp.ui.navigation.model.Route
 import com.dxmxp.ui.navigation.model.Screen
 import kotlinx.coroutines.flow.Flow
 import javax.inject.Inject
@@ -33,13 +34,13 @@ class NavigationOrchestrator @Inject constructor(
         event: NavigationEvent,
         targetGraph: Graph? = null
     ): Boolean {
-        val screen = event.screenOrNull()
+        val route = event.routeOrNull()
 
         // Determine if this event applies to this backstack
         val appliesHere = when {
             targetGraph == null -> true // Root level, handle everything not in subgraphs
-            screen == null -> true // Pop without target always applies
-            targetGraph.contains(screen) -> true // Screen is in this graph
+            route == null -> true // Pop without target always applies
+            targetGraph.contains(route) -> true // Screen is in this graph
             else -> false
         }
 
@@ -51,10 +52,10 @@ class NavigationOrchestrator @Inject constructor(
         // Prevent navigation to modal screens from non-modal contexts (delegate to parent)
         if (targetGraph != null && 
             !targetGraph.isModal && 
-            screen != null && 
+            route != null && 
             routeRegistry.getAllGraphs()
                 .filter { it.isModal }
-                .any { it.contains(screen) }
+                .any { it.contains(route) }
         ) {
             Log.d(TAG, "Event is for modal, delegating to parent")
             return false
@@ -81,26 +82,26 @@ class NavigationOrchestrator @Inject constructor(
     /**
      * Navigates from a ViewModel or non-UI component.
      */
-    fun navigate(screen: Screen) {
-        navigationManager.push(screen)
+    fun navigate(route: Route) {
+        navigationManager.push(route)
     }
 
-    fun popTo(screen: Screen) {
-        navigationManager.pop(screen)
+    fun popTo(route: Route) {
+        navigationManager.pop(route)
     }
 
     fun pop() {
         navigationManager.pop()
     }
 
-    fun setRoot(screen: Screen) {
-        navigationManager.setRoot(screen)
+    fun setRoot(route: Route) {
+        navigationManager.setRoot(route)
     }
 
     private fun NavigationEvent.logString() = when (this) {
-        is NavigationEvent.PushScreen -> "🔻Push to ${screen.javaClass.simpleName}"
-        is NavigationEvent.PopScreen -> "🔺Pop${screen?.run { " to ${javaClass.simpleName}" }.orEmpty()}"
-        is NavigationEvent.SetRootScreen -> "🔻Set root to ${screen.javaClass.simpleName}"
+        is NavigationEvent.PushScreen -> "🔻Push to ${route.javaClass.simpleName}"
+        is NavigationEvent.PopScreen -> "🔺Pop${route?.run { " to ${javaClass.simpleName}" }.orEmpty()}"
+        is NavigationEvent.SetRootScreen -> "🔻Set root to ${route.javaClass.simpleName}"
     }
 
     private fun NavBackStack<NavKey>.stackString(): String =

@@ -4,6 +4,7 @@ import androidx.navigation3.runtime.EntryProviderScope
 import androidx.navigation3.runtime.NavKey
 import com.dxmxp.seed.screens.login.LoginScreen
 import com.dxmxp.ui.navigation.model.Graph
+import com.dxmxp.ui.navigation.model.Route
 import com.dxmxp.ui.navigation.model.Screen
 import com.dxmxp.ui.navigation.model.Screen.Companion.screenEntry
 import dagger.Module
@@ -18,7 +19,7 @@ import kotlinx.serialization.Serializable
 @InstallIn(SingletonComponent::class)
 object AuthGraph : Graph {
 
-    override val screens: List<Class<out Screen>>
+    override val screens: List<Class<out Route>>
         get() = listOf(
             Login::class.java
         )

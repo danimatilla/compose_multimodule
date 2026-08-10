@@ -2,20 +2,21 @@ package com.dxmxp.ui.navigation.core
 
 import androidx.navigation3.runtime.NavBackStack
 import androidx.navigation3.runtime.NavKey
+import com.dxmxp.ui.navigation.model.Route
 import com.dxmxp.ui.navigation.model.Screen
 
 /**
  * Represents all navigation events that can occur in the application.
  */
 sealed interface NavigationEvent {
-    data class PushScreen(val screen: Screen) : NavigationEvent
-    data class PopScreen(val screen: Screen? = null) : NavigationEvent
-    data class SetRootScreen(val screen: Screen) : NavigationEvent
+    data class PushScreen(val route: Route) : NavigationEvent
+    data class PopScreen(val route: Route? = null) : NavigationEvent
+    data class SetRootScreen(val route: Route) : NavigationEvent
 
-    fun screenOrNull(): Screen? = when (this) {
-        is PushScreen -> screen
-        is PopScreen -> screen
-        is SetRootScreen -> screen
+    fun routeOrNull(): Route? = when (this) {
+        is PushScreen -> route
+        is PopScreen -> route
+        is SetRootScreen -> route
     }
 
     /**
@@ -24,12 +25,12 @@ sealed interface NavigationEvent {
     suspend fun handle(backStack: NavBackStack<NavKey>) {
         when (this) {
             is PushScreen -> {
-                if (backStack.lastOrNull() != screen) {
-                    backStack.add(screen)
+                if (backStack.lastOrNull() != route) {
+                    backStack.add(route)
                 }
             }
             is PopScreen -> {
-                screen?.run {
+                route?.run {
                     backStack.indexOfLast { it == this }
                         .takeIf { it != -1 }
                         ?.let { targetIndex ->
@@ -44,7 +45,7 @@ sealed interface NavigationEvent {
             is SetRootScreen -> {
                 backStack.run {
                     clear()
-                    add(screen)
+                    add(route)
                 }
             }
         }

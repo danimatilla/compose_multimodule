@@ -49,7 +49,7 @@ class FeedViewModel @Inject constructor(
 
     private fun openDetail(story: Story) {
         navigationManager.push(
-            screen = StoriesScaffoldGraph.StoryDetail(id = story.id, story = story)
+            route = StoriesScaffoldGraph.StoryDetail(id = story.id, story = story)
         )
     }
 }
