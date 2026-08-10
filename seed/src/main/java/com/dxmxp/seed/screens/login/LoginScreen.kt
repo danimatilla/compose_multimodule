@@ -27,6 +27,7 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.text.input.KeyboardType
 import androidx.compose.ui.text.input.PasswordVisualTransformation
+import androidx.compose.ui.text.input.VisualTransformation
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import androidx.hilt.lifecycle.viewmodel.compose.hiltViewModel
@@ -83,19 +84,18 @@ private fun Content(
             )
 
             OutlinedTextField(
-                value = password.orEmpty(),
+                value = password,
                 onValueChange = { onEvent(LoginViewModel.Event.OnPasswordChanged(it)) },
                 label = { Text("Password") },
                 modifier = Modifier.fillMaxWidth(),
-                visualTransformation = PasswordVisualTransformation(),
+                visualTransformation = if (passwordVisible) PasswordVisualTransformation() else VisualTransformation.None,
                 keyboardOptions = KeyboardOptions(keyboardType = KeyboardType.Password),
                 singleLine = true,
                 enabled = !isLoading,
                 trailingIcon = {
                     IconButton(onClick = { onEvent(LoginViewModel.Event.OnTogglePasswordVisibility) }) {
-                        val visible = passwordVisible
-                        val image = if (visible) Icons.Filled.VisibilityOff else Icons.Filled.Visibility
-                        val description = if (visible) "Hide password" else "Show password"
+                        val image = if (passwordVisible) Icons.Filled.VisibilityOff else Icons.Filled.Visibility
+                        val description = if (passwordVisible) "Hide password" else "Show password"
                         Icon(imageVector = image, contentDescription = description)
                     }
                 }
@@ -118,7 +118,10 @@ private fun Content(
 private fun LoginScreenPreview() {
     SeedTheme {
         Content(
-            state = LoginViewModel.State(),
+            state = LoginViewModel.State(
+                isCheckingSession = false,
+                passwordVisible = false
+            ),
             onEvent = {}
         )
     }

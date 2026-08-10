@@ -4,15 +4,19 @@ import androidx.lifecycle.viewModelScope
 import com.dxmxp.domain.common.fold
 import com.dxmxp.domain.use_case.AutoLoginUseCase
 import com.dxmxp.domain.use_case.LoginUseCase
+import com.dxmxp.seed.navigation.MainScaffold
+import com.dxmxp.seed.navigation.routes.MainScaffoldGraph
 import com.dxmxp.ui.base.BaseViewModel
 import com.dxmxp.ui.common.collectInto
+import com.dxmxp.ui.navigation.core.NavigationManager
 import dagger.hilt.android.lifecycle.HiltViewModel
 import javax.inject.Inject
 
 @HiltViewModel
 class LoginViewModel @Inject constructor(
     private val loginUseCase: LoginUseCase,
-    private val autoLoginUseCase: AutoLoginUseCase
+    private val autoLoginUseCase: AutoLoginUseCase,
+    private val navigationManager: NavigationManager
 ) : BaseViewModel<LoginViewModel.State, LoginViewModel.Effect, LoginViewModel.Event>() {
 
     data class State(
@@ -31,7 +35,6 @@ class LoginViewModel @Inject constructor(
     }
 
     interface Effect {
-        data object NavigateToMain : Effect
         data class ShowError(val message: String) : Effect
     }
 
@@ -58,7 +61,7 @@ class LoginViewModel @Inject constructor(
             result.fold(
                 onLoading = { null },
                 onSuccess = { _, _ ->
-                    setEffect { Effect.NavigateToMain }
+                    navigateToMain()
                     null
                 },
                 onError = { exception ->
@@ -85,7 +88,7 @@ class LoginViewModel @Inject constructor(
             result.fold(
                 onLoading = { copy(isLoading = it) },
                 onSuccess = { _, _ ->
-                    setEffect { Effect.NavigateToMain }
+                    navigateToMain()
                     copy(isLoading = false)
                 },
                 onError = { exception ->
@@ -94,5 +97,9 @@ class LoginViewModel @Inject constructor(
                 }
             )
         }
+    }
+
+    private fun navigateToMain() {
+        navigationManager.setRoot(MainScaffoldGraph)
     }
 }
