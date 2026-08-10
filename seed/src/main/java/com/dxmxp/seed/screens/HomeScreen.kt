@@ -8,7 +8,6 @@ import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
-import com.dxmxp.seed.navigation.routes.MainScaffoldGraph
 import com.dxmxp.ui.navigation.core.LocalNavigator
 import com.dxmxp.ui.screens.WebView
 
@@ -28,12 +27,6 @@ fun HomeScreen() {
                 navigator.push(WebView(url = "https://www.google.com"))
             },
             content = { Text("WebView") }
-        )
-        Button(
-            onClick = {
-                navigator.push(MainScaffoldGraph.Beers)
-            },
-            content = { Text("Beers") }
         )
     }
 }

@@ -26,10 +26,6 @@ object LocalModule {
 
     @Provides
     @Singleton
-    fun provideBeerDao(database: SeedDatabase) = database.beerDao
-
-    @Provides
-    @Singleton
     fun provideUserDao(database: SeedDatabase) = database.userDao
 
     @Provides

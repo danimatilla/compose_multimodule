@@ -6,7 +6,6 @@ import com.dxmxp.seed.navigation.MainScaffold
 import com.dxmxp.seed.screens.HomeScreen
 import com.dxmxp.seed.screens.MenuScreen
 import com.dxmxp.seed.screens.SearchScreen
-import com.dxmxp.seed.screens.beers.BeersScreen
 import com.dxmxp.ui.navigation.model.Graph
 import com.dxmxp.ui.navigation.model.Screen
 import com.dxmxp.ui.navigation.model.Screen.Companion.screenEntry
@@ -28,7 +27,6 @@ object MainScaffoldGraph : Graph {
             CatalogGraph::class.java,
             Search::class.java,
             Menu::class.java,
-            Beers::class.java,
             ProfileGraph::class.java
         )
 
@@ -50,18 +48,11 @@ object MainScaffoldGraph : Graph {
             get() = "${this@MainScaffoldGraph.route}/menu"
     }
 
-    @Serializable
-    data object Beers : Screen {
-        override val route: String
-            get() = "${this@MainScaffoldGraph.route}/beers"
-    }
-
     override fun EntryProviderScope<NavKey>.registerEntries() {
         screenEntry<MainScaffoldGraph> { MainScaffold() }
         screenEntry<Home> { HomeScreen() }
         screenEntry<Search> { SearchScreen() }
         screenEntry<Menu> { MenuScreen() }
-        screenEntry<Beers> { BeersScreen() }
     }
 
     override val route: String
