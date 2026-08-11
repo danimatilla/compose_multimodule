@@ -21,7 +21,7 @@ import com.dxmxp.ui.screens.WebViewScreen
 interface Screen : Route {
 
     override val route: String
-        get() = "/" + (this::class.simpleName ?: "").lowercase()
+        get() = Route.calculateRoute(this::class.java)
 
     override val showMainBottomBar: Boolean get() = true
 

@@ -75,8 +75,8 @@ class RouteRegistry @Inject constructor(
      * Registers a screen that accepts parameters.
      */
     private fun registerParameterizedScreen(screenClass: Class<out Screen>) {
-        val baseRoute = "/" + screenClass.simpleName.lowercase()
-        routeRegistry[baseRoute] = RouteEntry.Parameterized(screenClass)
+        val baseRoute = Route.calculateRoute(screenClass)
+        routeRegistry[baseRoute] = RouteEntry.Parameterized(screenClass, baseRoute)
         Log.d(TAG, "  📦 Registered parameterized: $baseRoute (${screenClass.simpleName})")
     }
 
@@ -155,9 +155,7 @@ class RouteRegistry @Inject constructor(
 
     sealed interface RouteEntry {
         data class Singleton(val route: Route) : RouteEntry
-        data class Parameterized(val screenClass: Class<out Screen>) : RouteEntry {
-            val baseRoute: String = "/" + screenClass.simpleName.lowercase()
-        }
+        data class Parameterized(val screenClass: Class<out Screen>, val baseRoute: String) : RouteEntry
     }
 
     private companion object {

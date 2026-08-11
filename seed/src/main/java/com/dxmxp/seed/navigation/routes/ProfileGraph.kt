@@ -34,7 +34,7 @@ object ProfileGraph : Graph {
     }
 
     override val route: String
-        get() = "/profile"
+        get() = "${MainScaffoldGraph.route}/profile"
 
     @Provides
     @IntoSet

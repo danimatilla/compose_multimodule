@@ -22,6 +22,9 @@ import kotlinx.serialization.Serializable
 @InstallIn(SingletonComponent::class)
 object MainScaffoldGraph : Graph {
 
+    override val route: String
+        get() = "/seed"
+
     override val screens: List<Class<out Route>>
         get() = listOf(
             Home::class.java,
@@ -46,10 +49,6 @@ object MainScaffoldGraph : Graph {
         screenEntry<Menu> { MenuScreen() }
     }
 
-    override val route: String
-        get() = "/seed"
-
-    @Provides
-    @IntoSet
+    @Provides @IntoSet
     override fun provideGraph(): Graph = MainScaffoldGraph
 }
