@@ -1,10 +1,10 @@
 package com.dxmxp.seed.screens.login
 
 import androidx.lifecycle.viewModelScope
+import com.dxmxp.domain.AppException
 import com.dxmxp.domain.common.fold
 import com.dxmxp.domain.use_case.AutoLoginUseCase
 import com.dxmxp.domain.use_case.LoginUseCase
-import com.dxmxp.seed.navigation.MainScaffold
 import com.dxmxp.seed.navigation.routes.MainScaffoldGraph
 import com.dxmxp.ui.base.BaseViewModel
 import com.dxmxp.ui.common.collectInto
@@ -59,13 +59,15 @@ class LoginViewModel @Inject constructor(
             setState = ::setState
         ) { result ->
             result.fold(
-                onLoading = { null },
+                onLoading = { copy(isCheckingSession = it) },
                 onSuccess = { _, _ ->
                     navigateToMain()
-                    null
+                    copy(isCheckingSession = false)
                 },
                 onError = { exception ->
-                    setEffect { Effect.ShowError(exception.message.orEmpty()) }
+                    if (exception !is AppException.UnauthorizedException) {
+                        setEffect { Effect.ShowError(exception.message.orEmpty()) }
+                    }
                     copy(isCheckingSession = false)
                 }
             )
