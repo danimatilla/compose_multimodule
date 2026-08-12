@@ -70,7 +70,7 @@ class RouteRegistry @Inject constructor(
                         registerGraph(instance, depth + 1)
                     } else {
                         routeRegistry[instance.route] = RouteEntry.Singleton(instance)
-                        logger.d(TAG, "$indent  ├─ 📄 [S] ${instance.route}")
+                        logger.d(TAG, "$indent ├─ 📄 [S] ${instance.route}")
                     }
                 } else {
                     // It's a parameterized route (data class)
@@ -81,7 +81,7 @@ class RouteRegistry @Inject constructor(
                     }
                 }
             } catch (e: Exception) {
-                logger.w(TAG, "$indent  ├─ ❌ Failed to register ${routeClass.simpleName}: ${e.message}")
+                logger.w(TAG, "$indent ├─ ❌ Failed to register ${routeClass.simpleName}: ${e.message}")
             }
         }
     }
@@ -93,7 +93,7 @@ class RouteRegistry @Inject constructor(
         val indent = "  ".repeat(depth)
         val baseRoute = Route.calculateRoute(screenClass)
         routeRegistry[baseRoute] = RouteEntry.Parameterized(screenClass, baseRoute)
-        logger.d(TAG, "$indent  ├─ 📦 [P] $baseRoute (${screenClass.simpleName})")
+        logger.d(TAG, "$indent ├─ 📦 [P] $baseRoute (${screenClass.simpleName})")
     }
 
     /**

@@ -3,6 +3,7 @@ package com.dxmxp.ui.navigation.orchestration
 import androidx.navigation3.runtime.NavBackStack
 import androidx.navigation3.runtime.NavKey
 import com.dxmxp.domain.base.Logger
+import com.dxmxp.domain.repository.AuthRepository
 import com.dxmxp.ui.navigation.core.NavigationEvent
 import com.dxmxp.ui.navigation.core.NavigationManager
 import com.dxmxp.ui.navigation.core.RouteRegistry
@@ -20,6 +21,7 @@ import javax.inject.Singleton
 class NavigationOrchestrator @Inject constructor(
     private val navigationManager: NavigationManager,
     private val routeRegistry: RouteRegistry,
+    private val authRepository: AuthRepository,
     private val logger: Logger
 ) {
     
@@ -47,6 +49,20 @@ class NavigationOrchestrator @Inject constructor(
         if (!appliesHere) {
             logger.d(TAG, "[${targetGraph?.route ?: "ROOT"}] ⏭️ Ignored: ${event.logString()} doesn't apply here")
             return false
+        }
+
+        // If user is not logged in and tries to access a protected route (non-auth), redirect to Login
+        if (route != null) {
+            val authGraph = routeRegistry.getAllGraphs().firstOrNull { it.route == "/auth" }
+            val isAuthRoute = authGraph?.contains(route) ?: false
+
+            if (!isAuthRoute && authRepository.getAccessToken() == null) {
+                logger.d(TAG, "🛡️ Protected route access attempt without session. Redirecting to Login.")
+                authGraph?.let {
+                    handleEvent(backStack, NavigationEvent.SetRootScreen(it), targetGraph)
+                }
+                return true
+            }
         }
 
         // Prevent navigation to modal screens from non-modal contexts (delegate to parent)
@@ -117,4 +133,3 @@ class NavigationOrchestrator @Inject constructor(
         const val TAG = "NavigationOrchestrator"
     }
 }
-
