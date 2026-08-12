@@ -1,14 +1,13 @@
 package com.dxmxp.ui.navigation.orchestration
 
-import android.util.Log
 import androidx.navigation3.runtime.NavBackStack
 import androidx.navigation3.runtime.NavKey
+import com.dxmxp.domain.base.Logger
 import com.dxmxp.ui.navigation.core.NavigationEvent
 import com.dxmxp.ui.navigation.core.NavigationManager
 import com.dxmxp.ui.navigation.core.RouteRegistry
 import com.dxmxp.ui.navigation.model.Graph
 import com.dxmxp.ui.navigation.model.Route
-import com.dxmxp.ui.navigation.model.Screen
 import kotlinx.coroutines.flow.Flow
 import javax.inject.Inject
 import javax.inject.Singleton
@@ -20,7 +19,8 @@ import javax.inject.Singleton
 @Singleton
 class NavigationOrchestrator @Inject constructor(
     private val navigationManager: NavigationManager,
-    private val routeRegistry: RouteRegistry
+    private val routeRegistry: RouteRegistry,
+    private val logger: Logger
 ) {
     
     val events: Flow<NavigationEvent> = navigationManager.events
@@ -45,7 +45,7 @@ class NavigationOrchestrator @Inject constructor(
         }
 
         if (!appliesHere) {
-            Log.d(TAG, "Event doesn't apply to graph ${targetGraph?.route}")
+            logger.d(TAG, "[${targetGraph?.route ?: "ROOT"}] ⏭️ Ignored: ${event.logString()} doesn't apply here")
             return false
         }
 
@@ -57,11 +57,11 @@ class NavigationOrchestrator @Inject constructor(
                 .filter { it.isModal }
                 .any { it.contains(route) }
         ) {
-            Log.d(TAG, "Event is for modal, delegating to parent")
+            logger.d(TAG, "[${targetGraph.route}] ⤴️ Delegating: ${event.logString()} is MODAL")
             return false
         }
 
-        handleEvent(backStack, event)
+        handleEvent(backStack, event, targetGraph)
         return true
     }
 
@@ -70,13 +70,15 @@ class NavigationOrchestrator @Inject constructor(
      */
     private suspend fun handleEvent(
         backStack: NavBackStack<NavKey>,
-        event: NavigationEvent
+        event: NavigationEvent,
+        targetGraph: Graph?
     ) {
-        val initialBackStack = backStack.stackString()
+        val graphTag = "[${targetGraph?.route ?: "ROOT"}]"
+        val initialStack = backStack.stackString()
 
         event.handle(backStack)
 
-        Log.d(TAG, "${event.logString()} $initialBackStack > ${backStack.stackString()}")
+        logger.d(TAG, "$graphTag ${event.logString()} | $initialStack ➔ ${backStack.stackString()}")
     }
 
     /**
@@ -98,14 +100,18 @@ class NavigationOrchestrator @Inject constructor(
         navigationManager.setRoot(route)
     }
 
-    private fun NavigationEvent.logString() = when (this) {
-        is NavigationEvent.PushScreen -> "🔻Push to ${route.javaClass.simpleName}"
-        is NavigationEvent.PopScreen -> "🔺Pop${route?.run { " to ${javaClass.simpleName}" }.orEmpty()}"
-        is NavigationEvent.SetRootScreen -> "🔻Set root to ${route.javaClass.simpleName}"
+    private fun NavigationEvent.logString(): String {
+        val route = routeOrNull()
+        val routeName = route?.route ?: route?.javaClass?.simpleName ?: ""
+        return when (this) {
+            is NavigationEvent.PushScreen -> "PUSH($routeName)"
+            is NavigationEvent.PopScreen -> "POP" + (route?.let { "($routeName)" } ?: "")
+            is NavigationEvent.SetRootScreen -> "SET_ROOT($routeName)"
+        }
     }
 
     private fun NavBackStack<NavKey>.stackString(): String =
-        "[ ${joinToString { it.javaClass.simpleName }} ]"
+        "[ ${joinToString(" > ") { (it as? Route)?.route ?: it.javaClass.simpleName }} ]"
 
     private companion object {
         const val TAG = "NavigationOrchestrator"

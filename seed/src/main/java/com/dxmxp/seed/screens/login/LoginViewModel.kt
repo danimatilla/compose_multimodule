@@ -24,7 +24,7 @@ class LoginViewModel @Inject constructor(
         val password: String = "emilyspass",
         val passwordVisible: Boolean = false,
         val isLoading: Boolean = false,
-        val isCheckingSession: Boolean = true
+        val isCheckingSession: Boolean = false
     )
 
     interface Event {
