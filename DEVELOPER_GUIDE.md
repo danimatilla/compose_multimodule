@@ -1,196 +1,89 @@
-# 🧭 Ultimate Navigation Guide (v3.0)
+# 🧭 Ultimate Navigation Guide (v3.1)
 
-This guide provides the technical details for working with the project's navigation system.
+Technical deep-dive into the hierarchical navigation system.
 
 ## 1. Core Principles
 
-The architecture is built on three pillars:
-1.  **Single Source of Truth**: The `Screen` object contains both the route and the data.
-2.  **Decoupling**: ViewModels don't know about Compose; they use `NavigationManager`.
-3.  **Orchestration**: `NavigationOrchestrator` decides which backstack handles an event, preventing "navigation leaks" between nested scaffolds.
+1.  **Hierarchy of Responsibility**: The Root (Activity) handles high-level transitions (Graphs). Scaffolds handle internal screens.
+2.  **Access Guard**: Auth state is checked at the point of navigation, not inside screens.
+3.  **Event Persistence**: `NavigationManager` uses `replay = 1`. If a deep link is sent before a Scaffold is ready, the Scaffold will "catch up" as soon as it subscribes.
 
 ---
 
-## 2. Components Reference
+## 2. Component Logic
 
-| Component | Responsibility |
-| :--- | :--- |
-| `Screen` | A serializable destination. Defines visibility (e.g., `showMainBottomBar`). |
-| `Graph` | A collection of `Screen`s. Must be registered in Hilt as a `Set<Graph>`. |
-| `NavigationManager` | Singleton service to trigger events from anywhere (Business Logic). |
-| `Navigator` | UI-layer interface (`LocalNavigator`). Bridges to `NavigationManager`. |
-| `NavigationOrchestrator` | The "brain" that delegates events to the correct `NavBackStack`. |
-| `RouteRegistry` | Central index of all routes for O(1) lookups and Deep Link resolution. |
-| `ScaffoldController` | Manages local state (current tab, local backstack) for a Scaffold. |
-| `NavigationStore` | Temporal store for large models and cross-screen results. |
+### NavigationOrchestrator
+The orchestrator determines if an event `appliesHere` based on the backstack context:
+- **At Root**: Handles events for `Graph`s or routes that don't belong to the currently active Scaffold.
+- **In Scaffold**: Handles events for routes strictly inside its own `Graph`. It ignores events referring to itself to prevent infinite recursion.
+
+### RouteRegistry
+A centralized index generated at startup. It uses Kotlin Reflection to:
+1.  Map route strings (URLs) to singleton objects or data classes.
+2.  Parse query parameters into constructor arguments.
+3.  Support optional/nullable parameters by verifying constructor metadata.
 
 ---
 
-## 3. Step-by-Step: Adding a New Feature
-
-### Step 1: Define Screens
-Create your screens in your module (e.g., `:stories` or a new library module). Always use `@Serializable`.
+## 3. Handling Auth
+The `requiresAuth` property (default: `true`) is checked by the `NavigationOrchestrator`.
 
 ```kotlin
-@Serializable
-data object ProductList : Screen
-
-@Serializable
-data class ProductDetail(val productId: Int) : Screen
-```
-
-### Step 2: Create the Graph
-Implement the `Graph` interface. Use `@Module` and `@Provides` to let the system discover it.
-
-```kotlin
-@Serializable
-@Module
-@InstallIn(SingletonComponent::class)
-object ProductGraph : Graph {
-    override val route = "/products"
-    override val screens = listOf(ProductList::class.java, ProductDetail::class.java)
-
-    override fun EntryProviderScope<NavKey>.registerEntries() {
-        screenEntry<ProductList> { ProductListScreen() }
-        screenEntry<ProductDetail, ProductDetailViewModel>(
-            viewModelProvide = { hiltViewModel() }
-        ) { vm -> ProductDetailScreen(vm) }
-    }
-
-    @Provides @IntoSet
-    fun provideGraph(): Graph = ProductGraph
+// In AuthGraph.kt
+object AuthGraph : Graph {
+    override val requiresAuth = false // Publicly accessible
 }
 ```
 
-### Step 3: Handle Parameters in ViewModel
-If your screen is a `data class` (parameterized), your ViewModel **must** implement `InitializableViewModel<S>` to receive the data. This is enforced at runtime by `screenEntry`.
-
-```kotlin
-@HiltViewModel
-class ProductDetailViewModel @Inject constructor() : ViewModel(), InitializableViewModel<ProductDetail> {
-    override fun init(screen: ProductDetail) {
-        val id = screen.productId
-        // Fetch product data...
-    }
-}
-```
+If a protected route is requested without a session, the Orchestrator performs a `setRoot(AuthGraph)` automatically.
 
 ---
 
-## 4. Advanced: Nested Scaffolds
-If your feature has its own Bottom Bar or local backstack, use `rememberScaffoldController`.
+## 4. Deep Link Execution Flow
 
+1.  **Intent** received in `MainActivity`.
+2.  `DeepLinkHandler` delegates to `RouteRegistry`.
+3.  `RouteRegistry` identifies the `Screen` and instantiates it with URL parameters.
+4.  A `PushScreen` event is emitted.
+5.  **Root Orchestrator** checks if the screen belongs to a different Scaffold.
+6.  If so, it **auto-opens** that Scaffold first.
+7.  The new **Scaffold Orchestrator** receives the same event (via `replay=1`) and navigates internally to the final destination.
+
+---
+
+## 5. Modal vs Regular Graphs
+
+- **Regular Graph**: Typically used for main sections. Navigating to one uses `setRoot`.
+- **Modal Graph** (`isModal = true`): Used for overlays (e.g., Stories). Root will `push` these instead of `setRoot` to allow going back.
+
+---
+
+## 6. Passing Large Data & Results
+
+Use `NavigationStore` for non-primitive data or large objects.
+
+### Step 1: Source ViewModel
 ```kotlin
-@Composable
-fun MyFeatureScaffold() {
-    val orchestrator = hiltViewModel<ScaffoldViewModel>().orchestrator
-    val controller = rememberScaffoldController(
-        initialScreen = ProductList,
-        graph = ProductGraph,
-        orchestrator = orchestrator
-    )
+navigationStore.pushData("story_key", heavyStoryModel)
+navManager.push(StoryDetail(id = "1"))
+```
 
-    Scaffold(
-        bottomBar = { MyBottomBar(controller.currentDestination) }
-    ) { padding ->
-        MyNavGraph(backStack = controller.backStack, modifier = Modifier.padding(padding))
-    }
+### Step 2: Destination ViewModel
+```kotlin
+override fun init(screen: StoryDetail) {
+    val story = navigationStore.getData<Story>("story_key")
 }
 ```
 
 ---
 
-## 5. Deep Linking
-Deep links are resolved via `RouteRegistry`. A link like `myapp://products/productdetail?productId=42` will:
-1. Be captured by `MainActivity`.
-2. Passed to `DeepLinkHandler`.
-3. `RouteRegistry` will find the matching `Screen` class, extract parameters from the URI query, and instantiate the screen using reflection (optimized).
-4. A `PushScreen` event is triggered via `NavigationManager`.
-
-> **Note**: For deep links to work, the `Screen` data class must have a primary constructor where parameter names match the URL query keys.
-
----
-
-## 6. Modal Navigation & Delegation
-The system supports "Modal" graphs (e.g., Full-screen overlays like Stories).
-- Set `override val isModal = true` in your `Graph`.
-- When a `PushScreen` event occurs, the `NavigationOrchestrator` checks if the target screen belongs to a modal graph.
-- If the current local backstack is NOT modal, it will **delegate** the event to the parent backstack (Root).
-- This ensures that modals always cover the entire UI regardless of where the event was triggered.
-
----
-
-## 7. Custom Animations
-You can use `NavigationUtils.modalAnimation()` inside your `registerEntries` to apply standardized transitions.
+## 7. Custom Transitions
+Use `metadata` in `screenEntry` to define animations.
 
 ```kotlin
-override fun EntryProviderScope<NavKey>.registerEntries() {
-    screenEntry<MyScreen>(
-        metadata = metadata { modalAnimation() }
-    ) { ... }
-}
+screenEntry<MyScreen>(
+    metadata = metadata { modalAnimation() }
+) { ... }
 ```
 
----
-
-## 8. Passing Large Data & Results
-To avoid `TransactionTooLargeException` and keep `Screen` classes clean, use `NavigationStore`. This allows sending models between screens and receiving **optional** results back.
-
-### Step 1: Push data from Origen
-```kotlin
-// In SourceViewModel
-fun onEditProduct(product: Product) {
-    // 1. Push the heavy model
-    navigationStore.pushData(product.id, product)
-
-    // 2. Observe for an optional result
-    viewModelScope.launch {
-        navigationStore.observeResult<Product>(product.id)
-            .take(1)
-            .collect { updatedProduct ->
-                updateProductList(updatedProduct)
-            }
-    }
-
-    navManager.push(ProductDetail(productId = product.id))
-}
-```
-
-### Step 2: Consume and Emit from Destination
-```kotlin
-// In DestinationViewModel
-override fun init(screen: ProductDetail) {
-    val cached: Product? = navigationStore.getData(screen.productId)
-    if (cached != null) {
-        setState { copy(product = cached) }
-    } else {
-        loadFromDb(screen.productId)
-    }
-}
-
-fun onSave() {
-    val updated = uiState.value.product
-    navigationStore.emitResult(updated.id, updated)
-    navManager.pop()
-}
-```
-
----
-
-## 9. Back Press Handling
-Use `LocalBackPressHandler` to intercept back events at the screen level (e.g., to show a confirmation dialog).
-
-```kotlin
-val backPressHandler = rememberBackPressHandler {
-    if (hasUnsavedChanges) {
-        showExitDialog = true
-        false // Prevent back
-    } else {
-        true // Allow back
-    }
-}
-
-CompositionLocalProvider(LocalBackPressHandler provides backPressHandler) {
-    Content(...)
-}
-```
+Standardized animations are available in `NavigationUtils`.

@@ -5,6 +5,7 @@ import androidx.navigation3.runtime.NavKey
 interface Route : NavKey {
     val route: String
     val showMainBottomBar: Boolean
+    val requiresAuth: Boolean get() = true
 
     companion object {
         /**
@@ -18,9 +19,9 @@ interface Route : NavKey {
                 .replace("screen", "")
             val enclosingClass = clazz.enclosingClass
 
-            if (enclosingClass != null && Route::class.java.isAssignableFrom(enclosingClass)) {
+            if ((enclosingClass != null) && Route::class.java.isAssignableFrom(enclosingClass)) {
                 return try {
-                    val parent = enclosingClass.getField("INSTANCE").get(null) as Route
+                    val parent = enclosingClass.getField("INSTANCE")[null] as Route
                     "${parent.route}/$name".replace("//", "/")
                 } catch (_: Exception) {
                     "/$name"

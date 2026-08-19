@@ -3,7 +3,6 @@ package com.dxmxp.ui.navigation.core
 import androidx.navigation3.runtime.NavBackStack
 import androidx.navigation3.runtime.NavKey
 import com.dxmxp.ui.navigation.model.Route
-import com.dxmxp.ui.navigation.model.Screen
 
 /**
  * Represents all navigation events that can occur in the application.
@@ -17,6 +16,16 @@ sealed interface NavigationEvent {
         is PushScreen -> route
         is PopScreen -> route
         is SetRootScreen -> route
+    }
+
+    fun logString(): String {
+        val route = routeOrNull()
+        val routeName = route?.route ?: route?.javaClass?.simpleName ?: ""
+        return when (this) {
+            is PushScreen -> "PUSH($routeName)"
+            is PopScreen -> "POP" + (route?.let { "($routeName)" } ?: "")
+            is SetRootScreen -> "SET_ROOT($routeName)"
+        }
     }
 
     /**
@@ -44,6 +53,7 @@ sealed interface NavigationEvent {
             }
             is SetRootScreen -> {
                 backStack.run {
+                    if (lastOrNull() == route) return@run
                     clear()
                     add(route)
                 }

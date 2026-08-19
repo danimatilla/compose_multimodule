@@ -5,20 +5,21 @@ A robust, type-safe, and scalable navigation architecture for Jetpack Compose ba
 ## 🚀 Key Features
 
 - **Type-Safe Navigation**: Destinations are defined as `@Serializable` objects or data classes.
-- **Multi-Module Support**: Decoupled navigation logic allowing features to be developed in isolation.
-- **Orchestrated Backstacks**: Intelligent handling of multiple backstacks (e.g., Root, Main Tab Bar, Nested Scaffolds).
+- **Hierarchical Orchestration**: Intelligent routing between Root and Nested backstacks (e.g., Main App vs. Modal Features).
+- **Integrated Auth Guard**: Simple `requiresAuth` property on routes with automatic redirection to Login.
+- **Event-Driven & Decoupled**: Navigate from ViewModels or Business logic without UI references using `NavigationManager`.
 - **Zero-Boilerplate Data Passing**: Pass data directly through Screen constructors with automatic ViewModel initialization.
 - **Large Data & Results Support**: `NavigationStore` for passing heavy models and receiving optional results without bloating routes.
-- **Reflection-Optimized Routing**: Fast route resolution and deep link handling via a centralized `RouteRegistry` that maps URLs to `@Serializable` screen instances.
+- **Reflection-Optimized Deep Linking**: Fast route resolution via a centralized `RouteRegistry` that supports complex parameter parsing.
 - **Common Screens Library**: Built-in support for reusable screens like `WebView` across all modules.
-- **Strict Architecture**: Enforced patterns via custom Konsist tests to ensure consistent navigation implementation.
+- **Standardized Transitions**: Pre-defined animations for Modals and Scaffolds.
 
 ---
 
 ## 🛠 Architecture Overview
 
 ### 1. Navigation Flow
-The navigation follows a decoupled, event-driven pattern. This ensures that features remain independent and navigation can be triggered from anywhere (UI or ViewModels).
+The navigation follows a decoupled, event-driven pattern. Events are buffered (`replay = 1`) to ensure feature scaffolds receive the latest navigation command upon creation.
 
 ```mermaid
 graph LR
@@ -27,32 +28,26 @@ graph LR
     NO --> BS[Target Backstack]
 ```
 
-1.  **UI Action**: A user interaction (e.g., button click) or a business logic decision.
-2.  **NavigationManager**: Acts as a central "Post Office". It captures navigation requests and broadcasts them as `NavigationEvent` objects. This allows ViewModels to trigger navigation without having any reference to the UI.
-3.  **NavigationOrchestrator**: The "Brain" of the system. It listens to the stream of events and determines which part of the app (the Root backstack, a nested scaffold, or a specific feature flow) should handle the request.
-4.  **Target Backstack**: The specific `NavBackStack` (from Navigation3) that gets updated. Changing the state of the backstack is what finally triggers the UI recomposition to show the new screen.
-
-### 2. Package Structure (`core:ui`)
-- `navigation.model`: Core entities (`Screen`, `Graph`).
-- `navigation.core`: Infrastructure (`Navigator`, `NavigationManager`, `NavigationStore`, `RouteRegistry`, `NavigationEvent`).
-- `navigation.orchestration`: Coordination logic (`NavigationOrchestrator`).
-- `navigation.scaffold`: UI controllers and helpers (`ScaffoldController`, `BackPressHandler`).
-- `navigation.utils`: Utilities (`DeepLinkHandler`, `NavigationUtils`).
+1.  **UI Action**: A user interaction or a business logic decision.
+2.  **NavigationManager**: A central service that captures and broadcasts `NavigationEvent` objects.
+3.  **NavigationOrchestrator**: The "Brain". It decides which backstack (Root or Nested) should handle the event based on the route hierarchy.
+4.  **Target Backstack**: The specific `NavBackStack` that updates, triggering UI recomposition.
 
 ---
 
 ## 📖 Implementation Guide
 
 ### 1. Define a Screen
-Screens are `NavKey` implementations. Use `data object` for simple destinations and `data class` for parameterized ones.
+Screens are `NavKey` implementations. Mark destinations as protected or public.
 
 ```kotlin
 @Serializable
 data object HomeScreen : Screen
 
 @Serializable
-data class DetailScreen(val id: String, val title: String) : Screen {
+data class DetailScreen(val id: String) : Screen {
     override val showMainBottomBar = false
+    override val requiresAuth = true // Default is true
 }
 ```
 
@@ -65,15 +60,10 @@ Graphs group related screens and manage their registration.
 @InstallIn(SingletonComponent::class)
 object MainGraph : Graph {
     override val route = "/main"
-    
-    // Explicitly list screens for performance and safety
     override val screens = listOf(Home::class.java, Detail::class.java)
 
     override fun EntryProviderScope<NavKey>.registerEntries() {
-        // Simple screen without VM
         screenEntry<Home> { HomeScreen() }
-        
-        // Screen with automatic ViewModel initialization
         screenEntry<Detail, DetailViewModel>(
             viewModelProvide = { hiltViewModel() }
         ) { vm -> DetailScreen(vm) }
@@ -85,7 +75,7 @@ object MainGraph : Graph {
 ```
 
 ### 3. Automatic ViewModel Initialization
-If your ViewModel implements `InitializableViewModel<S>`, it will receive the screen parameters automatically when the destination is reached.
+ViewModels implementing `InitializableViewModel<S>` receive screen parameters automatically.
 
 ```kotlin
 @HiltViewModel
@@ -97,60 +87,28 @@ class DetailViewModel @Inject constructor() : ViewModel(), InitializableViewMode
 ```
 
 ### 4. Navigating
-
-#### From Composables
-Use `LocalNavigator.current`:
 ```kotlin
+// From Composables
 val navigator = LocalNavigator.current
-Button(onClick = { navigator.push(DetailScreen(id = "1", title = "Hello")) }) {
-    Text("Go to Detail")
-}
-```
+navigator.push(DetailScreen(id = "1"))
 
-#### From ViewModels
-Inject `NavigationManager`:
-```kotlin
-class MyViewModel @Inject constructor(private val navManager: NavigationManager) : ViewModel() {
-    fun onComplete() = navManager.setRoot(HomeScreen)
-}
-```
-
-#### Passing Large Data & Results
-Use `NavigationStore` to pass models without bloating the route.
-
-```kotlin
-// Source
-navigationStore.pushData(id, myLargeModel)
-navManager.push(DetailScreen(id))
-
-// Destination
-val model = navigationStore.getData<MyModel>(screen.id)
-```
-
-### 5. Using Common Screens
-The `core:ui` module provides common screens that can be used anywhere.
-
-```kotlin
-// From any ViewModel
-navManager.push(WebView(url = "https://example.com", title = "Help"))
+// From ViewModels
+navManager.setRoot(MainGraph)
 ```
 
 ---
 
+## 🔐 Auth Handling
+Routes can be protected using the `requiresAuth` property. The `NavigationOrchestrator` checks this before every navigation event and redirects to the `/auth` route if no session is found.
+
 ## 🔗 Deep Links
-The system handles deep links automatically using the `RouteRegistry`. Simply register your graph, and URLs matching `your-app://your-domain/screen-name?param=value` will be mapped to the corresponding `Screen` instance.
+The `RouteRegistry` automatically maps URIs to screens. 
+Example: `myapp://stories/storydetail?id=42` maps to `StoryDetail(id="42")`.
+- Supports optional and default parameters.
+- Supports types: `String`, `Int`, `Boolean`, `Long`.
 
 ## 🏗 Modularization Strategy
-- `:core:ui`: Common navigation components, Design System, and common screens.
-- `:core:domain` / `:core:data`: Business logic and persistence.
-- `:stories`: Feature-specific module. Exports its `Graph` via Hilt.
-- `:seed`: The "App" module that collects all `Graph`s, sets up the Root backstack, and contains local features (like Auth).
-
-```mermaid
-graph TD
-    APP[":seed (App)"] --> F1[":stories"]
-    APP --> CUI[":core:ui"]
-    F1 --> CUI
-    CUI --> CD[":core:domain"]
-    CD --> CDAT[":core:data"]
-```
+- `:core:ui`: Core navigation, Design System, and common screens.
+- `:core:domain` / `:core:data`: Business logic, Repositories, and Auth state.
+- `:stories`: Feature module. Exports its `Graph` via Hilt.
+- `:seed`: App module. Collects all `Graph`s and defines the Root flow.

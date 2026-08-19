@@ -107,7 +107,7 @@ class RouteRegistry @Inject constructor(
      * Creates a route instance from a deep link URI.
      */
     fun createRouteFromUri(uri: Uri): Route? {
-        val path = uri.path ?: return null
+        val path = uri.path?.removeSuffix("/") ?: return null
         
         // Try exact match first
         getRouteByRoute(path)?.let { 
@@ -118,7 +118,10 @@ class RouteRegistry @Inject constructor(
         // Try parameterized route
         val entry = routeRegistry.values
             .filterIsInstance<RouteEntry.Parameterized>()
-            .firstOrNull { path.startsWith(it.baseRoute) }
+            .firstOrNull { 
+                path == it.baseRoute || path.startsWith("${it.baseRoute}/") || 
+                (it.baseRoute.isNotEmpty() && path.startsWith(it.baseRoute) && path.length > it.baseRoute.length && path[it.baseRoute.length] == '?')
+            }
         
         if (entry == null) {
             logger.w(TAG, "⚠️ Deep Link No Match: $path")
@@ -143,20 +146,43 @@ class RouteRegistry @Inject constructor(
                 return screenClass.getDeclaredConstructor().newInstance()
             }
 
-            val constructor = screenClass.kotlin.primaryConstructor ?: return null
-            val args = constructor.parameters.associateWith { param ->
-                val paramValue = queryParams[param.name] ?: return null
-                when (param.type.classifier) {
-                    String::class -> paramValue
-                    Int::class -> paramValue.toIntOrNull() ?: return null
-                    Boolean::class -> paramValue.toBoolean()
-                    Long::class -> paramValue.toLongOrNull() ?: return null
-                    else -> return null
-                }
+            val constructor = screenClass.kotlin.primaryConstructor ?: run {
+                logger.w(TAG, "   └─ ❌ No primary constructor found for ${screenClass.simpleName}")
+                return null
             }
+            val args = constructor.parameters
+                .filter { queryParams.containsKey(it.name) || !it.isOptional }
+                .associateWith { param ->
+                    val paramValue = queryParams[param.name]
+                    if (paramValue == null) {
+                        if (param.isOptional) return@associateWith null
+                        else {
+                            logger.w(TAG, "   └─ ❌ Missing mandatory param: ${param.name}")
+                            return null
+                        }
+                    }
+                    
+                    val parsedValue = when (param.type.classifier) {
+                        String::class -> paramValue
+                        Int::class -> paramValue.toIntOrNull()
+                        Boolean::class -> paramValue.toBoolean()
+                        Long::class -> paramValue.toLongOrNull()
+                        else -> {
+                            logger.w(TAG, "   └─ ❌ Unsupported param type: ${param.type.classifier}")
+                            null
+                        }
+                    }
+                    
+                    if (parsedValue == null && !param.type.isMarkedNullable) {
+                        logger.w(TAG, "   └─ ❌ Failed to parse param: ${param.name} = $paramValue")
+                        return null
+                    }
+                    parsedValue
+                }
             
             logger.d(TAG, "   └─ Params: $queryParams")
-            constructor.callBy(args) as? Route
+            val filteredArgs = args.filter { (param, value) -> value != null || param.type.isMarkedNullable }
+            constructor.callBy(filteredArgs as Map<kotlin.reflect.KParameter, Any?>) as? Route
         } catch (e: Exception) {
             logger.w(TAG, "   └─ ❌ Error creating screen ${screenClass.simpleName}: ${e.message}")
             null

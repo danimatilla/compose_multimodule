@@ -8,7 +8,6 @@ import com.dxmxp.ui.navigation.core.NavigationEvent
 import com.dxmxp.ui.navigation.core.NavigationManager
 import com.dxmxp.ui.navigation.core.RouteRegistry
 import com.dxmxp.ui.navigation.model.Graph
-import com.dxmxp.ui.navigation.model.Route
 import kotlinx.coroutines.flow.Flow
 import javax.inject.Inject
 import javax.inject.Singleton
@@ -34,100 +33,59 @@ class NavigationOrchestrator @Inject constructor(
     suspend fun handleEventForBackstack(
         backStack: NavBackStack<NavKey>,
         event: NavigationEvent,
-        targetGraph: Graph? = null
+        containerGraph: Graph? = null
     ): Boolean {
         val route = event.routeOrNull()
 
-        // Determine if this event applies to this backstack
-        val appliesHere = when {
-            targetGraph == null -> true // Root level, handle everything not in subgraphs
-            route == null -> true // Pop without target always applies
-            targetGraph.contains(route) -> true // Screen is in this graph
-            else -> false
+        // 1. Access Control: Only handled at ROOT level to prevent redirection loops.
+        if (containerGraph == null && (route?.requiresAuth == true) && (authRepository.getAccessToken() == null)) {
+            logger.d(TAG, "🛡️ Access Denied to ${route.route}. Redirecting to Auth.")
+            routeRegistry.getAllGraphs().firstOrNull { it.route == "/auth" }?.let { 
+                navigationManager.setRoot(it) 
+            }
+            return true
         }
 
-        if (!appliesHere) {
-            logger.d(TAG, "[${targetGraph?.route ?: "ROOT"}] ⏭️ Ignored: ${event.logString()} doesn't apply here")
-            return false
+        // 2. Hierarchical Decision: Determine which collector should handle this event.
+        val appliesHere = if (containerGraph == null) {
+            // ROOT level handles: 
+            // - Any Graph (to switch scaffolds or open modals)
+            // - Any route NOT contained in the currently active nested Graph
+            // - Pop events (when they reach the root)
+            val currentNested = backStack.lastOrNull() as? Graph
+            when {
+                route == null -> true
+                route is Graph -> true
+                currentNested == null -> true
+                else -> !currentNested.contains(route)
+            }
+        } else {
+            // SCAFFOLD level handles:
+            // - Any route that is strictly INSIDE its graph (recursively)
+            // - BUT NOT the graph itself (as it represents the scaffold container, handled by parent)
+            route != null && containerGraph.contains(route) && route.route != containerGraph.route
         }
 
-        // If user is not logged in and tries to access a protected route (non-auth), redirect to Login
-        if (route != null) {
-            val authGraph = routeRegistry.getAllGraphs().firstOrNull { it.route == "/auth" }
-            val isAuthRoute = authGraph?.contains(route) ?: false
+        if (!appliesHere) return false
 
-            if (!isAuthRoute && authRepository.getAccessToken() == null) {
-                logger.d(TAG, "🛡️ Protected route access attempt without session. Redirecting to Login.")
-                authGraph?.let {
-                    handleEvent(backStack, NavigationEvent.SetRootScreen(it), targetGraph)
-                }
+        // 3. Auto-open Scaffolds: If a screen belongs to a different scaffold, Root should open it first.
+        if (containerGraph == null && route != null && route !is Graph && event is NavigationEvent.PushScreen) {
+            val hostGraph = routeRegistry.getAllGraphs().firstOrNull { it.contains(route) }
+            // Only auto-open if the host is a different graph and not already at the top of the backstack.
+            if (hostGraph != null && hostGraph.route != route.route && !backStack.contains(hostGraph)) {
+                logger.d(TAG, "🔄 Root auto-opening host graph ${hostGraph.route} for ${route.route}")
+                navigationManager.push(hostGraph)
                 return true
             }
         }
 
-        // Prevent navigation to modal screens from non-modal contexts (delegate to parent)
-        if (targetGraph != null && 
-            !targetGraph.isModal && 
-            route != null && 
-            routeRegistry.getAllGraphs()
-                .filter { it.isModal }
-                .any { it.contains(route) }
-        ) {
-            logger.d(TAG, "[${targetGraph.route}] ⤴️ Delegating: ${event.logString()} is MODAL")
-            return false
-        }
-
-        handleEvent(backStack, event, targetGraph)
+        // 4. Final execution on the target backstack.
+        logger.d(TAG, "[${containerGraph?.route ?: "ROOT"}] Handling: ${event.logString()}")
+        event.handle(backStack)
         return true
     }
 
-    /**
-     * Directly handles a navigation event on a backstack.
-     */
-    private suspend fun handleEvent(
-        backStack: NavBackStack<NavKey>,
-        event: NavigationEvent,
-        targetGraph: Graph?
-    ) {
-        val graphTag = "[${targetGraph?.route ?: "ROOT"}]"
-        val initialStack = backStack.stackString()
-
-        event.handle(backStack)
-
-        logger.d(TAG, "$graphTag ${event.logString()} | $initialStack ➔ ${backStack.stackString()}")
-    }
-
-    /**
-     * Navigates from a ViewModel or non-UI component.
-     */
-    fun navigate(route: Route) {
-        navigationManager.push(route)
-    }
-
-    fun popTo(route: Route) {
-        navigationManager.pop(route)
-    }
-
-    fun pop() {
-        navigationManager.pop()
-    }
-
-    fun setRoot(route: Route) {
-        navigationManager.setRoot(route)
-    }
-
-    private fun NavigationEvent.logString(): String {
-        val route = routeOrNull()
-        val routeName = route?.route ?: route?.javaClass?.simpleName ?: ""
-        return when (this) {
-            is NavigationEvent.PushScreen -> "PUSH($routeName)"
-            is NavigationEvent.PopScreen -> "POP" + (route?.let { "($routeName)" } ?: "")
-            is NavigationEvent.SetRootScreen -> "SET_ROOT($routeName)"
-        }
-    }
-
-    private fun NavBackStack<NavKey>.stackString(): String =
-        "[ ${joinToString(" > ") { (it as? Route)?.route ?: it.javaClass.simpleName }} ]"
+    fun hasActiveSession(): Boolean = authRepository.getAccessToken() != null
 
     private companion object {
         const val TAG = "NavigationOrchestrator"

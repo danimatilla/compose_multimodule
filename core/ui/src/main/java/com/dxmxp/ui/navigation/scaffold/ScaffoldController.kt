@@ -62,7 +62,7 @@ class ScaffoldController(
         get() = backStack.size <= 1
 
     suspend fun handleNavigationEvent(event: NavigationEvent) {
-        val handled = orchestrator.handleEventForBackstack(backStack, event, targetGraph = graph)
+        val handled = orchestrator.handleEventForBackstack(backStack, event, containerGraph = graph)
         if (handled) {
             _currentDestination.value = backStack.lastOrNull()
         }

@@ -20,7 +20,6 @@ import androidx.compose.runtime.remember
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Modifier
 import androidx.navigation3.runtime.entryProvider
-import androidx.navigation3.runtime.metadata
 import androidx.navigation3.runtime.rememberNavBackStack
 import androidx.navigation3.ui.NavDisplay
 import com.dxmxp.seed.navigation.MainScaffold
@@ -64,7 +63,10 @@ class MainActivity : ComponentActivity() {
         intentState = intent
 
         setContent {
-            val backStack = rememberNavBackStack(AuthGraph)
+            val initialRoute = remember {
+                if (navigationOrchestrator.hasActiveSession()) MainScaffoldGraph else AuthGraph
+            }
+            val backStack = rememberNavBackStack(initialRoute)
 
             val navigator = remember {
                 NavigationManagerBridge(navigationManager)
@@ -72,14 +74,6 @@ class MainActivity : ComponentActivity() {
 
             LaunchedEffect(Unit) {
                 navigationOrchestrator.events.collect { event ->
-                    val currentRoot = backStack.lastOrNull()
-                    val route = event.routeOrNull()
-
-                    if (currentRoot is Graph && route != null && currentRoot.contains(route)) {
-                        // Let the nested scaffold handle it
-                        return@collect
-                    }
-
                     navigationOrchestrator.handleEventForBackstack(backStack, event)
                 }
             }
@@ -108,9 +102,9 @@ class MainActivity : ComponentActivity() {
                         entryProvider = entryProvider,
                         transitionSpec = { fadeIn(tween(500)) togetherWith fadeOut(tween(500)) },
                         popTransitionSpec = { fadeIn(tween(500)) togetherWith fadeOut(tween(500)) },
-                        modifier = Modifier.Companion
+                        modifier = Modifier
                             .fillMaxSize()
-                            .background(color = MaterialTheme.colorScheme.background)
+                            .background(color = MaterialTheme.colorScheme.background),
                     )
                 }
             }
