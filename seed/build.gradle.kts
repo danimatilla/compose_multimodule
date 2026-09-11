@@ -64,6 +64,8 @@ dependencies {
     implementation(project(":core:ui"))
     implementation(project(":stories"))
 
+    implementation(libs.androidx.core.splashscreen)
+
     implementation(libs.bundles.hilt)
     ksp(libs.hilt.compiler)
 
