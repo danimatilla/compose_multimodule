@@ -20,6 +20,9 @@ import kotlinx.serialization.Serializable
 @InstallIn(SingletonComponent::class)
 object ProfileGraph : Graph {
 
+    override val route: String
+        get() = "/profile"
+
     override val screens: List<Class<out Route>>
         get() = listOf(
             Settings::class.java
@@ -29,12 +32,8 @@ object ProfileGraph : Graph {
     data object Settings : Screen
 
     override fun EntryProviderScope<NavKey>.registerEntries() {
-        screenEntry<ProfileGraph> { ProfileScreen() }
         screenEntry<Settings> { SettingsScreen() }
     }
-
-    override val route: String
-        get() = "${MainScaffoldGraph.route}/profile"
 
     @Provides
     @IntoSet

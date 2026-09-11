@@ -19,6 +19,9 @@ import kotlinx.serialization.Serializable
 @InstallIn(SingletonComponent::class)
 object AuthGraph : Graph {
 
+    override val route: String
+        get() = "/auth"
+
     override val requiresAuth: Boolean
         get() = false
 
@@ -34,10 +37,8 @@ object AuthGraph : Graph {
 
     override fun EntryProviderScope<NavKey>.registerEntries() {
         screenEntry<AuthGraph> { LoginScreen() }
+        screenEntry<Login> { LoginScreen() }
     }
-
-    override val route: String
-        get() = "/auth"
 
     @Provides
     @IntoSet

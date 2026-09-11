@@ -6,6 +6,7 @@ import com.dxmxp.seed.navigation.MainScaffold
 import com.dxmxp.seed.screens.HomeScreen
 import com.dxmxp.seed.screens.MenuScreen
 import com.dxmxp.seed.screens.SearchScreen
+import com.dxmxp.seed.screens.profile.ProfileScreen
 import com.dxmxp.ui.navigation.model.Graph
 import com.dxmxp.ui.navigation.model.Route
 import com.dxmxp.ui.navigation.model.Screen
@@ -47,8 +48,10 @@ object MainScaffoldGraph : Graph {
         screenEntry<Home> { HomeScreen() }
         screenEntry<Search> { SearchScreen() }
         screenEntry<Menu> { MenuScreen() }
+        screenEntry<ProfileGraph> { ProfileScreen() }
     }
 
-    @Provides @IntoSet
+    @Provides
+    @IntoSet
     override fun provideGraph(): Graph = MainScaffoldGraph
 }

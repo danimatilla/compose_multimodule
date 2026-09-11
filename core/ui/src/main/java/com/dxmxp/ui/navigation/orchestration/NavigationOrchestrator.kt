@@ -55,7 +55,6 @@ class NavigationOrchestrator @Inject constructor(
             val currentNested = backStack.lastOrNull() as? Graph
             when {
                 route == null -> true
-                route is Graph -> true
                 currentNested == null -> true
                 else -> !currentNested.contains(route)
             }

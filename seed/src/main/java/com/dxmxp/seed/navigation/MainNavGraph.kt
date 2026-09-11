@@ -23,7 +23,6 @@ fun MainNavGraph(
         entryProvider {
             AuthGraph.run { registerEntries() }
             MainScaffoldGraph.run { registerEntries() }
-            ProfileGraph.run { registerEntries() }
         }
     }
 
