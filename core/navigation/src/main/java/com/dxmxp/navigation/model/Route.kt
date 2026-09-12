@@ -2,32 +2,12 @@ package com.dxmxp.navigation.model
 
 import androidx.navigation3.runtime.NavKey
 
+/**
+ * Common interface for all navigation keys.
+ * Routes should be @Serializable classes or objects.
+ */
 interface Route : NavKey {
     val route: String
-    val showMainBottomBar: Boolean
+    val showMainBottomBar: Boolean get() = true
     val requiresAuth: Boolean get() = true
-
-    companion object {
-        /**
-         * Calcula una ruta jerárquica basada en el anidamiento de clases.
-         * Si la clase está definida dentro de otro [Route] (como un [Graph]),
-         * añade automáticamente el prefijo de la ruta del padre.
-         */
-        fun calculateRoute(clazz: Class<out Route>): String {
-            val name = clazz.simpleName.lowercase()
-                .replace("graph", "")
-                .replace("screen", "")
-            val enclosingClass = clazz.enclosingClass
-
-            if ((enclosingClass != null) && Route::class.java.isAssignableFrom(enclosingClass)) {
-                return try {
-                    val parent = enclosingClass.getField("INSTANCE")[null] as Route
-                    "${parent.route}/$name".replace("//", "/")
-                } catch (_: Exception) {
-                    "/$name"
-                }
-            }
-            return "/$name"
-        }
-    }
 }

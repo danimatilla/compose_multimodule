@@ -15,6 +15,8 @@ import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.unit.dp
 import androidx.hilt.lifecycle.viewmodel.compose.hiltViewModel
+import com.dxmxp.navigation.core.LocalRootNavigator
+import com.dxmxp.seed.navigation.routes.AuthGraph
 
 
 @Composable
@@ -22,6 +24,7 @@ fun ProfileScreen(
     viewModel: ProfileViewModel = hiltViewModel()
 ) {
     val state by viewModel.uiState.collectAsState()
+    val rootNavigator = LocalRootNavigator.current
 
     Content(
         state = state,
@@ -30,7 +33,11 @@ fun ProfileScreen(
 
     LaunchedEffect(Unit) {
         viewModel.effect.collect { effect ->
-            // TODO: Handle events here.
+            when (effect) {
+                ProfileViewModel.Effect.NavigateToAuth -> {
+                    rootNavigator.setRoot(AuthGraph)
+                }
+            }
         }
     }
 }

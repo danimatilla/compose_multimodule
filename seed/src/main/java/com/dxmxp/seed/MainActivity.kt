@@ -5,12 +5,7 @@ import android.os.Bundle
 import androidx.activity.ComponentActivity
 import androidx.activity.compose.setContent
 import androidx.activity.enableEdgeToEdge
-import androidx.compose.animation.core.tween
-import androidx.compose.animation.fadeIn
-import androidx.compose.animation.fadeOut
-import androidx.compose.animation.togetherWith
 import androidx.compose.foundation.background
-import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.runtime.CompositionLocalProvider
 import androidx.compose.runtime.LaunchedEffect
@@ -20,25 +15,17 @@ import androidx.compose.runtime.remember
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Modifier
 import androidx.core.splashscreen.SplashScreen.Companion.installSplashScreen
-import androidx.navigation3.runtime.entryProvider
 import androidx.navigation3.runtime.rememberNavBackStack
-import androidx.navigation3.ui.NavDisplay
-import com.dxmxp.seed.navigation.MainScaffold
-import com.dxmxp.seed.navigation.routes.AuthGraph
-import com.dxmxp.seed.navigation.routes.MainScaffoldGraph
-import com.dxmxp.seed.screens.login.LoginScreen
-import com.dxmxp.stories.navigation.StoriesScaffold
-import com.dxmxp.stories.navigation.routes.StoriesScaffoldGraph
+import com.dxmxp.domain.repository.AuthRepository
 import com.dxmxp.navigation.core.LocalNavigator
-import com.dxmxp.navigation.core.NavigationManager
-import com.dxmxp.navigation.core.NavigationManagerBridge
-import com.dxmxp.navigation.model.Graph
-import com.dxmxp.navigation.model.Graph.Companion.registerGraphs
-import com.dxmxp.navigation.model.Screen.Companion.screenEntry
-import com.dxmxp.navigation.orchestration.NavigationOrchestrator
+import com.dxmxp.navigation.core.LocalRootNavigator
+import com.dxmxp.navigation.core.RouteRegistry
+import com.dxmxp.navigation.core.rememberNavigator
 import com.dxmxp.navigation.utils.DeepLinkHandler
-import com.dxmxp.navigation.utils.NavigationUtils.modalAnimation
-import com.dxmxp.ui.navigation.registerCoreUiEntries
+import com.dxmxp.seed.navigation.MainNavDisplay
+import com.dxmxp.seed.navigation.routes.AuthGraph
+import com.dxmxp.seed.navigation.routes.MainGraph
+import com.dxmxp.stories.navigation.routes.StoriesGraph
 import com.dxmxp.ui.theme.SeedTheme
 import dagger.hilt.android.AndroidEntryPoint
 import javax.inject.Inject
@@ -50,13 +37,10 @@ class MainActivity : ComponentActivity() {
     lateinit var deepLinkHandler: DeepLinkHandler
 
     @Inject
-    lateinit var navigationManager: NavigationManager
+    lateinit var authRepository: AuthRepository
 
     @Inject
-    lateinit var navigationOrchestrator: NavigationOrchestrator
-
-    @Inject
-    lateinit var graphs: Set<@JvmSuppressWildcards Graph>
+    lateinit var routeRegistry: RouteRegistry
 
     override fun onCreate(savedInstanceState: Bundle?) {
         installSplashScreen()
@@ -66,32 +50,26 @@ class MainActivity : ComponentActivity() {
         intentState = intent
 
         setContent {
+            val hasSession = remember { authRepository.getAccessToken() != null }
             val initialRoute = remember {
-                if (navigationOrchestrator.hasActiveSession()) MainScaffoldGraph else AuthGraph
+                if (hasSession) MainGraph else AuthGraph
             }
             val backStack = rememberNavBackStack(initialRoute)
-
-            val navigator = remember {
-                NavigationManagerBridge(navigationManager)
-            }
+            val navigator = rememberNavigator(backStack)
 
             LaunchedEffect(Unit) {
-                navigationOrchestrator.events.collect { event ->
-                    navigationOrchestrator.handleEventForBackstack(backStack, event)
-                }
-            }
-
-            val entryProvider = remember {
-                entryProvider {
-                    registerCoreUiEntries()
-                    registerGraphs(graphs)
+                // Example of explicit deep link registration
+                routeRegistry.register("/stories/detail") { uri ->
+                    uri.getQueryParameter("id")?.let { id ->
+                        StoriesGraph.StoryDetail(id = id)
+                    }
                 }
             }
 
             LaunchedEffect(intentState) {
                 intentState?.data?.let { uri ->
-                    deepLinkHandler.handle(uri)?.let { event ->
-                        navigationManager.navigate(event)
+                    deepLinkHandler.handle(uri)?.let { route ->
+                        navigator.push(route)
                     }
                     intentState = null
                 }
@@ -100,15 +78,11 @@ class MainActivity : ComponentActivity() {
             SeedTheme {
                 CompositionLocalProvider(
                     LocalNavigator provides navigator,
+                    LocalRootNavigator provides navigator,
                 ) {
-                    NavDisplay(
+                    MainNavDisplay(
                         backStack = backStack,
-                        entryProvider = entryProvider,
-                        transitionSpec = { fadeIn(tween(500)) togetherWith fadeOut(tween(500)) },
-                        popTransitionSpec = { fadeIn(tween(500)) togetherWith fadeOut(tween(500)) },
-                        modifier = Modifier
-                            .fillMaxSize()
-                            .background(color = MaterialTheme.colorScheme.background),
+                        modifier = Modifier.background(color = MaterialTheme.colorScheme.background),
                     )
                 }
             }

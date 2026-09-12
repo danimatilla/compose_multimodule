@@ -1,66 +1,64 @@
 # Compose Multi-Module Navigation Architecture
 
-A robust, type-safe, and scalable navigation architecture for Jetpack Compose based on **Navigation3**. This project demonstrates a multi-module setup designed for large-scale Android applications.
+A robust, type-safe, and scalable navigation architecture for Jetpack Compose based on **Navigation 3**. This project demonstrates a multi-module setup designed for large-scale Android applications with a focus on simplicity and official patterns.
 
 ## 🚀 Key Features
 
 - **Type-Safe Navigation**: Destinations are defined as `@Serializable` objects or data classes.
-- **Hierarchical Orchestration**: Intelligent routing between Root and Nested backstacks (e.g., Main App vs. Modal Features).
-- **Integrated Auth Guard**: Simple `requiresAuth` property on routes with automatic redirection to Login.
-- **Event-Driven & Decoupled**: Navigate from ViewModels or Business logic without UI references using `NavigationManager`.
+- **Hierarchical Backstacks**: Supports multiple nested backstacks (e.g., Main App with internal feature stacks).
+- **Decoupled Navigator**: Clean `Navigator` interface wrapping `NavBackStack` for UI-level navigation.
+- **Effect-Based ViewModel Navigation**: ViewModels trigger navigation via side-effects, keeping them pure and testable.
 - **Zero-Boilerplate Data Passing**: Pass data directly through Screen constructors with automatic ViewModel initialization.
 - **Large Data & Results Support**: `NavigationStore` for passing heavy models and receiving optional results without bloating routes.
-- **Reflection-Optimized Deep Linking**: Fast route resolution via a centralized `RouteRegistry` that supports complex parameter parsing.
-- **Common Screens Library**: Built-in support for reusable screens like `WebView` across all modules.
-- **Standardized Transitions**: Pre-defined animations for Modals and Scaffolds.
+- **Explicit Deep Linking**: Secure and predictable route resolution via a centralized `RouteRegistry`.
+- **Standardized Transitions**: Pre-defined animations for Modals and Scaffolds using Navigation 3 metadata.
 
 ---
 
 ## 🛠 Architecture Overview
 
 ### 1. Navigation Flow
-The navigation follows a decoupled, event-driven pattern. Events are buffered (`replay = 1`) to ensure feature scaffolds receive the latest navigation command upon creation.
+The architecture uses a hierarchical approach where each Scaffold manages its own nested backstack, while a Root navigator manages the top-level flow.
 
 ```mermaid
-graph LR
-    UI[UI Action] --> NM[NavigationManager]
-    NM --> NO[NavigationOrchestrator]
-    NO --> BS[Target Backstack]
+graph TD
+    Root[Root Navigator] --> Auth[Auth Stack]
+    Root --> Main[Main Scaffold Stack]
+    Main --> Features[Feature Screens]
 ```
 
-1.  **UI Action**: A user interaction or a business logic decision.
-2.  **NavigationManager**: A central service that captures and broadcasts `NavigationEvent` objects.
-3.  **NavigationOrchestrator**: The "Brain". It decides which backstack (Root or Nested) should handle the event based on the route hierarchy.
-4.  **Target Backstack**: The specific `NavBackStack` that updates, triggering UI recomposition.
+1.  **Root Navigator**: Managed in `MainActivity`, handles switching between top-level flows (Auth vs. Main).
+2.  **Nested Navigators**: Each scaffold (like `MainScaffold` or `StoriesScaffold`) manages its own `NavBackStack`.
+3.  **LocalNavigator**: Provided via `CompositionLocal` to allow any screen to navigate within its current scope.
+4.  **LocalRootNavigator**: Provided to allow nested screens to trigger top-level navigation (e.g., Logout).
 
 ---
 
 ## 📖 Implementation Guide
 
 ### 1. Define a Screen
-Screens are `NavKey` implementations. Mark destinations as protected or public.
+Screens are `Route` implementations. Use `@Serializable`.
 
 ```kotlin
 @Serializable
-data object HomeScreen : Screen
+data object HomeScreen : Screen {
+    override val route = "/home"
+}
 
 @Serializable
 data class DetailScreen(val id: String) : Screen {
+    override val route = "/detail"
     override val showMainBottomBar = false
-    override val requiresAuth = true // Default is true
 }
 ```
 
 ### 2. Create a Navigation Graph
-Graphs group related screens and manage their registration.
+Graphs group related screens and manage their registration explicitly.
 
 ```kotlin
 @Serializable
-@Module
-@InstallIn(SingletonComponent::class)
-object MainGraph : Graph {
+data object MainScaffoldGraph : Graph {
     override val route = "/main"
-    override val screens = listOf(Home::class.java, Detail::class.java)
 
     override fun EntryProviderScope<NavKey>.registerEntries() {
         screenEntry<Home> { HomeScreen() }
@@ -68,9 +66,6 @@ object MainGraph : Graph {
             viewModelProvide = { hiltViewModel() }
         ) { vm -> DetailScreen(vm) }
     }
-
-    @Provides @IntoSet
-    fun provideGraph(): Graph = MainGraph
 }
 ```
 
@@ -92,23 +87,30 @@ class DetailViewModel @Inject constructor() : ViewModel(), InitializableViewMode
 val navigator = LocalNavigator.current
 navigator.push(DetailScreen(id = "1"))
 
-// From ViewModels
-navManager.setRoot(MainGraph)
+// From nested screens to root
+val rootNavigator = LocalRootNavigator.current
+rootNavigator.setRoot(AuthGraph)
 ```
 
 ---
 
 ## 🔐 Auth Handling
-Routes can be protected using the `requiresAuth` property. The `NavigationOrchestrator` checks this before every navigation event and redirects to the `/auth` route if no session is found.
+Authentication state is checked at the root level in `MainActivity` to decide the initial route. Screens can also trigger navigation to Auth via effects.
 
 ## 🔗 Deep Links
-The `RouteRegistry` automatically maps URIs to screens. 
-Example: `myapp://stories/storydetail?id=42` maps to `StoryDetail(id="42")`.
-- Supports optional and default parameters.
-- Supports types: `String`, `Int`, `Boolean`, `Long`.
+The `RouteRegistry` maps URIs to screens explicitly. 
+Registration is done in `MainActivity` or module initializers:
+```kotlin
+routeRegistry.register("/stories/detail") { uri ->
+    uri.getQueryParameter("id")?.let { id ->
+        StoriesScaffoldGraph.StoryDetail(id = id)
+    }
+}
+```
 
 ## 🏗 Modularization Strategy
-- `:core:ui`: Core navigation, Design System, and common screens.
-- `:core:domain` / `:core:data`: Business logic, Repositories, and Auth state.
-- `:stories`: Feature module. Exports its `Graph` via Hilt.
-- `:seed`: App module. Collects all `Graph`s and defines the Root flow.
+- `:core:navigation`: Core interfaces, Navigator, and Registry.
+- `:core:ui`: Design System and common UI components.
+- `:core:domain` / `:core:data`: Business logic and Repositories.
+- `:feature:stories`: Feature module. Defines its own graph and internal routes.
+- `:seed`: App module. Integrates all features and defines the Root flow.

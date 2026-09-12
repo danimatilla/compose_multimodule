@@ -16,7 +16,8 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.hilt.lifecycle.viewmodel.compose.hiltViewModel
 import com.dxmxp.domain.model.Story
-import com.dxmxp.stories.navigation.routes.StoriesScaffoldGraph
+import com.dxmxp.navigation.core.LocalNavigator
+import com.dxmxp.stories.navigation.routes.StoriesGraph
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
@@ -24,17 +25,30 @@ fun FeedScreen(
     viewModel: FeedViewModel = hiltViewModel()
 ) {
     val state by viewModel.uiState.collectAsState()
+    val navigator = LocalNavigator.current
 
     Content(
         state = state,
-        handleEvent = viewModel::setEvent
+        onEvent = viewModel::setEvent
     )
+
+    LaunchedEffect(Unit) {
+        viewModel.effect.collect { effect ->
+            when (effect) {
+                is FeedViewModel.Effect.OpenDetail -> {
+                    navigator.push(
+                        StoriesGraph.StoryDetail(id = effect.story.id, story = effect.story)
+                    )
+                }
+            }
+        }
+    }
 }
 
 @Composable
 private fun Content(
     state: FeedViewModel.State,
-    handleEvent: (FeedViewModel.Event) -> Unit
+    onEvent: (FeedViewModel.Event) -> Unit
 ) {
     state.stories?.let { stories ->
         val listState = rememberLazyListState()
@@ -46,7 +60,7 @@ private fun Content(
                     headlineContent = { Text(story.title) },
                     supportingContent = { Text(story.description) },
                     modifier = Modifier.clickable(
-                        onClick = { handleEvent(FeedViewModel.Event.OpenDetail(story)) }
+                        onClick = { onEvent(FeedViewModel.Event.OpenDetail(story)) }
                     )
                 )
 
@@ -71,6 +85,6 @@ private fun FeedScreenPreview() {
                 )
             }
         ),
-        handleEvent = {}
+        onEvent = {}
     )
 }

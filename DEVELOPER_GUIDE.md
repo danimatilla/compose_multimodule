@@ -1,41 +1,33 @@
-# 🧭 Ultimate Navigation Guide (v3.1)
+# 🧭 Navigation Developer Guide (Simplified Nav 3)
 
-Technical deep-dive into the hierarchical navigation system.
+Technical deep-dive into the simplified hierarchical navigation system using Navigation 3.
 
 ## 1. Core Principles
 
 1.  **Hierarchy of Responsibility**: The Root (Activity) handles high-level transitions (Graphs). Scaffolds handle internal screens.
-2.  **Access Guard**: Auth state is checked at the point of navigation, not inside screens.
-3.  **Event Persistence**: `NavigationManager` uses `replay = 1`. If a deep link is sent before a Scaffold is ready, the Scaffold will "catch up" as soon as it subscribes.
+2.  **Explicit Registration**: Routes and deep links are registered explicitly, avoiding reflection for better performance and clarity.
+3.  **Scoped Navigators**: Use `LocalNavigator` for local/nested navigation and `LocalRootNavigator` for global transitions.
 
 ---
 
 ## 2. Component Logic
 
-### NavigationOrchestrator
-The orchestrator determines if an event `appliesHere` based on the backstack context:
-- **At Root**: Handles events for `Graph`s or routes that don't belong to the currently active Scaffold.
-- **In Scaffold**: Handles events for routes strictly inside its own `Graph`. It ignores events referring to itself to prevent infinite recursion.
+### Navigator
+A simple wrapper around `NavBackStack`. It provides basic operations like `push`, `pop`, and `setRoot`.
+- Provided via `CompositionLocal`.
+- decoupled from ViewModels; navigation is triggered via UI observing ViewModel effects.
 
 ### RouteRegistry
-A centralized index generated at startup. It uses Kotlin Reflection to:
-1.  Map route strings (URLs) to singleton objects or data classes.
-2.  Parse query parameters into constructor arguments.
-3.  Support optional/nullable parameters by verifying constructor metadata.
+A centralized registry for Deep Linking. It maps URL patterns to route creator functions.
+- Registration is manual and explicit.
+- No reflection used for instantiation.
 
 ---
 
 ## 3. Handling Auth
-The `requiresAuth` property (default: `true`) is checked by the `NavigationOrchestrator`.
-
-```kotlin
-// In AuthGraph.kt
-object AuthGraph : Graph {
-    override val requiresAuth = false // Publicly accessible
-}
-```
-
-If a protected route is requested without a session, the Orchestrator performs a `setRoot(AuthGraph)` automatically.
+Authentication state is checked in `MainActivity` during initialization and when processing deep links. 
+- ViewModels can emit a `NavigateToAuth` effect if a session expires.
+- The UI layer (Screens) catches this effect and calls `rootNavigator.setRoot(AuthGraph)`.
 
 ---
 
@@ -43,37 +35,34 @@ If a protected route is requested without a session, the Orchestrator performs a
 
 1.  **Intent** received in `MainActivity`.
 2.  `DeepLinkHandler` delegates to `RouteRegistry`.
-3.  `RouteRegistry` identifies the `Screen` and instantiates it with URL parameters.
-4.  A `PushScreen` event is emitted.
-5.  **Root Orchestrator** checks if the screen belongs to a different Scaffold.
-6.  If so, it **auto-opens** that Scaffold first.
-7.  The new **Scaffold Orchestrator** receives the same event (via `replay=1`) and navigates internally to the final destination.
+3.  `RouteRegistry` finds the creator for the path and returns a `Route` instance.
+4.  `MainActivity` calls `navigator.navigate(route)`.
+5.  If the route belongs to a nested graph, the Root navigator pushes that graph, and the graph's initial route handles the rest.
 
 ---
 
-## 5. Modal vs Regular Graphs
+## 5. Multiple Backstacks
 
-- **Regular Graph**: Typically used for main sections. Navigating to one uses `setRoot`.
-- **Modal Graph** (`isModal = true`): Used for overlays (e.g., Stories). Root will `push` these instead of `setRoot` to allow going back.
+Each scaffold (e.g., `MainScaffold`) creates its own `NavBackStack` using `rememberNavBackStack`.
+- This backstack is independent of the root one.
+- Navigation inside the scaffold only affects the nested stack.
+- State is preserved when switching between top-level graphs if managed correctly at the root.
 
 ---
 
 ## 6. Passing Large Data & Results
 
-Use `NavigationStore` for non-primitive data or large objects.
+Use `NavigationStore` for non-primitive data or large objects to keep routes clean and avoid `TransactionTooLargeException`.
 
-### Step 1: Source ViewModel
+### Step 1: Source Screen/ViewModel
 ```kotlin
-navigationStore.pushData("story_key", heavyStoryModel)
-navManager.push(StoryDetail(id = "1"))
-```
+// Emitting effect with data
+setEffect { Effect.OpenDetail(heavyStoryModel) }
 
-### Step 2: Destination ViewModel
-```kotlin
-override fun init(screen: StoryDetail) {
-    val story = navigationStore.getData<Story>("story_key")
-}
+// In Screen
+navigator.navigate(StoryDetail(id = story.id, story = story))
 ```
+*Note: Simple data classes can be passed directly if they are @Serializable. For truly large objects, use NavigationStore.*
 
 ---
 

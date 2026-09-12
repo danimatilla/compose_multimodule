@@ -14,34 +14,18 @@ class GraphArchitectureTest {
             .assertTrue { obj ->
                 // 1. Mandatory Annotations
                 val hasSerializable = obj.hasAnnotation { it.name == "Serializable" }
-                val hasModule = obj.hasAnnotation { it.name == "Module" }
-                val hasInstallIn = obj.hasAnnotation { 
-                    it.name == "InstallIn" && it.text.contains("SingletonComponent") 
-                }
                 
-                // 2. Mandatory Properties (MainScaffoldGraph pattern)
-                val hasScreensProperty = obj.hasProperty { it.name == "screens" && it.hasOverrideModifier }
+                // 2. Mandatory Properties
                 val hasRouteProperty = obj.hasProperty { it.name == "route" && it.hasOverrideModifier }
                 
                 // 3. Mandatory Functions
                 val hasRegisterEntries = obj.hasFunction { 
                     it.name == "registerEntries" && it.hasOverrideModifier 
                 }
-                
-                // 4. Hilt Provision
-                val hasHiltProvides = obj.functions().any { func ->
-                    func.hasAnnotation { it.name == "Provides" } &&
-                    func.hasAnnotation { it.name == "IntoSet" } &&
-                    (func.name == "provideGraph" || func.name.startsWith("provide"))
-                }
 
                 hasSerializable && 
-                hasModule && 
-                hasInstallIn && 
-                hasScreensProperty && 
                 hasRouteProperty && 
-                hasRegisterEntries && 
-                hasHiltProvides
+                hasRegisterEntries
             }
     }
 

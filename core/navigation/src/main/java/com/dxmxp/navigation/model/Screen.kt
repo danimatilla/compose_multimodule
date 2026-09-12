@@ -8,15 +8,9 @@ import androidx.navigation3.runtime.NavKey
 import com.dxmxp.navigation.common.InitializableViewModel
 
 /**
- * Screen represents an individual screen in the application. Each Screen is a NavKey that can be
- * added to the navigation backStack. Screens can be part of a Graph, allowing
- * organization of navigation into logical sections. When navigating to a screen, it's added to the backStack,
- * and when popping, it returns to the previous screen.
+ * Screen represents an individual screen in the application.
  */
 interface Screen : Route {
-
-    override val route: String
-        get() = Route.calculateRoute(this::class.java)
 
     override val showMainBottomBar: Boolean get() = true
 
@@ -24,9 +18,6 @@ interface Screen : Route {
 
         /**
          * Enhanced entry that automatically handles ViewModel initialization.
-         *
-         * If the [Route] type [K] has parameters (data class), it forces the [VM] to implement
-         * [InitializableViewModel] and calls its [InitializableViewModel.init] method.
          */
         @Suppress("UNCHECKED_CAST")
         inline fun <reified K : Route, reified VM : ViewModel> EntryProviderScope<NavKey>.screenEntry(
@@ -34,8 +25,6 @@ interface Screen : Route {
             crossinline viewModelProvide: @Composable () -> VM,
             crossinline content: @Composable (VM) -> Unit,
         ) {
-            val isSingleton = K::class.java.declaredFields.any { it.name == "INSTANCE" }
-
             entry<K>(metadata = metadata) { route ->
                 val viewModel = viewModelProvide()
 
@@ -43,7 +32,7 @@ interface Screen : Route {
                     (viewModel as? InitializableViewModel<K>)?.init(route)
                 }
 
-                if (viewModel !is InitializableViewModel<*> && (!isSingleton)) {
+                if (viewModel !is InitializableViewModel<*>) {
                     error("Route ${K::class.simpleName} has parameters but ViewModel ${VM::class.simpleName} does not implement InitializableViewModel")
                 }
 

@@ -1,7 +1,7 @@
 package com.dxmxp.stories.screens.story_detail
 
 import com.dxmxp.domain.model.Story
-import com.dxmxp.stories.navigation.routes.StoriesScaffoldGraph
+import com.dxmxp.stories.navigation.routes.StoriesGraph
 import com.dxmxp.ui.base.BaseViewModel
 import com.dxmxp.navigation.common.InitializableViewModel
 import dagger.hilt.android.lifecycle.HiltViewModel
@@ -9,9 +9,9 @@ import javax.inject.Inject
 
 @HiltViewModel
 class StoryDetailViewModel @Inject constructor() :
-    BaseViewModel<StoryDetailViewModel.State, StoryDetailViewModel.Effect, StoryDetailViewModel.Event>(),
-    InitializableViewModel<StoriesScaffoldGraph.StoryDetail> {
-
+    InitializableViewModel<StoriesGraph.StoryDetail>,
+    BaseViewModel<StoryDetailViewModel.State, StoryDetailViewModel.Effect, StoryDetailViewModel.Event>()
+{
     data class State(
         val storyId: String? = null,
         val story: Story? = null
@@ -25,15 +25,13 @@ class StoryDetailViewModel @Inject constructor() :
 
     override fun createInitialState(): State = State()
 
-    override fun init(route: StoriesScaffoldGraph.StoryDetail) {
+    override fun init(route: StoriesGraph.StoryDetail) {
         setState { copy(storyId = route.id, story = route.story) }
     }
 
     override fun handleEvent(event: Event) {
         when (event) {
-            is Event.Init -> {
-                init(StoriesScaffoldGraph.StoryDetail(event.id))
-            }
+            is Event.Init -> init(StoriesGraph.StoryDetail(event.id))
         }
     }
 }

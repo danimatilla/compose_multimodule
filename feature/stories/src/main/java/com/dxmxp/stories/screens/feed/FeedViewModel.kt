@@ -1,16 +1,12 @@
 package com.dxmxp.stories.screens.feed
 
 import com.dxmxp.domain.model.Story
-import com.dxmxp.stories.navigation.routes.StoriesScaffoldGraph
 import com.dxmxp.ui.base.BaseViewModel
-import com.dxmxp.navigation.core.NavigationManager
 import dagger.hilt.android.lifecycle.HiltViewModel
 import javax.inject.Inject
 
 @HiltViewModel
-class FeedViewModel @Inject constructor(
-    private val navigationManager: NavigationManager
-) : BaseViewModel<FeedViewModel.State, FeedViewModel.Effect, FeedViewModel.Event>() {
+class FeedViewModel @Inject constructor() : BaseViewModel<FeedViewModel.State, FeedViewModel.Effect, FeedViewModel.Event>() {
 
     data class State(
         val stories: List<Story>? = null
@@ -28,7 +24,7 @@ class FeedViewModel @Inject constructor(
 
     override fun handleEvent(event: Event) {
         when (event) {
-            is Event.OpenDetail -> openDetail(event.story)
+            is Event.OpenDetail -> setEffect { Effect.OpenDetail(event.story) }
         }
     }
 
@@ -45,11 +41,5 @@ class FeedViewModel @Inject constructor(
             )
         }
         setState { copy(stories = stories) }
-    }
-
-    private fun openDetail(story: Story) {
-        navigationManager.push(
-            route = StoriesScaffoldGraph.StoryDetail(id = story.id, story = story)
-        )
     }
 }

@@ -1,37 +1,58 @@
 package com.dxmxp.navigation.core
 
+import androidx.compose.runtime.Composable
+import androidx.compose.runtime.ProvidableCompositionLocal
+import androidx.compose.runtime.remember
 import androidx.compose.runtime.staticCompositionLocalOf
+import androidx.navigation3.runtime.NavBackStack
+import androidx.navigation3.runtime.NavKey
 import com.dxmxp.navigation.model.Route
-import kotlinx.coroutines.flow.Flow
 
-interface Navigator {
-    val events: Flow<NavigationEvent>
-    fun navigate(event: NavigationEvent)
+/**
+ * A simple navigator that wraps NavBackStack to provide navigation operations.
+ */
+class Navigator(private val backStack: NavBackStack<NavKey>) {
 
     fun push(route: Route) {
-        navigate(NavigationEvent.PushScreen(route))
+        if (backStack.lastOrNull() != route) {
+            backStack.add(route)
+        }
     }
 
-    fun pop(route: Route? = null) {
-        navigate(NavigationEvent.PopScreen(route))
+    fun pop() {
+        if (backStack.size > 1) {
+            backStack.removeLastOrNull()
+        }
+    }
+
+    fun popTo(route: Route) {
+        val index = backStack.indexOfLast { it == route }
+        if (index != -1) {
+            backStack.subList(index + 1, backStack.size).clear()
+        }
     }
 
     fun setRoot(route: Route) {
-        navigate(NavigationEvent.SetRootScreen(route))
+        backStack.run {
+            if (lastOrNull() == route) return@run
+            clear()
+            add(route)
+        }
     }
+
+    val currentDestination: NavKey?
+        get() = backStack.lastOrNull()
 }
 
-/**
- * An implementation of [Navigator] that delegates to [NavigationManager].
- * This bridges the gap between the UI-based Navigator and the ViewModel-based Manager.
- */
-class NavigationManagerBridge(private val navigationManager: NavigationManager) : Navigator {
-    override val events = navigationManager.events
-    override fun navigate(event: NavigationEvent) {
-        navigationManager.navigate(event)
-    }
+@Composable
+fun rememberNavigator(backStack: NavBackStack<NavKey>): Navigator {
+    return remember(backStack) { Navigator(backStack) }
 }
 
-val LocalNavigator = staticCompositionLocalOf<Navigator> {
+val LocalNavigator: ProvidableCompositionLocal<Navigator> = staticCompositionLocalOf {
     error("No Navigator provided")
+}
+
+val LocalRootNavigator: ProvidableCompositionLocal<Navigator> = staticCompositionLocalOf {
+    error("No Root Navigator provided")
 }

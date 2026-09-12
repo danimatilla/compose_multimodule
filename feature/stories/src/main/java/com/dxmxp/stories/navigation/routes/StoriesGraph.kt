@@ -11,60 +11,49 @@ import com.dxmxp.navigation.utils.NavigationUtils.modalAnimation
 import com.dxmxp.stories.screens.story_detail.StoryDetailScreen
 import com.dxmxp.stories.screens.story_detail.StoryDetailViewModel
 import com.dxmxp.navigation.model.Graph
-import com.dxmxp.navigation.model.Route
 import com.dxmxp.navigation.model.Screen
 import com.dxmxp.navigation.model.Screen.Companion.screenEntry
-import dagger.Module
-import dagger.Provides
-import dagger.hilt.InstallIn
-import dagger.hilt.components.SingletonComponent
-import dagger.multibindings.IntoSet
 import kotlinx.serialization.Serializable
 
 @Serializable
-@Module
-@InstallIn(SingletonComponent::class)
-object StoriesScaffoldGraph : Graph {
+data object StoriesGraph : Graph {
 
-    override val isModal: Boolean
-        get() = true
-
-    override val screens: List<Class<out Route>>
-        get() = listOf(
-            Feed::class.java,
-            StoryDetail::class.java,
-            Profile::class.java,
-            Notifications::class.java
-        )
+    override val isModal: Boolean get() = true
+    override val route: String get() = "/stories"
 
     @Serializable
-    data object Feed : Screen
+    data object Feed : Screen {
+        override val route: String get() = "${StoriesGraph.route}/home"
+    }
 
     @Serializable
-    data class StoryDetail(val id: String, val story: Story? = null) : Screen
+    data object Profile : Screen {
+        override val route: String get() = "${StoriesGraph.route}/profile"
+    }
 
     @Serializable
-    data object Profile : Screen
+    data class StoryDetail(val id: String, val story: Story? = null) : Screen {
+        override val route: String get() = "${StoriesGraph.route}/detail"
+    }
 
     @Serializable
-    data object Notifications : Screen
+    data object Notifications : Screen {
+        override val route: String get() = "${StoriesGraph.route}/notifications"
+    }
 
-    override fun EntryProviderScope<NavKey>.registerEntries() {
-        screenEntry<StoriesScaffoldGraph>(
+    override fun EntryProviderScope<NavKey>.registerScreens() {
+        screenEntry<StoriesGraph>(
             metadata = metadata { modalAnimation() }
         ) { StoriesScaffold() }
         screenEntry<Feed> { FeedScreen() }
         screenEntry<StoryDetail, StoryDetailViewModel>(
             viewModelProvide = { hiltViewModel<StoryDetailViewModel>() },
         ) { viewModel -> StoryDetailScreen(viewModel) }
-        screenEntry<Profile> { /* ProfileScreen() */ }
-        screenEntry<Notifications> { /* NotificationsScreen() */ }
+        screenEntry<Profile> {}
+        screenEntry<Notifications> {}
     }
+}
 
-    override val route: String
-        get() = "/stories"
-
-    @Provides
-    @IntoSet
-    override fun provideGraph(): Graph = StoriesScaffoldGraph
+fun EntryProviderScope<NavKey>.storiesGraph() {
+    with(StoriesGraph) { registerScreens() }
 }

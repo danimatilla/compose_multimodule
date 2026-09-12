@@ -5,18 +5,15 @@ import com.dxmxp.domain.AppException
 import com.dxmxp.domain.common.fold
 import com.dxmxp.domain.use_case.AutoLoginUseCase
 import com.dxmxp.domain.use_case.LoginUseCase
-import com.dxmxp.seed.navigation.routes.MainScaffoldGraph
 import com.dxmxp.ui.base.BaseViewModel
 import com.dxmxp.ui.common.collectInto
-import com.dxmxp.navigation.core.NavigationManager
 import dagger.hilt.android.lifecycle.HiltViewModel
 import javax.inject.Inject
 
 @HiltViewModel
 class LoginViewModel @Inject constructor(
     private val loginUseCase: LoginUseCase,
-    private val autoLoginUseCase: AutoLoginUseCase,
-    private val navigationManager: NavigationManager
+    private val autoLoginUseCase: AutoLoginUseCase
 ) : BaseViewModel<LoginViewModel.State, LoginViewModel.Effect, LoginViewModel.Event>() {
 
     data class State(
@@ -36,6 +33,7 @@ class LoginViewModel @Inject constructor(
 
     interface Effect {
         data class ShowError(val message: String) : Effect
+        data object NavigateToMain : Effect
     }
 
     override fun createInitialState(): State = State()
@@ -61,7 +59,7 @@ class LoginViewModel @Inject constructor(
             result.fold(
                 onLoading = { copy(isCheckingSession = it) },
                 onSuccess = { _, _ ->
-                    navigateToMain()
+                    setEffect { Effect.NavigateToMain }
                     copy(isCheckingSession = false)
                 },
                 onError = { exception ->
@@ -90,7 +88,7 @@ class LoginViewModel @Inject constructor(
             result.fold(
                 onLoading = { copy(isLoading = it) },
                 onSuccess = { _, _ ->
-                    navigateToMain()
+                    setEffect { Effect.NavigateToMain }
                     copy(isLoading = false)
                 },
                 onError = { exception ->
@@ -99,9 +97,5 @@ class LoginViewModel @Inject constructor(
                 }
             )
         }
-    }
-
-    private fun navigateToMain() {
-        navigationManager.setRoot(MainScaffoldGraph)
     }
 }

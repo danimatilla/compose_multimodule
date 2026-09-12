@@ -32,11 +32,15 @@ import androidx.compose.ui.text.input.VisualTransformation
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import androidx.hilt.lifecycle.viewmodel.compose.hiltViewModel
+import com.dxmxp.navigation.core.LocalNavigator
+import com.dxmxp.navigation.core.Navigator
+import com.dxmxp.seed.navigation.routes.MainGraph
 import com.dxmxp.ui.theme.SeedTheme
 
 @Composable
 fun LoginScreen(
-    viewModel: LoginViewModel = hiltViewModel()
+    viewModel: LoginViewModel = hiltViewModel(),
+    navigator: Navigator = LocalNavigator.current
 ) {
     val state by viewModel.uiState.collectAsState()
     val context = LocalContext.current
@@ -52,6 +56,7 @@ fun LoginScreen(
                 is LoginViewModel.Effect.ShowError -> {
                     Toast.makeText(context, effect.message, Toast.LENGTH_SHORT).show()
                 }
+                LoginViewModel.Effect.NavigateToMain -> navigator.setRoot(MainGraph)
             }
         }
     }

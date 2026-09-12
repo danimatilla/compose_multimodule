@@ -30,11 +30,7 @@ fun BottomBar(
     ) {
         // Find the most specific match in the navigationBarItems list
         val selectedItem = bottomBarItems.map { it.first }.findLast { route ->
-            route == currentDestination || (route is Graph && currentDestination?.let {
-                route.contains(
-                    it
-                )
-            } == true)
+            route == currentDestination || (currentDestination as? Route)?.route?.startsWith(route.route) == true
         }
 
         NavigationBar(

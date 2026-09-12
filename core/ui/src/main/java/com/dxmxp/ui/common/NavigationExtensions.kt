@@ -1,4 +1,4 @@
-package com.dxmxp.ui.navigation
+package com.dxmxp.ui.common
 
 import androidx.navigation3.runtime.EntryProviderScope
 import androidx.navigation3.runtime.NavKey
@@ -10,7 +10,7 @@ import com.dxmxp.ui.screens.WebViewScreen
  * Extension to register common UI screens from the core:ui module.
  * This keeps the core:navigation module pure and free from UI implementations.
  */
-fun EntryProviderScope<NavKey>.registerCoreUiEntries() {
+fun EntryProviderScope<NavKey>.registerCommonEntries() {
     screenEntry<WebView> { webView ->
         WebViewScreen(screen = webView)
     }

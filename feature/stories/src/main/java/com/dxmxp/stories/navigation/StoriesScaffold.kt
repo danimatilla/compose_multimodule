@@ -12,71 +12,60 @@ import androidx.compose.material3.IconButton
 import androidx.compose.material3.Scaffold
 import androidx.compose.material3.TopAppBar
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.CompositionLocalProvider
 import androidx.compose.runtime.remember
 import androidx.compose.ui.Modifier
-import androidx.hilt.lifecycle.viewmodel.compose.hiltViewModel
-import androidx.lifecycle.ViewModel
-import com.dxmxp.stories.navigation.routes.StoriesScaffoldGraph
+import androidx.navigation3.runtime.rememberNavBackStack
 import com.dxmxp.navigation.core.LocalNavigator
-import com.dxmxp.navigation.orchestration.NavigationOrchestrator
-import com.dxmxp.navigation.model.Route
-import com.dxmxp.navigation.scaffold.rememberScaffoldController
+import com.dxmxp.navigation.core.rememberNavigator
+import com.dxmxp.stories.navigation.routes.StoriesGraph
 import com.dxmxp.ui.screens.BottomBar
-import dagger.hilt.android.lifecycle.HiltViewModel
-import javax.inject.Inject
-
-@HiltViewModel
-class StoriesScaffoldViewModel @Inject constructor(
-    val orchestrator: NavigationOrchestrator
-) : ViewModel()
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
 fun StoriesScaffold() {
-    val navigator = LocalNavigator.current
-    val scaffoldViewModel: StoriesScaffoldViewModel = hiltViewModel()
-
-    val controller = rememberScaffoldController(
-        initialRoute = StoriesScaffoldGraph.Feed,
-        graph = StoriesScaffoldGraph,
-        orchestrator = scaffoldViewModel.orchestrator
-    )
+    val rootNavigator = LocalNavigator.current
+    
+    val nestedBackStack = rememberNavBackStack(StoriesGraph.Feed)
+    val nestedNavigator = rememberNavigator(nestedBackStack)
 
     val navigationBarItems = remember {
         listOf(
-            StoriesScaffoldGraph.Feed to Icons.Default.Home,
-            StoriesScaffoldGraph.Notifications to Icons.Default.Notifications,
-            StoriesScaffoldGraph.Profile to Icons.Default.Person,
+            StoriesGraph.Feed to Icons.Default.Home,
+            StoriesGraph.Notifications to Icons.Default.Notifications,
+            StoriesGraph.Profile to Icons.Default.Person,
         )
     }
     
-    val currentDestination = controller.currentDestination
+    val currentDestination = nestedNavigator.currentDestination
 
-    Scaffold(
-        topBar = {
-            TopAppBar(
-                title = { },
-                navigationIcon = {
-                    IconButton(
-                        content = { Icon(Icons.Default.Close, contentDescription = "Close") },
-                        onClick = { navigator.pop() }
-                    )
-                }
+    CompositionLocalProvider(LocalNavigator provides nestedNavigator) {
+        Scaffold(
+            topBar = {
+                TopAppBar(
+                    title = { },
+                    navigationIcon = {
+                        IconButton(
+                            content = { Icon(Icons.Default.Close, contentDescription = "Close") },
+                            onClick = { rootNavigator.pop() }
+                        )
+                    }
+                )
+            },
+            bottomBar = {
+                BottomBar(
+                    bottomBarItems = navigationBarItems,
+                    currentDestination = currentDestination,
+                    onClickItem = { route ->
+                        nestedNavigator.setRoot(route)
+                    }
+                )
+            },
+        ) { innerPadding ->
+            StoriesNavDisplay(
+                backStack = nestedBackStack,
+                modifier = Modifier.padding(innerPadding),
             )
-        },
-        bottomBar = {
-            BottomBar(
-                bottomBarItems = navigationBarItems,
-                currentDestination = currentDestination,
-                onClickItem = { route ->
-                    navigator.setRoot(route)
-                }
-            )
-        },
-    ) { innerPadding ->
-        StoriesNavGraph(
-            backStack = controller.backStack,
-            modifier = Modifier.padding(innerPadding),
-        )
+        }
     }
 }

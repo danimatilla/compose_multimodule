@@ -5,38 +5,26 @@ import androidx.navigation3.runtime.NavKey
 import com.dxmxp.seed.screens.profile.ProfileScreen
 import com.dxmxp.seed.screens.profile.SettingsScreen
 import com.dxmxp.navigation.model.Graph
-import com.dxmxp.navigation.model.Route
 import com.dxmxp.navigation.model.Screen
 import com.dxmxp.navigation.model.Screen.Companion.screenEntry
-import dagger.Module
-import dagger.Provides
-import dagger.hilt.InstallIn
-import dagger.hilt.components.SingletonComponent
-import dagger.multibindings.IntoSet
 import kotlinx.serialization.Serializable
 
 @Serializable
-@Module
-@InstallIn(SingletonComponent::class)
-object ProfileGraph : Graph {
+data object ProfileGraph : Graph {
 
-    override val route: String
-        get() = "/profile"
-
-    override val screens: List<Class<out Route>>
-        get() = listOf(
-            Settings::class.java
-        )
+    override val route: String get() = "/profile"
 
     @Serializable
-    data object Settings : Screen
+    data object Settings : Screen {
+        override val route: String get() = "/profile/settings"
+    }
 
-    override fun EntryProviderScope<NavKey>.registerEntries() {
+    override fun EntryProviderScope<NavKey>.registerScreens() {
         screenEntry<ProfileGraph> { ProfileScreen() }
         screenEntry<Settings> { SettingsScreen() }
     }
+}
 
-    @Provides
-    @IntoSet
-    override fun provideGraph(): Graph = ProfileGraph
+fun EntryProviderScope<NavKey>.profileGraph() {
+    with(ProfileGraph) { registerScreens() }
 }
