@@ -7,10 +7,11 @@ import com.dxmxp.seed.screens.HomeScreen
 import com.dxmxp.seed.screens.MenuScreen
 import com.dxmxp.seed.screens.SearchScreen
 import com.dxmxp.seed.screens.profile.ProfileScreen
-import com.dxmxp.ui.navigation.model.Graph
-import com.dxmxp.ui.navigation.model.Route
-import com.dxmxp.ui.navigation.model.Screen
-import com.dxmxp.ui.navigation.model.Screen.Companion.screenEntry
+import com.dxmxp.navigation.model.Graph
+import com.dxmxp.navigation.model.Route
+import com.dxmxp.navigation.model.Screen
+import com.dxmxp.navigation.model.Screen.Companion.screenEntry
+import com.dxmxp.stories.navigation.routes.StoriesScaffoldGraph
 import dagger.Module
 import dagger.Provides
 import dagger.hilt.InstallIn
@@ -31,6 +32,7 @@ object MainScaffoldGraph : Graph {
             Home::class.java,
             Search::class.java,
             Menu::class.java,
+            StoriesScaffoldGraph::class.java,
             ProfileGraph::class.java
         )
 
@@ -48,7 +50,6 @@ object MainScaffoldGraph : Graph {
         screenEntry<Home> { HomeScreen() }
         screenEntry<Search> { SearchScreen() }
         screenEntry<Menu> { MenuScreen() }
-        screenEntry<ProfileGraph> { ProfileScreen() }
     }
 
     @Provides

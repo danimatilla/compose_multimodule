@@ -4,10 +4,10 @@ import androidx.navigation3.runtime.EntryProviderScope
 import androidx.navigation3.runtime.NavKey
 import com.dxmxp.seed.screens.profile.ProfileScreen
 import com.dxmxp.seed.screens.profile.SettingsScreen
-import com.dxmxp.ui.navigation.model.Graph
-import com.dxmxp.ui.navigation.model.Route
-import com.dxmxp.ui.navigation.model.Screen
-import com.dxmxp.ui.navigation.model.Screen.Companion.screenEntry
+import com.dxmxp.navigation.model.Graph
+import com.dxmxp.navigation.model.Route
+import com.dxmxp.navigation.model.Screen
+import com.dxmxp.navigation.model.Screen.Companion.screenEntry
 import dagger.Module
 import dagger.Provides
 import dagger.hilt.InstallIn
@@ -32,6 +32,7 @@ object ProfileGraph : Graph {
     data object Settings : Screen
 
     override fun EntryProviderScope<NavKey>.registerEntries() {
+        screenEntry<ProfileGraph> { ProfileScreen() }
         screenEntry<Settings> { SettingsScreen() }
     }
 

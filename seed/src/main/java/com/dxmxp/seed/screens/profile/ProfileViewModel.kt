@@ -4,7 +4,7 @@ import androidx.lifecycle.viewModelScope
 import com.dxmxp.domain.use_case.LogoutUseCase
 import com.dxmxp.seed.navigation.routes.AuthGraph
 import com.dxmxp.ui.base.BaseViewModel
-import com.dxmxp.ui.navigation.core.NavigationManager
+import com.dxmxp.navigation.core.NavigationManager
 import dagger.hilt.android.lifecycle.HiltViewModel
 import kotlinx.coroutines.launch
 import javax.inject.Inject

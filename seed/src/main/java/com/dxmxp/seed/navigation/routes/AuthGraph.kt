@@ -3,10 +3,10 @@ package com.dxmxp.seed.navigation.routes
 import androidx.navigation3.runtime.EntryProviderScope
 import androidx.navigation3.runtime.NavKey
 import com.dxmxp.seed.screens.login.LoginScreen
-import com.dxmxp.ui.navigation.model.Graph
-import com.dxmxp.ui.navigation.model.Route
-import com.dxmxp.ui.navigation.model.Screen
-import com.dxmxp.ui.navigation.model.Screen.Companion.screenEntry
+import com.dxmxp.navigation.model.Graph
+import com.dxmxp.navigation.model.Route
+import com.dxmxp.navigation.model.Screen
+import com.dxmxp.navigation.model.Screen.Companion.screenEntry
 import dagger.Module
 import dagger.Provides
 import dagger.hilt.InstallIn

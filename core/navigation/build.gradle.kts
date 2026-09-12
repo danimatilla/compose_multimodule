@@ -7,7 +7,7 @@ plugins {
 }
 
 android {
-    namespace = "com.dxmxp.ui"
+    namespace = "com.dxmxp.navigation"
     compileSdk {
         version = release(36) {
             minorApiLevel = 1
@@ -34,15 +34,11 @@ android {
     }
 }
 
-composeCompiler {
-    stabilityConfigurationFiles.add(rootProject.layout.projectDirectory.file("compose-stability.conf"))
-    metricsDestination = layout.buildDirectory.dir("compose_metrics")
-    reportsDestination = layout.buildDirectory.dir("compose_reports")
-}
-
 dependencies {
     implementation(project(":core:domain"))
-    api(project(":core:navigation"))
+
+    api(libs.androidx.navigation3.runtime)
+    api(libs.androidx.navigation3.ui)
 
     implementation(libs.hilt)
     ksp(libs.hilt.compiler)
@@ -57,17 +53,7 @@ dependencies {
 
     implementation(platform(libs.androidx.compose.bom))
     implementation(libs.androidx.compose.ui)
-    implementation(libs.androidx.compose.ui.graphics)
-    implementation(libs.androidx.compose.ui.tooling.preview)
     implementation(libs.androidx.compose.material3)
     implementation(libs.androidx.compose.material.icons.core)
     implementation(libs.androidx.compose.material.icons.extended)
-    implementation(libs.coil.compose)
-    implementation(libs.coil.network.okhttp)
-
-    testImplementation(libs.junit)
-    testImplementation(libs.konsist)
-
-    androidTestImplementation(libs.androidx.junit)
-    androidTestImplementation(libs.androidx.espresso.core)
 }

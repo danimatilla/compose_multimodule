@@ -62,7 +62,7 @@ dependencies {
     implementation(project(":core:domain"))
     implementation(project(":core:data"))
     implementation(project(":core:ui"))
-    implementation(project(":stories"))
+    implementation(project(":feature:stories"))
 
     implementation(libs.androidx.core.splashscreen)
 

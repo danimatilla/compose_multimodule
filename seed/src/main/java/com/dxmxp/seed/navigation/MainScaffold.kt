@@ -15,10 +15,10 @@ import androidx.lifecycle.ViewModel
 import com.dxmxp.seed.navigation.routes.MainScaffoldGraph
 import com.dxmxp.seed.navigation.routes.ProfileGraph
 import com.dxmxp.stories.navigation.routes.StoriesScaffoldGraph
-import com.dxmxp.ui.navigation.core.LocalNavigator
-import com.dxmxp.ui.navigation.orchestration.NavigationOrchestrator
-import com.dxmxp.ui.navigation.model.Route
-import com.dxmxp.ui.navigation.scaffold.rememberScaffoldController
+import com.dxmxp.navigation.core.LocalNavigator
+import com.dxmxp.navigation.orchestration.NavigationOrchestrator
+import com.dxmxp.navigation.model.Route
+import com.dxmxp.navigation.scaffold.rememberScaffoldController
 import com.dxmxp.ui.screens.BottomBar
 import dagger.hilt.android.lifecycle.HiltViewModel
 import javax.inject.Inject

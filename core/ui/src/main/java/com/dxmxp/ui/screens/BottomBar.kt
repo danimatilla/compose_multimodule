@@ -11,9 +11,9 @@ import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.vector.ImageVector
 import androidx.navigation3.runtime.NavKey
-import com.dxmxp.ui.navigation.model.Graph
-import com.dxmxp.ui.navigation.model.Route
-import com.dxmxp.ui.navigation.model.Screen
+import com.dxmxp.navigation.model.Graph
+import com.dxmxp.navigation.model.Route
+import com.dxmxp.navigation.model.Screen
 
 @Composable
 fun BottomBar(
