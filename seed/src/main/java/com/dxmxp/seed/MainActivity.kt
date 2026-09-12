@@ -38,6 +38,7 @@ import com.dxmxp.navigation.model.Screen.Companion.screenEntry
 import com.dxmxp.navigation.orchestration.NavigationOrchestrator
 import com.dxmxp.navigation.utils.DeepLinkHandler
 import com.dxmxp.navigation.utils.NavigationUtils.modalAnimation
+import com.dxmxp.ui.navigation.registerCoreUiEntries
 import com.dxmxp.ui.theme.SeedTheme
 import dagger.hilt.android.AndroidEntryPoint
 import javax.inject.Inject
@@ -82,6 +83,7 @@ class MainActivity : ComponentActivity() {
 
             val entryProvider = remember {
                 entryProvider {
+                    registerCoreUiEntries()
                     registerGraphs(graphs)
                 }
             }
