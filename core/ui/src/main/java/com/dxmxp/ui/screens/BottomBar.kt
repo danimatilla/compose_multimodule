@@ -7,13 +7,10 @@ import androidx.compose.material3.Icon
 import androidx.compose.material3.NavigationBar
 import androidx.compose.material3.NavigationBarItem
 import androidx.compose.runtime.Composable
-import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.vector.ImageVector
 import androidx.navigation3.runtime.NavKey
-import com.dxmxp.navigation.model.Graph
 import com.dxmxp.navigation.model.Route
-import com.dxmxp.navigation.model.Screen
 
 @Composable
 fun BottomBar(
