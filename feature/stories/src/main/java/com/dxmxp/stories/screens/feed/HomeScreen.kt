@@ -21,8 +21,8 @@ import com.dxmxp.stories.navigation.routes.StoriesGraph
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
-fun FeedScreen(
-    viewModel: FeedViewModel = hiltViewModel()
+fun HomeScreen(
+    viewModel: HomeViewModel = hiltViewModel()
 ) {
     val state by viewModel.uiState.collectAsState()
     val navigator = LocalNavigator.current
@@ -35,7 +35,7 @@ fun FeedScreen(
     LaunchedEffect(Unit) {
         viewModel.effect.collect { effect ->
             when (effect) {
-                is FeedViewModel.Effect.OpenDetail -> {
+                is HomeViewModel.Effect.OpenDetail -> {
                     navigator.push(
                         StoriesGraph.StoryDetail(id = effect.story.id, story = effect.story)
                     )
@@ -47,8 +47,8 @@ fun FeedScreen(
 
 @Composable
 private fun Content(
-    state: FeedViewModel.State,
-    onEvent: (FeedViewModel.Event) -> Unit
+    state: HomeViewModel.State,
+    onEvent: (HomeViewModel.Event) -> Unit
 ) {
     state.stories?.let { stories ->
         val listState = rememberLazyListState()
@@ -60,7 +60,7 @@ private fun Content(
                     headlineContent = { Text(story.title) },
                     supportingContent = { Text(story.description) },
                     modifier = Modifier.clickable(
-                        onClick = { onEvent(FeedViewModel.Event.OpenDetail(story)) }
+                        onClick = { onEvent(HomeViewModel.Event.OpenDetail(story)) }
                     )
                 )
 
@@ -76,7 +76,7 @@ private fun Content(
 @Composable
 private fun FeedScreenPreview() {
     Content(
-        state = FeedViewModel.State(
+        state = HomeViewModel.State(
             stories = (1..20).map {
                 Story(
                     id = "$it",

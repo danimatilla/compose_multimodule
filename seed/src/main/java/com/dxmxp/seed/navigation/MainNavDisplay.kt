@@ -8,8 +8,8 @@ import androidx.navigation3.runtime.NavBackStack
 import androidx.navigation3.runtime.NavKey
 import androidx.navigation3.runtime.entryProvider
 import androidx.navigation3.ui.NavDisplay
-import com.dxmxp.seed.navigation.routes.authGraph
-import com.dxmxp.seed.navigation.routes.mainGraph
+import com.dxmxp.seed.navigation.routes.AuthGraph
+import com.dxmxp.seed.navigation.routes.MainGraph
 import com.dxmxp.ui.common.registerCommonEntries
 
 @Composable
@@ -20,8 +20,8 @@ fun MainNavDisplay(
     val entryProvider = remember {
         entryProvider {
             registerCommonEntries()
-            authGraph()
-            mainGraph()
+            AuthGraph.run { registerScreens() }
+            MainGraph.run { registerScreens() }
         }
     }
 
@@ -31,4 +31,3 @@ fun MainNavDisplay(
         modifier = modifier.fillMaxSize()
     )
 }
-

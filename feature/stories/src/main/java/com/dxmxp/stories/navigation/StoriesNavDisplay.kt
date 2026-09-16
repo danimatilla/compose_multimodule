@@ -8,7 +8,7 @@ import androidx.navigation3.runtime.NavBackStack
 import androidx.navigation3.runtime.NavKey
 import androidx.navigation3.runtime.entryProvider
 import androidx.navigation3.ui.NavDisplay
-import com.dxmxp.stories.navigation.routes.storiesGraph
+import com.dxmxp.stories.navigation.routes.StoriesGraph
 
 @Composable
 fun StoriesNavDisplay(
@@ -17,7 +17,7 @@ fun StoriesNavDisplay(
 ) {
     val entryProvider = remember {
         entryProvider {
-            storiesGraph()
+            StoriesGraph.run { registerScreens() }
         }
     }
 

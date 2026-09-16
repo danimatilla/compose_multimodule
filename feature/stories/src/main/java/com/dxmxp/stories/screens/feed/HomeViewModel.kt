@@ -6,7 +6,7 @@ import dagger.hilt.android.lifecycle.HiltViewModel
 import javax.inject.Inject
 
 @HiltViewModel
-class FeedViewModel @Inject constructor() : BaseViewModel<FeedViewModel.State, FeedViewModel.Effect, FeedViewModel.Event>() {
+class HomeViewModel @Inject constructor() : BaseViewModel<HomeViewModel.State, HomeViewModel.Effect, HomeViewModel.Event>() {
 
     data class State(
         val stories: List<Story>? = null

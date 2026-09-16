@@ -25,7 +25,6 @@ import com.dxmxp.navigation.utils.DeepLinkHandler
 import com.dxmxp.seed.navigation.MainNavDisplay
 import com.dxmxp.seed.navigation.routes.AuthGraph
 import com.dxmxp.seed.navigation.routes.MainGraph
-import com.dxmxp.stories.navigation.routes.StoriesGraph
 import com.dxmxp.ui.theme.SeedTheme
 import dagger.hilt.android.AndroidEntryPoint
 import javax.inject.Inject
@@ -38,9 +37,6 @@ class MainActivity : ComponentActivity() {
 
     @Inject
     lateinit var authRepository: AuthRepository
-
-    @Inject
-    lateinit var routeRegistry: RouteRegistry
 
     override fun onCreate(savedInstanceState: Bundle?) {
         installSplashScreen()
@@ -56,15 +52,6 @@ class MainActivity : ComponentActivity() {
             }
             val backStack = rememberNavBackStack(initialRoute)
             val navigator = rememberNavigator(backStack)
-
-            LaunchedEffect(Unit) {
-                // Example of explicit deep link registration
-                routeRegistry.register("/stories/detail") { uri ->
-                    uri.getQueryParameter("id")?.let { id ->
-                        StoriesGraph.StoryDetail(id = id)
-                    }
-                }
-            }
 
             LaunchedEffect(intentState) {
                 intentState?.data?.let { uri ->
@@ -82,7 +69,7 @@ class MainActivity : ComponentActivity() {
                 ) {
                     MainNavDisplay(
                         backStack = backStack,
-                        modifier = Modifier.background(color = MaterialTheme.colorScheme.background),
+                        modifier = Modifier.background(color = MaterialTheme.colorScheme.background)
                     )
                 }
             }
