@@ -10,4 +10,5 @@ interface AuthRepository {
     suspend fun logout()
     fun getAccessToken(): String?
     fun autoLogin(): Flow<DataResult<Unit>>
+    suspend fun hasSession(): Boolean
 }

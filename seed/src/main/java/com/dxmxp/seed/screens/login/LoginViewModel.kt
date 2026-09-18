@@ -1,9 +1,7 @@
 package com.dxmxp.seed.screens.login
 
 import androidx.lifecycle.viewModelScope
-import com.dxmxp.domain.AppException
 import com.dxmxp.domain.common.fold
-import com.dxmxp.domain.use_case.AutoLoginUseCase
 import com.dxmxp.domain.use_case.LoginUseCase
 import com.dxmxp.ui.base.BaseViewModel
 import com.dxmxp.ui.common.collectInto
@@ -12,16 +10,14 @@ import javax.inject.Inject
 
 @HiltViewModel
 class LoginViewModel @Inject constructor(
-    private val loginUseCase: LoginUseCase,
-    private val autoLoginUseCase: AutoLoginUseCase
+    private val loginUseCase: LoginUseCase
 ) : BaseViewModel<LoginViewModel.State, LoginViewModel.Effect, LoginViewModel.Event>() {
 
     data class State(
         val username: String = "emilys",
         val password: String = "emilyspass",
         val passwordVisible: Boolean = false,
-        val isLoading: Boolean = false,
-        val isCheckingSession: Boolean = false
+        val isLoading: Boolean = false
     )
 
     interface Event {
@@ -44,31 +40,6 @@ class LoginViewModel @Inject constructor(
             is Event.OnPasswordChanged -> setState { copy(password = event.password) }
             is Event.OnLoginClick -> login()
             is Event.OnTogglePasswordVisibility -> setState { copy(passwordVisible = !passwordVisible) }
-        }
-    }
-
-    init {
-        checkSession()
-    }
-
-    private fun checkSession() {
-        viewModelScope.collectInto(
-            flow = autoLoginUseCase(Unit),
-            setState = ::setState
-        ) { result ->
-            result.fold(
-                onLoading = { copy(isCheckingSession = it) },
-                onSuccess = { _, _ ->
-                    setEffect { Effect.NavigateToMain }
-                    copy(isCheckingSession = false)
-                },
-                onError = { exception ->
-                    if (exception !is AppException.UnauthorizedException) {
-                        setEffect { Effect.ShowError(exception.message.orEmpty()) }
-                    }
-                    copy(isCheckingSession = false)
-                }
-            )
         }
     }
 

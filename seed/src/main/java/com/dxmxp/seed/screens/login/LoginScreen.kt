@@ -2,7 +2,6 @@ package com.dxmxp.seed.screens.login
 
 import android.widget.Toast
 import androidx.compose.foundation.layout.Arrangement
-import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
@@ -67,16 +66,6 @@ private fun Content(
     state: LoginViewModel.State,
     onEvent: (LoginViewModel.Event) -> Unit
 ) {
-    if (state.isCheckingSession) {
-        Box(
-            modifier = Modifier.fillMaxSize(),
-            contentAlignment = Alignment.Center
-        ) {
-            CircularProgressIndicator()
-        }
-        return
-    }
-
     with(state){
         Column(
             horizontalAlignment = Alignment.CenterHorizontally,
@@ -131,7 +120,6 @@ private fun LoginScreenPreview() {
     SeedTheme {
         Content(
             state = LoginViewModel.State(
-                isCheckingSession = false,
                 passwordVisible = false
             ),
             onEvent = {}

@@ -70,6 +70,17 @@ class AuthRepositoryImpl @Inject constructor(
 
     override fun getAccessToken(): String? = sessionManager.accessToken
 
+    override suspend fun hasSession(): Boolean {
+        if (sessionManager.isUserLoggedIn()) return true
+        val token = sessionDataStore.accessToken.first()
+        return if (token != null) {
+            sessionManager.saveToken(token)
+            true
+        } else {
+            false
+        }
+    }
+
     companion object {
         const val TAG = "AuthRepository"
     }
