@@ -49,7 +49,7 @@ class ScreenArchitectureTest {
                 
                 if (hasViewModel) {
                     val text = file.text
-                    val collectsState = text.contains("collectAsState()") || text.contains("collectAsStateWithLifecycle()")
+                    val collectsState = text.contains("collectAsStateWithLifecycle()")
                     val collectsEffect = text.contains("viewModel.effect.collect") && text.contains("LaunchedEffect")
                     
                     collectsState && collectsEffect

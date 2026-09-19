@@ -19,13 +19,13 @@ class GraphArchitectureTest {
                 val hasRouteProperty = obj.hasProperty { it.name == "route" && it.hasOverrideModifier }
                 
                 // 3. Mandatory Functions
-                val hasRegisterEntries = obj.hasFunction { 
-                    it.name == "registerEntries" && it.hasOverrideModifier 
+                val hasRegisterScreens = obj.hasFunction { 
+                    it.name == "registerScreens" && it.hasOverrideModifier 
                 }
 
                 hasSerializable && 
                 hasRouteProperty && 
-                hasRegisterEntries
+                hasRegisterScreens
             }
     }
 
