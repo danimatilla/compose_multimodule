@@ -26,7 +26,8 @@ class MainViewModel @Inject constructor(
 
     data class State(
         val initialRoute: Route? = null,
-        val showBottomBar: Boolean = false
+        val showBottomBar: Boolean = false,
+        val pendingRoute: Route? = null
     )
 
     interface Event {
@@ -116,7 +117,17 @@ class MainViewModel @Inject constructor(
         when (event) {
             is Event.HandleDeepLink -> handleDeepLink(event.uri)
             is Event.OnRouteChanged -> {
-                setState { copy(showBottomBar = shouldShowBottomBar(event.route)) }
+                val state = uiState.value
+                val showBar = shouldShowBottomBar(event.route)
+                
+                // If we have a pending route and we just transitioned to an authenticated area (MainGraph)
+                if (state.pendingRoute != null && (event.route is MainGraph)) {
+                    val destination = state.pendingRoute
+                    setState { copy(pendingRoute = null, showBottomBar = showBar) }
+                    setEffect { Effect.SetRoot(destination) }
+                } else {
+                    setState { copy(showBottomBar = showBar) }
+                }
             }
         }
     }
@@ -127,7 +138,8 @@ class MainViewModel @Inject constructor(
                 val hasSession = hasSessionUseCase(Unit)
                 
                 if (requiresAuth(route) && !hasSession) {
-                    // Redirect to auth if trying to access a protected route without session
+                    // Save for after login
+                    setState { copy(pendingRoute = route) }
                     setEffect { Effect.SetRoot(AuthGraph) }
                 } else {
                     setEffect { Effect.SetRoot(route) }
