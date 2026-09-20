@@ -63,9 +63,7 @@ interface Graph : Route {
      *
      * @return Set of static route registrations
      */
-    fun staticRoutes(): Set<RouteRegistration> = setOf(
-        RouteRegistration(RouteKey.of(route), this)
-    )
+    fun staticRoutes(): Set<RouteRegistration>
 
     /**
      * Define dynamic route patterns for deep linking.
@@ -86,5 +84,5 @@ interface Graph : Route {
      * )
      * ```
      */
-    fun dynamicRoutePatterns(): Map<String, (Uri) -> Route?> = emptyMap()
+    fun dynamicRoutePatterns(): Map<String, (Uri) -> Route?>
 }

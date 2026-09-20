@@ -1,11 +1,13 @@
 package com.dxmxp.seed.navigation.routes
 
+import android.net.Uri
 import androidx.navigation3.runtime.EntryProviderScope
 import androidx.navigation3.runtime.NavKey
 import com.dxmxp.navigation.core.RouteKey
 import com.dxmxp.navigation.core.RouteRegistration
 import com.dxmxp.seed.screens.login.LoginScreen
 import com.dxmxp.navigation.model.Graph
+import com.dxmxp.navigation.model.Route
 import com.dxmxp.navigation.model.Screen
 import com.dxmxp.navigation.model.Screen.Companion.screenEntry
 import kotlinx.serialization.Serializable
@@ -51,6 +53,8 @@ data object AuthGraph : Graph {
         RouteRegistration(RouteKey.of(route), this),
         RouteRegistration(RouteKey.of(Login.route), Login),
     )
+
+    override fun dynamicRoutePatterns(): Map<String, (Uri) -> Route?> = emptyMap()
 
     /**
      * Register all composable screens for this graph.

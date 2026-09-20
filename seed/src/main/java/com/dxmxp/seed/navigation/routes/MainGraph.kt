@@ -1,43 +1,22 @@
 package com.dxmxp.seed.navigation.routes
 
+import android.net.Uri
 import androidx.navigation3.runtime.EntryProviderScope
 import androidx.navigation3.runtime.NavKey
 import com.dxmxp.navigation.core.RouteKey
 import com.dxmxp.navigation.core.RouteRegistration
+import com.dxmxp.navigation.model.Graph
+import com.dxmxp.navigation.model.Route
+import com.dxmxp.navigation.model.Screen
+import com.dxmxp.navigation.model.Screen.Companion.screenEntry
 import com.dxmxp.seed.navigation.MainScaffold
 import com.dxmxp.seed.screens.HomeScreen
 import com.dxmxp.seed.screens.MenuScreen
 import com.dxmxp.seed.screens.SearchScreen
-import com.dxmxp.navigation.model.Graph
-import com.dxmxp.navigation.model.Screen
-import com.dxmxp.navigation.model.Screen.Companion.screenEntry
 import com.dxmxp.stories.navigation.routes.StoriesGraph
 import kotlinx.serialization.Serializable
 
-/**
- * MainGraph represents the primary navigation context after user authentication.
- *
- * Route: /seed
- * Screens:
- * - Home: /seed/home (home feed)
- * - Search: /seed/search (search interface)
- * - Menu: /seed/menu (main menu)
- *
- * Also composes the StoriesGraph and ProfileGraph as nested navigation contexts.
- *
- * Type-safe navigation:
- * ```
- * navigator.push(MainGraph)
- * navigator.push(MainGraph.Home)
- * navigator.push(MainGraph.Search)
- * ```
- *
- * Deep link resolution:
- * - app://seed → MainGraph
- * - app://seed/home → MainGraph.Home
- * - app://seed/search → MainGraph.Search
- * - app://seed/menu → MainGraph.Menu
- */
+
 @Serializable
 data object MainGraph : Graph {
 
@@ -69,6 +48,8 @@ data object MainGraph : Graph {
         RouteRegistration(RouteKey.of(Menu.route), Menu),
     )
 
+    override fun dynamicRoutePatterns(): Map<String, (Uri) -> Route?> = emptyMap()
+
     /**
      * Register all composable screens for this graph.
      * Called by the navigation engine to set up the UI hierarchy.
@@ -78,7 +59,7 @@ data object MainGraph : Graph {
         screenEntry<Home> { HomeScreen() }
         screenEntry<Search> { SearchScreen() }
         screenEntry<Menu> { MenuScreen() }
-        // Compose nested graphs
+        // Nested graphs
         StoriesGraph.run { registerScreens() }
         ProfileGraph.run { registerScreens() }
     }

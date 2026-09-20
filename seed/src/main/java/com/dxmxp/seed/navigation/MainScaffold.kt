@@ -10,6 +10,7 @@ import androidx.compose.material.icons.filled.Search
 import androidx.compose.material3.Scaffold
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.CompositionLocalProvider
+import androidx.compose.runtime.remember
 import androidx.compose.ui.Modifier
 import androidx.navigation3.runtime.rememberNavBackStack
 import com.dxmxp.navigation.core.LocalNavigator
@@ -23,9 +24,17 @@ import com.dxmxp.ui.screens.BottomBar
 @Composable
 fun MainScaffold() {
     val rootNavigator = LocalNavigator.current
+    val rootDestination = rootNavigator.currentDestination
+
+    val initialNestedRoute = remember(rootDestination) {
+        when (rootDestination) {
+            is MainGraph -> MainGraph.Home
+            else -> rootDestination ?: MainGraph.Home
+        }
+    }
     
     // Nested backstack for the main content area
-    val nestedBackStack = rememberNavBackStack(MainGraph.Home)
+    val nestedBackStack = rememberNavBackStack(initialNestedRoute)
     val nestedNavigator = rememberNavigator(nestedBackStack)
 
     val bottomBarItems = listOf(
