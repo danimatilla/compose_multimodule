@@ -7,6 +7,7 @@ import com.dxmxp.domain.common.fold
 import com.dxmxp.domain.use_case.AutoLoginUseCase
 import com.dxmxp.domain.use_case.HasSessionUseCase
 import com.dxmxp.navigation.core.RouteRegistry
+import com.dxmxp.navigation.model.Graph
 import com.dxmxp.navigation.model.Route
 import com.dxmxp.navigation.utils.DeepLinkHandler
 import com.dxmxp.seed.navigation.routes.AuthGraph
@@ -40,37 +41,6 @@ class MainViewModel @Inject constructor(
     }
 
     override fun createInitialState(): State = State()
-
-    /**
-     * Determines if the BottomBar should be shown for a given route.
-     * Inherits visibility from the parent Graph if not explicitly overridden by the route.
-     */
-    private fun shouldShowBottomBar(route: Route?): Boolean {
-        if (route == null) return false
-        
-        val graph = routeRegistry.getGraphForRoute(route)
-        
-        // If the graph itself says no bar, we hide it for everything inside.
-        if (graph != null && !graph.showMainBottomBar) return false
-        
-        // Otherwise, respect the route's own property.
-        return route.showMainBottomBar
-    }
-
-    /**
-     * Determines if a route requires authentication.
-     * Inherits from the parent Graph if not explicitly overridden by the route.
-     */
-    private fun requiresAuth(route: Route?): Boolean {
-        if (route == null) return true
-        
-        val graph = routeRegistry.getGraphForRoute(route)
-        
-        // If the graph itself is public, all screens inside are public unless they override it.
-        if (graph != null && !graph.requiresAuth) return false
-        
-        return route.requiresAuth
-    }
 
     init {
         checkSession()
@@ -116,19 +86,21 @@ class MainViewModel @Inject constructor(
     override fun handleEvent(event: Event) {
         when (event) {
             is Event.HandleDeepLink -> handleDeepLink(event.uri)
-            is Event.OnRouteChanged -> {
-                val state = uiState.value
-                val showBar = shouldShowBottomBar(event.route)
-                
-                // If we have a pending route and we just transitioned to an authenticated area (MainGraph)
-                if (state.pendingRoute != null && (event.route is MainGraph)) {
-                    val destination = state.pendingRoute
-                    setState { copy(pendingRoute = null, showBottomBar = showBar) }
-                    setEffect { Effect.SetRoot(destination) }
-                } else {
-                    setState { copy(showBottomBar = showBar) }
-                }
-            }
+            is Event.OnRouteChanged -> onRouteChange(event)
+        }
+    }
+
+    private fun onRouteChange(event: Event.OnRouteChanged) {
+        val state = uiState.value
+        val showBar = shouldShowBottomBar(event.route)
+
+        // If we have a pending route and we just transitioned to an authenticated area (MainGraph)
+        if (state.pendingRoute != null && (event.route is MainGraph)) {
+            val destination = state.pendingRoute
+            setState { copy(pendingRoute = null, showBottomBar = showBar) }
+            setEffect { Effect.SetRoot(destination) }
+        } else {
+            setState { copy(showBottomBar = showBar) }
         }
     }
 
@@ -146,5 +118,36 @@ class MainViewModel @Inject constructor(
                 }
             }
         }
+    }
+
+    /**
+     * Determines if the BottomBar should be shown for a given route.
+     * Inherits visibility from the parent Graph if not explicitly overridden by the route.
+     */
+    private fun shouldShowBottomBar(route: Route?): Boolean {
+        if (route == null) return false
+
+        val graph = routeRegistry.getGraphForRoute(route)
+
+        // If the graph itself says no bar, we hide it for everything inside.
+        if (graph != null && !graph.showMainBottomBar) return false
+
+        // Otherwise, respect the route's own property.
+        return route.showMainBottomBar
+    }
+
+    /**
+     * Determines if a route requires authentication.
+     * Inherits from the parent Graph if not explicitly overridden by the route.
+     */
+    private fun requiresAuth(route: Route?): Boolean {
+        if (route == null) return true
+
+        val graph = routeRegistry.getGraphForRoute(route)
+
+        // If the graph itself is public, all screens inside are public unless they override it.
+        if (graph != null && !graph.requiresAuth) return false
+
+        return route.requiresAuth
     }
 }

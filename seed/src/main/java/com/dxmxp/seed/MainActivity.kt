@@ -14,10 +14,12 @@ import androidx.compose.material.icons.filled.Menu
 import androidx.compose.material.icons.filled.Person
 import androidx.compose.material.icons.filled.Search
 import androidx.compose.material3.Scaffold
+import androidx.compose.runtime.Composable
 import androidx.compose.runtime.CompositionLocalProvider
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
+import androidx.compose.runtime.remember
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Modifier
 import androidx.core.splashscreen.SplashScreen.Companion.installSplashScreen
@@ -30,6 +32,7 @@ import com.dxmxp.navigation.model.Route
 import com.dxmxp.seed.navigation.MainNavDisplay
 import com.dxmxp.seed.navigation.routes.MainGraph
 import com.dxmxp.seed.navigation.routes.ProfileGraph
+import com.dxmxp.stories.navigation.StoriesScaffold
 import com.dxmxp.stories.navigation.routes.StoriesGraph
 import com.dxmxp.ui.screens.BottomBar
 import com.dxmxp.ui.theme.SeedTheme
@@ -40,24 +43,42 @@ class MainActivity : ComponentActivity() {
 
     private val viewModel: MainViewModel by viewModels()
 
-    override fun onCreate(savedInstanceState: Bundle?) {
+    override fun onCreate(
+        savedInstanceState: Bundle?
+    ) {
         val splashScreen = installSplashScreen()
         enableEdgeToEdge()
 
         super.onCreate(savedInstanceState)
-        
+
         splashScreen.setKeepOnScreenCondition {
             viewModel.uiState.value.initialRoute == null
         }
-        
+
         intentState = intent
 
         setContent {
+            val bottomBarItems = remember {
+                listOf(
+                    MainGraph.Home to Icons.Default.Home,
+                    MainGraph.Search to Icons.Default.Search,
+                    MainGraph.Menu to Icons.Default.Menu,
+                    StoriesGraph to Icons.Default.AutoStories,
+                    ProfileGraph to Icons.Default.Person
+                )
+            }
+
             val uiState by viewModel.uiState.collectAsStateWithLifecycle()
 
             uiState.initialRoute?.let { initialRoute ->
                 val backStack = rememberNavBackStack(initialRoute)
                 val navigator = rememberNavigator(backStack)
+
+                val currentDestination = navigator.currentDestination
+
+                LaunchedEffect(currentDestination) {
+                    viewModel.setEvent(MainViewModel.Event.OnRouteChanged(currentDestination as? Route))
+                }
 
                 LaunchedEffect(intentState) {
                     intentState?.data?.let { uri ->
@@ -74,10 +95,29 @@ class MainActivity : ComponentActivity() {
                     }
                 }
 
-                val currentDestination = navigator.currentDestination
-
-                LaunchedEffect(currentDestination) {
-                    viewModel.setEvent(MainViewModel.Event.OnRouteChanged(currentDestination as? Route))
+                @Composable
+                fun MainScaffold() {
+                    Scaffold(
+                        bottomBar = {
+                            BottomBar(
+                                shouldShowBottomBar = uiState.showBottomBar,
+                                currentDestination = currentDestination,
+                                bottomBarItems = bottomBarItems,
+                                onClickItem = { route ->
+                                    if (route is StoriesGraph) {
+                                        navigator.push(route)
+                                    } else {
+                                        navigator.setRoot(route)
+                                    }
+                                }
+                            )
+                        }
+                    ) { paddingValues ->
+                        MainNavDisplay(
+                            backStack = backStack,
+                            modifier = Modifier.padding(paddingValues)
+                        )
+                    }
                 }
 
                 SeedTheme {
@@ -85,32 +125,9 @@ class MainActivity : ComponentActivity() {
                         LocalNavigator provides navigator,
                         LocalRootNavigator provides navigator,
                     ) {
-                        Scaffold(
-                            bottomBar = {
-                                BottomBar(
-                                    shouldShowBottomBar = uiState.showBottomBar,
-                                    currentDestination = currentDestination,
-                                    bottomBarItems = listOf(
-                                        MainGraph.Home to Icons.Default.Home,
-                                        MainGraph.Search to Icons.Default.Search,
-                                        MainGraph.Menu to Icons.Default.Menu,
-                                        StoriesGraph to Icons.Default.AutoStories,
-                                        ProfileGraph to Icons.Default.Person
-                                    ),
-                                    onClickItem = { route ->
-                                        if (route is StoriesGraph) {
-                                            navigator.push(route)
-                                        } else {
-                                            navigator.setRoot(route)
-                                        }
-                                    }
-                                )
-                            }
-                        ) { paddingValues ->
-                            MainNavDisplay(
-                                backStack = backStack,
-                                modifier = Modifier.padding(paddingValues)
-                            )
+                        when (currentDestination) {
+                            is StoriesGraph -> StoriesScaffold()
+                            else -> MainScaffold()
                         }
                     }
                 }

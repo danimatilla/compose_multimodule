@@ -49,36 +49,18 @@ import dagger.multibindings.IntoSet
 @InstallIn(SingletonComponent::class)
 object AppGraphsModule {
 
-    /**
-     * Provides the main app graph.
-     * Root navigation context for the main authenticated flow.
-     */
     @Provides
     @IntoSet
     fun provideMainGraph(): Graph = MainGraph
 
-    /**
-     * Provides the authentication graph.
-     * Navigation context for login/registration flow.
-     * Typically shown before auth is acquired.
-     */
     @Provides
     @IntoSet
     fun provideAuthGraph(): Graph = AuthGraph
 
-    /**
-     * Provides the profile graph.
-     * Navigation context for user profile and settings screens.
-     */
     @Provides
     @IntoSet
     fun provideProfileGraph(): Graph = ProfileGraph
 
-    /**
-     * Provides the stories graph (feature module).
-     * Navigation context for story feed, details, and interactions.
-     * Demonstrates how feature modules contribute graphs to the central module.
-     */
     @Provides
     @IntoSet
     fun provideStoriesGraph(): Graph = StoriesGraph
