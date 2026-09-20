@@ -51,6 +51,23 @@ class RouteRegistry @Inject constructor(
     private val graphs: Set<@JvmSuppressWildcards Graph>,
 ) {
     /**
+     * Finds the graph that contains the given route.
+     * Checks both static routes and path prefixes for dynamic routes.
+     */
+    fun getGraphForRoute(route: Route): Graph? {
+        // 1. Try to find an exact static match
+        val staticMatch = graphs.find { graph ->
+            graph.staticRoutes().any { it.route == route }
+        }
+        if (staticMatch != null) return staticMatch
+
+        // 2. Fallback to path prefix matching (for dynamic routes)
+        // Sort by length descending to get the most specific match
+        return graphs
+            .filter { route.route.startsWith(it.route) }
+            .maxByOrNull { it.route.length }
+    }
+    /**
      * Maps [RouteKey] to [Route] for type-safe lookups.
      * Built from all static routes in registered graphs.
      */

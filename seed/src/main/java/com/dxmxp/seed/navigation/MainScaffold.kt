@@ -1,5 +1,6 @@
 package com.dxmxp.seed.navigation
 
+import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.padding
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.AutoStories
@@ -12,7 +13,9 @@ import androidx.compose.runtime.Composable
 import androidx.compose.runtime.CompositionLocalProvider
 import androidx.compose.runtime.remember
 import androidx.compose.ui.Modifier
+import androidx.navigation3.runtime.entryProvider
 import androidx.navigation3.runtime.rememberNavBackStack
+import androidx.navigation3.ui.NavDisplay
 import com.dxmxp.navigation.core.LocalNavigator
 import com.dxmxp.navigation.core.rememberNavigator
 import com.dxmxp.navigation.model.Route
@@ -28,11 +31,13 @@ fun MainScaffold() {
 
     val initialNestedRoute = remember(rootDestination) {
         when (rootDestination) {
-            is MainGraph -> MainGraph.Home
-            else -> rootDestination ?: MainGraph.Home
+            is MainGraph.Search -> MainGraph.Search
+            is MainGraph.Menu -> MainGraph.Menu
+            is ProfileGraph -> ProfileGraph
+            else -> MainGraph.Home
         }
     }
-    
+
     // Nested backstack for the main content area
     val nestedBackStack = rememberNavBackStack(initialNestedRoute)
     val nestedNavigator = rememberNavigator(nestedBackStack)
@@ -44,7 +49,7 @@ fun MainScaffold() {
         StoriesGraph to Icons.Default.AutoStories,
         ProfileGraph to Icons.Default.Person
     )
-    
+
     val currentDestination = nestedNavigator.currentDestination
     val shouldShowBottomBar = (currentDestination as? Route)?.showMainBottomBar != false
 
@@ -58,16 +63,22 @@ fun MainScaffold() {
                     onClickItem = { route ->
                         when (route) {
                             is StoriesGraph -> rootNavigator.push(route)
-                            is ProfileGraph -> nestedNavigator.setRoot(route)
                             else -> nestedNavigator.setRoot(route)
                         }
                     }
                 )
             }
         ) { innerPaddings ->
-            MainNavDisplay(
+            val entryProvider = remember {
+                entryProvider { MainGraph.run { registerScreens() } }
+            }
+
+            NavDisplay(
                 backStack = nestedBackStack,
-                modifier = Modifier.padding(innerPaddings)
+                entryProvider = entryProvider,
+                modifier = Modifier
+                    .padding(innerPaddings)
+                    .fillMaxSize()
             )
         }
     }

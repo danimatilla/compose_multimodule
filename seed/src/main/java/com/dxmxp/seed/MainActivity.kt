@@ -6,8 +6,14 @@ import androidx.activity.ComponentActivity
 import androidx.activity.compose.setContent
 import androidx.activity.enableEdgeToEdge
 import androidx.activity.viewModels
-import androidx.compose.foundation.background
-import androidx.compose.material3.MaterialTheme
+import androidx.compose.foundation.layout.padding
+import androidx.compose.material.icons.Icons
+import androidx.compose.material.icons.filled.AutoStories
+import androidx.compose.material.icons.filled.Home
+import androidx.compose.material.icons.filled.Menu
+import androidx.compose.material.icons.filled.Person
+import androidx.compose.material.icons.filled.Search
+import androidx.compose.material3.Scaffold
 import androidx.compose.runtime.CompositionLocalProvider
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.getValue
@@ -20,7 +26,12 @@ import androidx.navigation3.runtime.rememberNavBackStack
 import com.dxmxp.navigation.core.LocalNavigator
 import com.dxmxp.navigation.core.LocalRootNavigator
 import com.dxmxp.navigation.core.rememberNavigator
+import com.dxmxp.navigation.model.Route
 import com.dxmxp.seed.navigation.MainNavDisplay
+import com.dxmxp.seed.navigation.routes.MainGraph
+import com.dxmxp.seed.navigation.routes.ProfileGraph
+import com.dxmxp.stories.navigation.routes.StoriesGraph
+import com.dxmxp.ui.screens.BottomBar
 import com.dxmxp.ui.theme.SeedTheme
 import dagger.hilt.android.AndroidEntryPoint
 
@@ -58,9 +69,15 @@ class MainActivity : ComponentActivity() {
                 LaunchedEffect(Unit) {
                     viewModel.effect.collect { effect ->
                         when (effect) {
-                            is MainViewModel.Effect.NavigateTo -> navigator.push(effect.route)
+                            is MainViewModel.Effect.SetRoot -> navigator.setRoot(effect.route)
                         }
                     }
+                }
+
+                val currentDestination = navigator.currentDestination
+
+                LaunchedEffect(currentDestination) {
+                    viewModel.setEvent(MainViewModel.Event.OnRouteChanged(currentDestination as? Route))
                 }
 
                 SeedTheme {
@@ -68,10 +85,33 @@ class MainActivity : ComponentActivity() {
                         LocalNavigator provides navigator,
                         LocalRootNavigator provides navigator,
                     ) {
-                        MainNavDisplay(
-                            backStack = backStack,
-                            modifier = Modifier.background(color = MaterialTheme.colorScheme.background)
-                        )
+                        Scaffold(
+                            bottomBar = {
+                                BottomBar(
+                                    shouldShowBottomBar = uiState.showBottomBar,
+                                    currentDestination = currentDestination,
+                                    bottomBarItems = listOf(
+                                        MainGraph.Home to Icons.Default.Home,
+                                        MainGraph.Search to Icons.Default.Search,
+                                        MainGraph.Menu to Icons.Default.Menu,
+                                        StoriesGraph to Icons.Default.AutoStories,
+                                        ProfileGraph to Icons.Default.Person
+                                    ),
+                                    onClickItem = { route ->
+                                        if (route is StoriesGraph) {
+                                            navigator.push(route)
+                                        } else {
+                                            navigator.setRoot(route)
+                                        }
+                                    }
+                                )
+                            }
+                        ) { paddingValues ->
+                            MainNavDisplay(
+                                backStack = backStack,
+                                modifier = Modifier.padding(paddingValues)
+                            )
+                        }
                     }
                 }
             }

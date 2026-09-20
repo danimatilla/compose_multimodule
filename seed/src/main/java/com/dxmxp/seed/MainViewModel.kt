@@ -6,6 +6,7 @@ import com.dxmxp.domain.AppException
 import com.dxmxp.domain.common.fold
 import com.dxmxp.domain.use_case.AutoLoginUseCase
 import com.dxmxp.domain.use_case.HasSessionUseCase
+import com.dxmxp.navigation.core.RouteRegistry
 import com.dxmxp.navigation.model.Route
 import com.dxmxp.navigation.utils.DeepLinkHandler
 import com.dxmxp.seed.navigation.routes.AuthGraph
@@ -19,22 +20,56 @@ import javax.inject.Inject
 class MainViewModel @Inject constructor(
     private val hasSessionUseCase: HasSessionUseCase,
     private val autoLoginUseCase: AutoLoginUseCase,
+    private val routeRegistry: RouteRegistry,
     private val deepLinkHandler: DeepLinkHandler
 ) : BaseViewModel<MainViewModel.State, MainViewModel.Effect, MainViewModel.Event>() {
 
     data class State(
-        val initialRoute: Route? = null
+        val initialRoute: Route? = null,
+        val showBottomBar: Boolean = false
     )
 
     interface Event {
         data class HandleDeepLink(val uri: Uri) : Event
+        data class OnRouteChanged(val route: Route?) : Event
     }
 
     interface Effect {
-        data class NavigateTo(val route: Route) : Effect
+        data class SetRoot(val route: Route) : Effect
     }
 
     override fun createInitialState(): State = State()
+
+    /**
+     * Determines if the BottomBar should be shown for a given route.
+     * Inherits visibility from the parent Graph if not explicitly overridden by the route.
+     */
+    private fun shouldShowBottomBar(route: Route?): Boolean {
+        if (route == null) return false
+        
+        val graph = routeRegistry.getGraphForRoute(route)
+        
+        // If the graph itself says no bar, we hide it for everything inside.
+        if (graph != null && !graph.showMainBottomBar) return false
+        
+        // Otherwise, respect the route's own property.
+        return route.showMainBottomBar
+    }
+
+    /**
+     * Determines if a route requires authentication.
+     * Inherits from the parent Graph if not explicitly overridden by the route.
+     */
+    private fun requiresAuth(route: Route?): Boolean {
+        if (route == null) return true
+        
+        val graph = routeRegistry.getGraphForRoute(route)
+        
+        // If the graph itself is public, all screens inside are public unless they override it.
+        if (graph != null && !graph.requiresAuth) return false
+        
+        return route.requiresAuth
+    }
 
     init {
         checkSession()
@@ -43,7 +78,7 @@ class MainViewModel @Inject constructor(
     private fun checkSession() {
         viewModelScope.launch {
             if (!hasSessionUseCase(Unit)) {
-                setState { copy(initialRoute = AuthGraph) }
+                updateInitialRoute(AuthGraph)
                 return@launch
             }
 
@@ -53,14 +88,14 @@ class MainViewModel @Inject constructor(
                         setState { copy(initialRoute = null) }
                     },
                     onSuccess = { _, _ ->
-                        setState { copy(initialRoute = MainGraph) }
+                        updateInitialRoute(MainGraph.Home)
                     },
                     onError = { exception ->
                         if (exception is AppException.UnauthorizedException) {
-                            setState { copy(initialRoute = AuthGraph) }
+                            updateInitialRoute(AuthGraph)
                         } else {
                             // Network error or other, we still have the token in memory
-                            setState { copy(initialRoute = MainGraph) }
+                            updateInitialRoute(MainGraph.Home)
                         }
                     }
                 )
@@ -68,15 +103,36 @@ class MainViewModel @Inject constructor(
         }
     }
 
+    private fun updateInitialRoute(route: Route) {
+        setState { 
+            copy(
+                initialRoute = route,
+                showBottomBar = shouldShowBottomBar(route)
+            )
+        }
+    }
+
     override fun handleEvent(event: Event) {
         when (event) {
             is Event.HandleDeepLink -> handleDeepLink(event.uri)
+            is Event.OnRouteChanged -> {
+                setState { copy(showBottomBar = shouldShowBottomBar(event.route)) }
+            }
         }
     }
 
     private fun handleDeepLink(uri: Uri) {
-        deepLinkHandler.handle(uri)?.let { route ->
-            setEffect { Effect.NavigateTo(route) }
+        viewModelScope.launch {
+            deepLinkHandler.handle(uri)?.let { route ->
+                val hasSession = hasSessionUseCase(Unit)
+                
+                if (requiresAuth(route) && !hasSession) {
+                    // Redirect to auth if trying to access a protected route without session
+                    setEffect { Effect.SetRoot(AuthGraph) }
+                } else {
+                    setEffect { Effect.SetRoot(route) }
+                }
+            }
         }
     }
 }

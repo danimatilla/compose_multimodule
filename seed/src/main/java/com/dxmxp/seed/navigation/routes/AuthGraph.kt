@@ -39,11 +39,11 @@ data object AuthGraph : Graph {
 
     override val route: String get() = "/auth"
     override val requiresAuth: Boolean get() = false
+    override val showMainBottomBar: Boolean get() = false
 
     @Serializable
     data object Login : Screen {
         override val route: String get() = "${AuthGraph.route}/login"
-        override val requiresAuth: Boolean = false
     }
 
     /**

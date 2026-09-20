@@ -9,7 +9,6 @@ import com.dxmxp.navigation.model.Graph
 import com.dxmxp.navigation.model.Route
 import com.dxmxp.navigation.model.Screen
 import com.dxmxp.navigation.model.Screen.Companion.screenEntry
-import com.dxmxp.seed.navigation.MainScaffold
 import com.dxmxp.seed.screens.HomeScreen
 import com.dxmxp.seed.screens.MenuScreen
 import com.dxmxp.seed.screens.SearchScreen
@@ -52,13 +51,13 @@ data object MainGraph : Graph {
 
     /**
      * Register all composable screens for this graph.
-     * Called by the navigation engine to set up the UI hierarchy.
      */
     override fun EntryProviderScope<NavKey>.registerScreens() {
-        screenEntry<MainGraph> { MainScaffold() }
+        screenEntry<MainGraph> { HomeScreen() }
         screenEntry<Home> { HomeScreen() }
         screenEntry<Search> { SearchScreen() }
         screenEntry<Menu> { MenuScreen() }
+
         // Nested graphs
         StoriesGraph.run { registerScreens() }
         ProfileGraph.run { registerScreens() }
