@@ -13,9 +13,17 @@ Technical deep-dive into the simplified hierarchical navigation system using Nav
 ## 2. Component Logic
 
 ### Navigator
-A simple wrapper around `NavBackStack`. It provides basic operations like `push`, `pop`, `setRoot`, and atomic stack updates via `updateStack { ... }`.
+A wrapper around `NavBackStack`. It provides operations like `push`, `pop`, `root`, atomic stack updates via `updateStack { ... }`, and executes actions via `navAction`.
 - Provided via `LocalNavigator`.
-- Decoupled from ViewModels; navigation is triggered via UI observing ViewModel effects.
+- Decoupled from ViewModels; navigation is triggered via UI observing `NavAction` effects (`viewModel.effect.collect(navigator::navAction)`).
+
+### NavAction
+A sealed interface wrapping navigation intent:
+- `NavAction.Push(route)`
+- `NavAction.Pop`
+- `NavAction.PopTo(route)`
+- `NavAction.Root(route)`
+- `NavAction.UpdateStack(block)`
 
 ### RouteRegistry
 A centralized registry for Deep Linking. It maps URL patterns to route creator functions.

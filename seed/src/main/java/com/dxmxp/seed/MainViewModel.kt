@@ -6,6 +6,7 @@ import com.dxmxp.domain.AppException
 import com.dxmxp.domain.common.fold
 import com.dxmxp.domain.use_case.AutoLoginUseCase
 import com.dxmxp.domain.use_case.HasSessionUseCase
+import com.dxmxp.navigation.core.NavAction
 import com.dxmxp.navigation.core.RouteRegistry
 import com.dxmxp.navigation.model.Graph
 import com.dxmxp.navigation.model.Route
@@ -38,8 +39,7 @@ class MainViewModel @Inject constructor(
     }
 
     interface Effect {
-        data class SetRoot(val route: Route) : Effect
-        data class SetStack(val routes: List<Route>) : Effect
+        data class Navigate(val action: NavAction) : Effect
     }
 
     override fun createInitialState(): State = State()
@@ -119,7 +119,7 @@ class MainViewModel @Inject constructor(
                 if (requiresAuth(route) && !hasSession) {
                     // Save for after login
                     setState { copy(pendingRoute = route) }
-                    setEffect { Effect.SetRoot(AuthGraph) }
+                    setEffect { Effect.Navigate(NavAction.Root(AuthGraph)) }
                 } else {
                     navigateToAuthenticatedRoute(route)
                 }
@@ -128,10 +128,9 @@ class MainViewModel @Inject constructor(
     }
 
     private fun navigateToAuthenticatedRoute(route: Route) {
-        when (route) {
-            AuthGraph -> setEffect { Effect.SetRoot(AuthGraph) }
-            MainGraph.Home, MainGraph -> setEffect { Effect.SetRoot(MainGraph.Home) }
-            else -> setEffect { Effect.SetStack(listOf(MainGraph.Home, route)) }
+        when {
+            route.isModal -> setEffect { Effect.Navigate(NavAction.Push(route)) }
+            else -> setEffect { Effect.Navigate(NavAction.Root(route)) }
         }
     }
 

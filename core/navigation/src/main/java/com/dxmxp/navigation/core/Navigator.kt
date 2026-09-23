@@ -13,7 +13,7 @@ annotation class NavigationDslMarker
 
 /**
  * A simple navigator that wraps NavBackStack to provide navigation operations.
- * Supports atomic stack modifications via the [updateStack] DSL.
+ * Supports atomic stack modifications via the [navAction] DSL.
  */
 class Navigator(private val backStack: NavBackStack<NavKey>) {
 
@@ -82,6 +82,16 @@ class Navigator(private val backStack: NavBackStack<NavKey>) {
         }
     }
 
+    fun navAction(action: NavAction) {
+        when (action) {
+            is NavAction.Push -> push(action.route)
+            is NavAction.Pop -> pop()
+            is NavAction.PopTo -> popTo(action.route)
+            is NavAction.Root -> root(action.route)
+            is NavAction.UpdateStack -> updateStack(action.block)
+        }
+    }
+
     fun push(route: Route) {
         updateStack { push(route) }
     }
@@ -94,12 +104,20 @@ class Navigator(private val backStack: NavBackStack<NavKey>) {
         updateStack { popTo(route) }
     }
 
-    fun setRoot(route: Route) {
+    fun root(route: Route) {
         updateStack { root(route) }
     }
 
     val currentDestination: NavKey?
         get() = backStack.lastOrNull()
+}
+
+sealed interface NavAction {
+    data class Push(val route: Route) : NavAction
+    data object Pop : NavAction
+    data class PopTo(val route: Route) : NavAction
+    data class Root(val route: Route) : NavAction
+    data class UpdateStack(val block: Navigator.StackBuilder.() -> Unit) : NavAction
 }
 
 @Composable

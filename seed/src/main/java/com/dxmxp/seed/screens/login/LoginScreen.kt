@@ -55,7 +55,7 @@ fun LoginScreen(
                 is LoginViewModel.Effect.ShowError -> {
                     Toast.makeText(context, effect.message, Toast.LENGTH_SHORT).show()
                 }
-                LoginViewModel.Effect.NavigateToMain -> navigator.setRoot(MainGraph)
+                is LoginViewModel.Effect.Navigate -> navigator.navAction(effect.action)
             }
         }
     }

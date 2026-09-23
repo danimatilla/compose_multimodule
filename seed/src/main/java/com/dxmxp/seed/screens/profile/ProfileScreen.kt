@@ -34,9 +34,7 @@ fun ProfileScreen(
     LaunchedEffect(Unit) {
         viewModel.effect.collect { effect ->
             when (effect) {
-                ProfileViewModel.Effect.NavigateToAuth -> {
-                    navigator.setRoot(AuthGraph)
-                }
+                is ProfileViewModel.Effect.Navigate -> navigator.navAction(effect.action)
             }
         }
     }

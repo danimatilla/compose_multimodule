@@ -43,11 +43,6 @@ import com.dxmxp.navigation.model.Route
  * ```
  */
 interface Graph : Route {
-    override val showMainBottomBar: Boolean get() = true
-
-    /** Whether this graph should be presented as a modal dialog */
-    val isModal: Boolean get() = false
-
     /**
      * Register all screens of this graph within the navigation system.
      * This is called by the router to set up the composable hierarchy.

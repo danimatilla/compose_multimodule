@@ -5,16 +5,25 @@ import androidx.compose.runtime.LaunchedEffect
 import androidx.lifecycle.ViewModel
 import androidx.navigation3.runtime.EntryProviderScope
 import androidx.navigation3.runtime.NavKey
+import androidx.navigation3.runtime.metadata
 import com.dxmxp.navigation.common.InitializableViewModel
+import com.dxmxp.navigation.utils.NavigationUtils.modalAnimation
 
 /**
  * Screen represents an individual screen in the application.
  */
 interface Screen : Route {
 
-    override val showMainBottomBar: Boolean get() = true
-
     companion object {
+
+        inline fun <reified K : Route> resolveMetadata(customMetadata: Map<String, Any>): Map<String, Any> {
+            val isModal = K::class.objectInstance?.isModal == true
+            return if (isModal) {
+                metadata { modalAnimation() } + customMetadata
+            } else {
+                customMetadata
+            }
+        }
 
         /**
          * Enhanced entry that automatically handles ViewModel initialization.
@@ -25,7 +34,7 @@ interface Screen : Route {
             crossinline viewModelProvide: @Composable () -> VM,
             crossinline content: @Composable (VM) -> Unit,
         ) {
-            entry<K>(metadata = metadata) { route ->
+            entry<K>(metadata = resolveMetadata<K>(metadata)) { route ->
                 val viewModel = viewModelProvide()
 
                 LaunchedEffect(route) {
@@ -47,7 +56,7 @@ interface Screen : Route {
             metadata: Map<String, Any> = emptyMap(),
             crossinline content: @Composable (K) -> Unit,
         ) {
-            entry<K>(metadata = metadata) { route -> content(route) }
+            entry<K>(metadata = resolveMetadata<K>(metadata)) { route -> content(route) }
         }
     }
 }

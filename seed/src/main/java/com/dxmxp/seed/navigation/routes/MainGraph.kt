@@ -29,6 +29,7 @@ data object MainGraph : Graph {
     @Serializable
     data object Search : Screen {
         override val route: String get() = "${MainGraph.route}/search"
+        override val isModal: Boolean get() = true
     }
 
     @Serializable

@@ -2,6 +2,8 @@ package com.dxmxp.seed.screens.profile
 
 import androidx.lifecycle.viewModelScope
 import com.dxmxp.domain.use_case.LogoutUseCase
+import com.dxmxp.navigation.core.NavAction
+import com.dxmxp.seed.navigation.routes.AuthGraph
 import com.dxmxp.ui.base.BaseViewModel
 import dagger.hilt.android.lifecycle.HiltViewModel
 import kotlinx.coroutines.launch
@@ -21,7 +23,7 @@ class ProfileViewModel @Inject constructor(
     }
 
     interface Effect {
-        data object NavigateToAuth : Effect
+        data class Navigate(val action: NavAction) : Effect
     }
 
     override fun createInitialState(): State = State()
@@ -37,7 +39,7 @@ class ProfileViewModel @Inject constructor(
             setState { copy(isLoading = true) }
             logoutUseCase()
             setState { copy(isLoading = false) }
-            setEffect { Effect.NavigateToAuth }
+            setEffect { Effect.Navigate(NavAction.Root(AuthGraph)) }
         }
     }
 }

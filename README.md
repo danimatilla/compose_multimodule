@@ -82,7 +82,7 @@ class DetailViewModel @Inject constructor() : ViewModel(), InitializableViewMode
 
 ### 4. Navigating
 ```kotlin
-// From Composables
+// Direct navigation from Composables
 val navigator = LocalNavigator.current
 navigator.push(DetailScreen(id = "1"))
 navigator.setRoot(AuthGraph)
@@ -91,6 +91,22 @@ navigator.setRoot(AuthGraph)
 navigator.updateStack {
     root(MainGraph.Home)
     push(DetailScreen(id = "1"))
+}
+
+// Effect-based navigation via NavAction in Screens/Activities
+LaunchedEffect(Unit) {
+    viewModel.effect.collect(navigator::navAction)
+}
+```
+
+### 5. Modal Screens (`isModal`)
+Override `isModal = true` on any `Route` or `Graph` to automatically apply slide-up transitions, hide the bottom bar, and render as an overlay above main screens:
+
+```kotlin
+@Serializable
+data class StoryDetail(val id: String) : Screen {
+    override val route = "/stories/detail"
+    override val isModal = true // Automatic modal presentation & animation
 }
 ```
 

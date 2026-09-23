@@ -26,6 +26,7 @@ import androidx.core.splashscreen.SplashScreen.Companion.installSplashScreen
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import androidx.navigation3.runtime.rememberNavBackStack
 import com.dxmxp.navigation.core.LocalNavigator
+import com.dxmxp.navigation.core.NavAction
 import com.dxmxp.navigation.core.rememberNavigator
 import com.dxmxp.navigation.model.Route
 import com.dxmxp.seed.navigation.MainNavDisplay
@@ -89,11 +90,7 @@ class MainActivity : ComponentActivity() {
                 LaunchedEffect(Unit) {
                     viewModel.effect.collect { effect ->
                         when (effect) {
-                            is MainViewModel.Effect.SetRoot -> navigator.setRoot(effect.route)
-                            is MainViewModel.Effect.SetStack -> navigator.updateStack {
-                                effect.routes.firstOrNull()?.let { root(it) }
-                                effect.routes.drop(1).forEach { push(it) }
-                            }
+                            is MainViewModel.Effect.Navigate -> navigator.navAction(effect.action)
                         }
                     }
                 }
@@ -107,11 +104,13 @@ class MainActivity : ComponentActivity() {
                                 currentDestination = currentDestination,
                                 bottomBarItems = bottomBarItems,
                                 onClickItem = { route ->
-                                    if (route is StoriesGraph) {
-                                        navigator.push(route)
-                                    } else {
-                                        navigator.setRoot(route)
-                                    }
+                                    navigator.navAction(
+                                        if (route.isModal) {
+                                            NavAction.Push(route)
+                                        } else {
+                                            NavAction.Root(route)
+                                        }
+                                    )
                                 }
                             )
                         }
@@ -129,15 +128,20 @@ class MainActivity : ComponentActivity() {
                     ) {
                         val currentRoute = currentDestination as? Route
                         val graph = currentRoute?.let { uiState.currentGraph }
+                        val isModal = currentRoute?.isModal == true
 
-                        when (graph) {
-                            is StoriesGraph -> {
-                                StoriesScaffold(
-                                    initialRoute = if (currentRoute is StoriesGraph) StoriesGraph.Home else currentRoute
-                                )
+                        if (isModal) {
+                            when (graph) {
+                                is StoriesGraph -> {
+                                    StoriesScaffold(
+                                        initialRoute = if (currentRoute is StoriesGraph) StoriesGraph.Home else currentRoute
+                                    )
+                                }
+
+                                else -> MainNavDisplay(backStack = backStack)
                             }
-
-                            else -> MainScaffold()
+                        } else {
+                            MainScaffold()
                         }
                     }
                 }

@@ -1,6 +1,8 @@
 package com.dxmxp.stories.screens.feed
 
 import com.dxmxp.domain.model.Story
+import com.dxmxp.navigation.core.NavAction
+import com.dxmxp.stories.navigation.routes.StoriesGraph
 import com.dxmxp.ui.base.BaseViewModel
 import dagger.hilt.android.lifecycle.HiltViewModel
 import javax.inject.Inject
@@ -17,14 +19,17 @@ class HomeViewModel @Inject constructor() : BaseViewModel<HomeViewModel.State, H
     }
 
     interface Effect {
-        data class OpenDetail(val story: Story) : Effect
+        data class Navigate(val action: NavAction) : Effect
     }
 
     override fun createInitialState(): State = State()
 
     override fun handleEvent(event: Event) {
         when (event) {
-            is Event.OpenDetail -> setEffect { Effect.OpenDetail(event.story) }
+            is Event.OpenDetail -> {
+                val route = StoriesGraph.StoryDetail(id = event.story.id, story = event.story)
+                setEffect { Effect.Navigate(NavAction.Push(route)) }
+            }
         }
     }
 

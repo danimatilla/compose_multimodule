@@ -292,6 +292,11 @@ navigator.updateStack {
     push(StoriesGraph.Detail(id = "story_123"))
 }
 
+// Effect-based navigation via NavAction
+LaunchedEffect(Unit) {
+    viewModel.effect.collect(navigator::navAction)
+}
+
 // Deep links (automatic)
 // app://stories/feed → StoriesGraph.Feed
 // app://stories/detail?id=story_123 → StoriesGraph.Detail(id="story_123")

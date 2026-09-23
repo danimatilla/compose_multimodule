@@ -9,6 +9,7 @@ import androidx.compose.runtime.Composable
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import com.dxmxp.navigation.core.LocalNavigator
+import com.dxmxp.navigation.core.NavAction
 import com.dxmxp.ui.screens.WebView
 
 
@@ -24,7 +25,8 @@ fun HomeScreen() {
         Text("Home Screen")
         Button(
             onClick = {
-                navigator.push(WebView(url = "https://www.google.com"))
+                val route = WebView(url = "https://www.google.com")
+                navigator.navAction(NavAction.Push(route))
             },
             content = { Text("WebView") }
         )

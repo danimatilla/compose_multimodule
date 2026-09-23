@@ -27,6 +27,7 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.viewinterop.AndroidView
 import com.dxmxp.navigation.core.LocalNavigator
+import com.dxmxp.navigation.core.NavAction
 import com.dxmxp.navigation.model.Screen
 import kotlinx.serialization.Serializable
 import android.webkit.WebView as NativeWebView
@@ -56,7 +57,7 @@ fun WebViewScreen(
         if (canGoBack) {
             webViewInstance?.goBack()
         } else {
-            navigator.pop()
+            navigator.navAction(NavAction.Pop)
         }
     }
 
@@ -150,7 +151,7 @@ private fun TopAppBar(
                     if (canGoBack) {
                         webViewInstance?.goBack()
                     } else {
-                        navigator.pop()
+                        navigator.navAction(NavAction.Pop)
                     }
                 },
             ) {

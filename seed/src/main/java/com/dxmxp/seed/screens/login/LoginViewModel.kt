@@ -3,6 +3,8 @@ package com.dxmxp.seed.screens.login
 import androidx.lifecycle.viewModelScope
 import com.dxmxp.domain.common.fold
 import com.dxmxp.domain.use_case.LoginUseCase
+import com.dxmxp.navigation.core.NavAction
+import com.dxmxp.seed.navigation.routes.MainGraph
 import com.dxmxp.ui.base.BaseViewModel
 import com.dxmxp.ui.common.collectInto
 import dagger.hilt.android.lifecycle.HiltViewModel
@@ -29,7 +31,7 @@ class LoginViewModel @Inject constructor(
 
     interface Effect {
         data class ShowError(val message: String) : Effect
-        data object NavigateToMain : Effect
+        data class Navigate(val action: NavAction) : Effect
     }
 
     override fun createInitialState(): State = State()
@@ -59,7 +61,7 @@ class LoginViewModel @Inject constructor(
             result.fold(
                 onLoading = { copy(isLoading = it) },
                 onSuccess = { _, _ ->
-                    setEffect { Effect.NavigateToMain }
+                    setEffect { Effect.Navigate(NavAction.Root(MainGraph)) }
                     copy(isLoading = false)
                 },
                 onError = { exception ->

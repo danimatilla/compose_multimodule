@@ -17,6 +17,7 @@ import androidx.hilt.lifecycle.viewmodel.compose.hiltViewModel
 import androidx.lifecycle.ViewModel
 import androidx.navigation3.runtime.rememberNavBackStack
 import com.dxmxp.navigation.core.LocalNavigator
+import com.dxmxp.navigation.core.NavAction
 import com.dxmxp.navigation.core.Navigator
 import com.dxmxp.navigation.core.RouteRegistry
 import com.dxmxp.navigation.core.rememberNavigator
@@ -56,7 +57,7 @@ fun StoriesScaffold(
                     navigationIcon = {
                         IconButton(
                             content = { Icon(Icons.Default.Close, contentDescription = "Close") },
-                            onClick = { rootNavigator.pop() }
+                            onClick = { rootNavigator.navAction(NavAction.Pop) }
                         )
                     }
                 )
@@ -66,7 +67,7 @@ fun StoriesScaffold(
                     bottomBarItems = navigationBarItems,
                     currentDestination = currentDestination,
                     onClickItem = { route ->
-                        nestedNavigator.push(route)
+                        nestedNavigator.navAction(NavAction.Push(route))
                     }
                 )
             },

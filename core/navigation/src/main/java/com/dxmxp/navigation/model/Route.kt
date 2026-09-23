@@ -8,6 +8,7 @@ import androidx.navigation3.runtime.NavKey
  */
 interface Route : NavKey {
     val route: String
-    val showMainBottomBar: Boolean get() = true
+    val isModal: Boolean get() = false
+    val showMainBottomBar: Boolean get() = !isModal
     val requiresAuth: Boolean get() = true
 }

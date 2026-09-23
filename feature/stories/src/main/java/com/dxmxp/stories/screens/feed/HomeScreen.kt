@@ -17,6 +17,7 @@ import androidx.hilt.lifecycle.viewmodel.compose.hiltViewModel
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import com.dxmxp.domain.model.Story
 import com.dxmxp.navigation.core.LocalNavigator
+import com.dxmxp.navigation.core.NavAction
 import com.dxmxp.stories.navigation.routes.StoriesGraph
 
 @OptIn(ExperimentalMaterial3Api::class)
@@ -35,11 +36,7 @@ fun HomeScreen(
     LaunchedEffect(Unit) {
         viewModel.effect.collect { effect ->
             when (effect) {
-                is HomeViewModel.Effect.OpenDetail -> {
-                    navigator.push(
-                        StoriesGraph.StoryDetail(id = effect.story.id, story = effect.story)
-                    )
-                }
+                is HomeViewModel.Effect.Navigate -> navigator.navAction(effect.action)
             }
         }
     }
