@@ -5,7 +5,6 @@ import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.Close
 import androidx.compose.material.icons.filled.Home
 import androidx.compose.material.icons.filled.Person
-import androidx.compose.material.icons.filled.PersonPin
 import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.Icon
 import androidx.compose.material3.IconButton
@@ -18,10 +17,10 @@ import androidx.hilt.lifecycle.viewmodel.compose.hiltViewModel
 import androidx.lifecycle.ViewModel
 import androidx.navigation3.runtime.rememberNavBackStack
 import com.dxmxp.navigation.core.LocalNavigator
-import com.dxmxp.navigation.core.LocalRootNavigator
 import com.dxmxp.navigation.core.Navigator
 import com.dxmxp.navigation.core.RouteRegistry
 import com.dxmxp.navigation.core.rememberNavigator
+import com.dxmxp.navigation.model.Route
 import com.dxmxp.stories.navigation.routes.StoriesGraph
 import com.dxmxp.ui.screens.BottomBar
 import dagger.hilt.android.lifecycle.HiltViewModel
@@ -35,10 +34,11 @@ class StoriesScaffoldViewModel @Inject constructor(
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
 fun StoriesScaffold(
-    rootNavigator: Navigator = LocalRootNavigator.current,
+    initialRoute: Route = StoriesGraph.Home,
+    rootNavigator: Navigator = LocalNavigator.current,
     viewModel: StoriesScaffoldViewModel = hiltViewModel()
 ) {
-    val nestedBackStack = rememberNavBackStack(StoriesGraph.Home)
+    val nestedBackStack = rememberNavBackStack(initialRoute)
     val nestedNavigator = rememberNavigator(nestedBackStack)
 
     val navigationBarItems = listOf(

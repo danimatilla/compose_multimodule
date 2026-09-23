@@ -21,14 +21,15 @@ import javax.inject.Inject
 class MainViewModel @Inject constructor(
     private val hasSessionUseCase: HasSessionUseCase,
     private val autoLoginUseCase: AutoLoginUseCase,
-    private val routeRegistry: RouteRegistry,
+    val routeRegistry: RouteRegistry,
     private val deepLinkHandler: DeepLinkHandler
 ) : BaseViewModel<MainViewModel.State, MainViewModel.Effect, MainViewModel.Event>() {
 
     data class State(
         val initialRoute: Route? = null,
         val showBottomBar: Boolean = false,
-        val pendingRoute: Route? = null
+        val pendingRoute: Route? = null,
+        val currentGraph: Graph? = null
     )
 
     interface Event {
@@ -38,6 +39,7 @@ class MainViewModel @Inject constructor(
 
     interface Effect {
         data class SetRoot(val route: Route) : Effect
+        data class SetStack(val routes: List<Route>) : Effect
     }
 
     override fun createInitialState(): State = State()
@@ -75,7 +77,7 @@ class MainViewModel @Inject constructor(
     }
 
     private fun updateInitialRoute(route: Route) {
-        setState { 
+        setState {
             copy(
                 initialRoute = route,
                 showBottomBar = shouldShowBottomBar(route)
@@ -94,11 +96,16 @@ class MainViewModel @Inject constructor(
         val state = uiState.value
         val showBar = shouldShowBottomBar(event.route)
 
-        // If we have a pending route and we just transitioned to an authenticated area (MainGraph)
-        if (state.pendingRoute != null && (event.route is MainGraph)) {
+        event.route?.let {
+            val graph = routeRegistry.getGraphForRoute(it)
+            setState { copy(currentGraph = graph) }
+        }
+
+        // If we have a pending route and we just transitioned to an authenticated area
+        if ((state.pendingRoute != null) && (event.route != null) && requiresAuth(event.route)) {
             val destination = state.pendingRoute
             setState { copy(pendingRoute = null, showBottomBar = showBar) }
-            setEffect { Effect.SetRoot(destination) }
+            navigateToAuthenticatedRoute(destination)
         } else {
             setState { copy(showBottomBar = showBar) }
         }
@@ -108,15 +115,23 @@ class MainViewModel @Inject constructor(
         viewModelScope.launch {
             deepLinkHandler.handle(uri)?.let { route ->
                 val hasSession = hasSessionUseCase(Unit)
-                
+
                 if (requiresAuth(route) && !hasSession) {
                     // Save for after login
                     setState { copy(pendingRoute = route) }
                     setEffect { Effect.SetRoot(AuthGraph) }
                 } else {
-                    setEffect { Effect.SetRoot(route) }
+                    navigateToAuthenticatedRoute(route)
                 }
             }
+        }
+    }
+
+    private fun navigateToAuthenticatedRoute(route: Route) {
+        when (route) {
+            AuthGraph -> setEffect { Effect.SetRoot(AuthGraph) }
+            MainGraph.Home, MainGraph -> setEffect { Effect.SetRoot(MainGraph.Home) }
+            else -> setEffect { Effect.SetStack(listOf(MainGraph.Home, route)) }
         }
     }
 

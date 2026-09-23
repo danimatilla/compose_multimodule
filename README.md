@@ -30,7 +30,6 @@ graph TD
 1.  **Root Navigator**: Managed in `MainActivity`, handles switching between top-level flows (Auth vs. Main).
 2.  **Nested Navigators**: Each scaffold (like `MainScaffold` or `StoriesScaffold`) manages its own `NavBackStack`.
 3.  **LocalNavigator**: Provided via `CompositionLocal` to allow any screen to navigate within its current scope.
-4.  **LocalRootNavigator**: Provided to allow nested screens to trigger top-level navigation (e.g., Logout).
 
 ---
 
@@ -86,10 +85,13 @@ class DetailViewModel @Inject constructor() : ViewModel(), InitializableViewMode
 // From Composables
 val navigator = LocalNavigator.current
 navigator.push(DetailScreen(id = "1"))
+navigator.setRoot(AuthGraph)
 
-// From nested screens to root
-val rootNavigator = LocalRootNavigator.current
-rootNavigator.setRoot(AuthGraph)
+// Atomic stack updates via DSL
+navigator.updateStack {
+    root(MainGraph.Home)
+    push(DetailScreen(id = "1"))
+}
 ```
 
 ---
