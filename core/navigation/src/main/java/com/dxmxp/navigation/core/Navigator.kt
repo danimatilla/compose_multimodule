@@ -8,36 +8,94 @@ import androidx.navigation3.runtime.NavBackStack
 import androidx.navigation3.runtime.NavKey
 import com.dxmxp.navigation.model.Route
 
+@DslMarker
+annotation class NavigationDslMarker
+
 /**
  * A simple navigator that wraps NavBackStack to provide navigation operations.
+ * Supports atomic stack modifications via the [updateStack] DSL.
  */
 class Navigator(private val backStack: NavBackStack<NavKey>) {
 
-    fun push(route: Route) {
-        if (backStack.lastOrNull() != route) {
-            backStack.add(route)
+    @NavigationDslMarker
+    class StackBuilder internal constructor(initialRoutes: List<NavKey>) {
+        private val routes = initialRoutes.toMutableList()
+
+        /**
+         * Clears the current stack and sets [route] as the sole root element.
+         */
+        fun root(route: Route) {
+            routes.clear()
+            routes.add(route)
         }
+
+        /**
+         * Pushes [route] onto the top of the stack if it is not already the top element.
+         */
+        fun push(route: Route) {
+            if (routes.lastOrNull() != route) {
+                routes.add(route)
+            }
+        }
+
+        /**
+         * Removes the top element from the stack, keeping at least 1 element if available.
+         */
+        fun pop() {
+            if (routes.size > 1) {
+                routes.removeLastOrNull()
+            }
+        }
+
+        /**
+         * Pops elements back to and including the given [route].
+         */
+        fun popTo(route: Route) {
+            val index = routes.indexOfLast { it == route }
+            if (index != -1) {
+                routes.subList(index + 1, routes.size).clear()
+            }
+        }
+
+        internal fun build(): List<NavKey> = routes.toList()
+    }
+
+    /**
+     * Executes atomic modifications to the navigation stack inside a DSL block.
+     * Re-renders the UI only once upon completion of all changes.
+     *
+     * Example:
+     * ```
+     * navigator.updateStack {
+     *     root(MainGraph.Home)
+     *     push(StoriesGraph.StoryDetail(id = "123"))
+     * }
+     * ```
+     */
+    fun updateStack(block: StackBuilder.() -> Unit) {
+        val newRoutes = StackBuilder(backStack).apply(block).build()
+        if ((newRoutes.isNotEmpty()) && (newRoutes != backStack)) {
+            backStack.run {
+                clear()
+                newRoutes.forEach { add(it) }
+            }
+        }
+    }
+
+    fun push(route: Route) {
+        updateStack { push(route) }
     }
 
     fun pop() {
-        if (backStack.size > 1) {
-            backStack.removeLastOrNull()
-        }
+        updateStack { pop() }
     }
 
     fun popTo(route: Route) {
-        val index = backStack.indexOfLast { it == route }
-        if (index != -1) {
-            backStack.subList(index + 1, backStack.size).clear()
-        }
+        updateStack { popTo(route) }
     }
 
     fun setRoot(route: Route) {
-        backStack.run {
-            if (lastOrNull() == route) return@run
-            clear()
-            add(route)
-        }
+        updateStack { root(route) }
     }
 
     val currentDestination: NavKey?
@@ -51,8 +109,4 @@ fun rememberNavigator(backStack: NavBackStack<NavKey>): Navigator {
 
 val LocalNavigator: ProvidableCompositionLocal<Navigator> = staticCompositionLocalOf {
     error("No Navigator provided")
-}
-
-val LocalRootNavigator: ProvidableCompositionLocal<Navigator> = staticCompositionLocalOf {
-    error("No Root Navigator provided")
 }

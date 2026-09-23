@@ -286,6 +286,12 @@ val navigator = LocalNavigator.current
 navigator.push(StoriesGraph.Feed)
 navigator.push(StoriesGraph.Detail(id = "story_123"))
 
+// Atomic stack updates via DSL
+navigator.updateStack {
+    root(MainGraph.Home)
+    push(StoriesGraph.Detail(id = "story_123"))
+}
+
 // Deep links (automatic)
 // app://stories/feed → StoriesGraph.Feed
 // app://stories/detail?id=story_123 → StoriesGraph.Detail(id="story_123")

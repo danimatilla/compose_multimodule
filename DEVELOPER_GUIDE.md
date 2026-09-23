@@ -6,16 +6,16 @@ Technical deep-dive into the simplified hierarchical navigation system using Nav
 
 1.  **Hierarchy of Responsibility**: The Root (Activity) handles high-level transitions (Graphs). Scaffolds handle internal screens.
 2.  **Explicit Registration**: Routes and deep links are registered explicitly, avoiding reflection for better performance and clarity.
-3.  **Scoped Navigators**: Use `LocalNavigator` for local/nested navigation and `LocalRootNavigator` for global transitions.
+3.  **Scoped Navigators**: Use `LocalNavigator` for navigation within the current scope.
 
 ---
 
 ## 2. Component Logic
 
 ### Navigator
-A simple wrapper around `NavBackStack`. It provides basic operations like `push`, `pop`, and `setRoot`.
-- Provided via `CompositionLocal`.
-- decoupled from ViewModels; navigation is triggered via UI observing ViewModel effects.
+A simple wrapper around `NavBackStack`. It provides basic operations like `push`, `pop`, `setRoot`, and atomic stack updates via `updateStack { ... }`.
+- Provided via `LocalNavigator`.
+- Decoupled from ViewModels; navigation is triggered via UI observing ViewModel effects.
 
 ### RouteRegistry
 A centralized registry for Deep Linking. It maps URL patterns to route creator functions.
@@ -27,7 +27,7 @@ A centralized registry for Deep Linking. It maps URL patterns to route creator f
 ## 3. Handling Auth
 Authentication state is checked in `MainActivity` during initialization and when processing deep links. 
 - ViewModels can emit a `NavigateToAuth` effect if a session expires.
-- The UI layer (Screens) catches this effect and calls `rootNavigator.setRoot(AuthGraph)`.
+- The UI layer (Screens) catches this effect and calls `navigator.setRoot(AuthGraph)`.
 
 ---
 
@@ -36,7 +36,7 @@ Authentication state is checked in `MainActivity` during initialization and when
 1.  **Intent** received in `MainActivity`.
 2.  `DeepLinkHandler` delegates to `RouteRegistry`.
 3.  `RouteRegistry` finds the creator for the path and returns a `Route` instance.
-4.  `MainActivity` calls `navigator.navigate(route)`.
+4.  `MainActivity` calls `navigator.updateStack { ... }` or `navigator.push(route)`.
 5.  If the route belongs to a nested graph, the Root navigator pushes that graph, and the graph's initial route handles the rest.
 
 ---
