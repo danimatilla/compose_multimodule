@@ -22,7 +22,7 @@ import javax.inject.Inject
 class MainViewModel @Inject constructor(
     private val hasSessionUseCase: HasSessionUseCase,
     private val autoLoginUseCase: AutoLoginUseCase,
-    val routeRegistry: RouteRegistry,
+    private val routeRegistry: RouteRegistry,
     private val deepLinkHandler: DeepLinkHandler
 ) : BaseViewModel<MainViewModel.State, MainViewModel.Effect, MainViewModel.Event>() {
 

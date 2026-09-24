@@ -14,7 +14,6 @@ import androidx.compose.material.icons.filled.Menu
 import androidx.compose.material.icons.filled.Person
 import androidx.compose.material.icons.filled.Search
 import androidx.compose.material3.Scaffold
-import androidx.compose.runtime.Composable
 import androidx.compose.runtime.CompositionLocalProvider
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.getValue
@@ -22,6 +21,7 @@ import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.unit.dp
 import androidx.core.splashscreen.SplashScreen.Companion.installSplashScreen
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import androidx.navigation3.runtime.rememberNavBackStack
@@ -32,7 +32,6 @@ import com.dxmxp.navigation.model.Route
 import com.dxmxp.seed.navigation.MainNavDisplay
 import com.dxmxp.seed.navigation.routes.MainGraph
 import com.dxmxp.seed.navigation.routes.ProfileGraph
-import com.dxmxp.stories.navigation.StoriesScaffold
 import com.dxmxp.stories.navigation.routes.StoriesGraph
 import com.dxmxp.ui.screens.BottomBar
 import com.dxmxp.ui.theme.SeedTheme
@@ -95,53 +94,34 @@ class MainActivity : ComponentActivity() {
                     }
                 }
 
-                @Composable
-                fun MainScaffold() {
-                    Scaffold(
-                        bottomBar = {
-                            BottomBar(
-                                shouldShowBottomBar = uiState.showBottomBar,
-                                currentDestination = currentDestination,
-                                bottomBarItems = bottomBarItems,
-                                onClickItem = { route ->
-                                    navigator.navAction(
-                                        if (route.isModal) {
-                                            NavAction.Push(route)
-                                        } else {
-                                            NavAction.Root(route)
-                                        }
-                                    )
-                                }
-                            )
-                        }
-                    ) { paddingValues ->
-                        MainNavDisplay(
-                            backStack = backStack,
-                            modifier = Modifier.padding(paddingValues)
-                        )
-                    }
-                }
-
                 SeedTheme {
                     CompositionLocalProvider(
                         LocalNavigator provides navigator,
                     ) {
                         val currentRoute = currentDestination as? Route
-                        val graph = currentRoute?.let { uiState.currentGraph }
-                        val isModal = currentRoute?.isModal == true
+                        val showBottomBar = uiState.showBottomBar && (currentRoute?.showMainBottomBar == true)
 
-                        if (isModal) {
-                            when (graph) {
-                                is StoriesGraph -> {
-                                    StoriesScaffold(
-                                        initialRoute = if (currentRoute is StoriesGraph) StoriesGraph.Home else currentRoute
-                                    )
-                                }
-
-                                else -> MainNavDisplay(backStack = backStack)
+                        Scaffold(
+                            bottomBar = {
+                                BottomBar(
+                                    shouldShowBottomBar = showBottomBar,
+                                    currentDestination = currentDestination,
+                                    bottomBarItems = bottomBarItems,
+                                    onClickItem = { route ->
+                                        navigator.navAction(
+                                            if (route.isModal) NavAction.Push(route)
+                                            else NavAction.Root(route)
+                                        )
+                                    }
+                                )
                             }
-                        } else {
-                            MainScaffold()
+                        ) { paddingValues ->
+                            MainNavDisplay(
+                                backStack = backStack,
+                                modifier = Modifier.padding(
+                                    bottom = if (showBottomBar) paddingValues.calculateBottomPadding() else 0.dp
+                                )
+                            )
                         }
                     }
                 }

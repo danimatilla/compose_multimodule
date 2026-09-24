@@ -29,7 +29,7 @@ import javax.inject.Inject
 
 @HiltViewModel
 class StoriesScaffoldViewModel @Inject constructor(
-    val routeRegistry: RouteRegistry
+    private val routeRegistry: RouteRegistry
 ) : ViewModel()
 
 @OptIn(ExperimentalMaterial3Api::class)

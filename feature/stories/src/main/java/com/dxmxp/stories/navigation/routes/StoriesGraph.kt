@@ -121,9 +121,7 @@ data object StoriesGraph : Graph {
      * The ViewModel injection is handled by Screen.screenEntry() helper.
      */
     override fun EntryProviderScope<NavKey>.registerScreens() {
-        screenEntry<StoriesGraph>(
-            metadata = metadata { modalAnimation() }
-        ) { StoriesScaffold() }
+        screenEntry<StoriesGraph> { StoriesScaffold() }
         screenEntry<Home> { HomeScreen() }
         screenEntry<Profile> { /* ProfileScreen() */ }
         screenEntry<StoryDetail, StoryDetailViewModel>(
