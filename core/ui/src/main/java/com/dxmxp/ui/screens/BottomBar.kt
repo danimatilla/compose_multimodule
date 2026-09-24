@@ -2,6 +2,8 @@ package com.dxmxp.ui.screens
 
 import androidx.compose.animation.AnimatedVisibility
 import androidx.compose.animation.expandVertically
+import androidx.compose.animation.fadeIn
+import androidx.compose.animation.fadeOut
 import androidx.compose.animation.shrinkVertically
 import androidx.compose.material3.Icon
 import androidx.compose.material3.NavigationBar
@@ -22,8 +24,8 @@ fun BottomBar(
 ) {
     AnimatedVisibility(
         visible = shouldShowBottomBar,
-        enter = expandVertically(),
-        exit = shrinkVertically()
+        enter = fadeIn() + expandVertically(),
+        exit = fadeOut() + shrinkVertically()
     ) {
         // Find the most specific match in the navigationBarItems list
         val selectedItem = bottomBarItems.map { it.first }.findLast { route ->

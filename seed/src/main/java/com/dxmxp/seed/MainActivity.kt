@@ -115,12 +115,10 @@ class MainActivity : ComponentActivity() {
                                     }
                                 )
                             }
-                        ) { paddingValues ->
+                        ) { _ ->
                             MainNavDisplay(
                                 backStack = backStack,
-                                modifier = Modifier.padding(
-                                    bottom = if (showBottomBar) paddingValues.calculateBottomPadding() else 0.dp
-                                )
+                                modifier = Modifier.padding(0.dp)
                             )
                         }
                     }
