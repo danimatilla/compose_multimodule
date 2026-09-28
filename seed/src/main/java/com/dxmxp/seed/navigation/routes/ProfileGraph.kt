@@ -18,6 +18,7 @@ import kotlinx.serialization.Serializable
 data object ProfileGraph : Graph {
 
     override val route: String get() = "/profile"
+    override val requiresAuth: Boolean get() = true
 
     @Serializable
     data object Settings : Screen {

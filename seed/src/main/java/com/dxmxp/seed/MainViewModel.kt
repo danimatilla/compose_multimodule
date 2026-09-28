@@ -3,6 +3,7 @@ package com.dxmxp.seed
 import android.net.Uri
 import androidx.lifecycle.viewModelScope
 import com.dxmxp.domain.AppException
+import com.dxmxp.domain.base.Logger
 import com.dxmxp.domain.common.fold
 import com.dxmxp.domain.use_case.AutoLoginUseCase
 import com.dxmxp.domain.use_case.HasSessionUseCase
@@ -80,7 +81,7 @@ class MainViewModel @Inject constructor(
         setState {
             copy(
                 initialRoute = route,
-                showBottomBar = shouldShowBottomBar(route)
+                showBottomBar = routeRegistry.shouldShowBottomBar(route)
             )
         }
     }
@@ -94,7 +95,7 @@ class MainViewModel @Inject constructor(
 
     private fun onRouteChange(event: Event.OnRouteChanged) {
         val state = uiState.value
-        val showBar = shouldShowBottomBar(event.route)
+        val showBar = routeRegistry.shouldShowBottomBar(event.route)
 
         event.route?.let {
             val graph = routeRegistry.getGraphForRoute(it)
@@ -102,7 +103,7 @@ class MainViewModel @Inject constructor(
         }
 
         // If we have a pending route and we just transitioned to an authenticated area
-        if ((state.pendingRoute != null) && (event.route != null) && requiresAuth(event.route)) {
+        if ((state.pendingRoute != null) && (event.route != null) && routeRegistry.requiresAuth(event.route)) {
             val destination = state.pendingRoute
             setState { copy(pendingRoute = null, showBottomBar = showBar) }
             navigateToAuthenticatedRoute(destination)
@@ -116,7 +117,7 @@ class MainViewModel @Inject constructor(
             deepLinkHandler.handle(uri)?.let { route ->
                 val hasSession = hasSessionUseCase(Unit)
 
-                if (requiresAuth(route) && !hasSession) {
+                if (routeRegistry.requiresAuth(route) && !hasSession) {
                     // Save for after login
                     setState { copy(pendingRoute = route) }
                     setEffect { Effect.Navigate(NavAction.Root(AuthGraph)) }
@@ -128,40 +129,27 @@ class MainViewModel @Inject constructor(
     }
 
     private fun navigateToAuthenticatedRoute(route: Route) {
-        when {
-            route.isModal -> setEffect { Effect.Navigate(NavAction.Push(route)) }
-            else -> setEffect { Effect.Navigate(NavAction.Root(route)) }
+        val graph = routeRegistry.getGraphForRoute(route)
+        val isModal = routeRegistry.isModal(route)
+
+        setEffect {
+            Effect.Navigate(
+                NavAction.UpdateStack {
+                    graph?.let { graph ->
+                        if (graph is MainGraph) {
+                            if (isModal) push(route)
+                            else root(route)
+                        } else {
+                            if (isModal) {
+                                root(MainGraph)
+                                push(graph)
+                            } else {
+                                root(graph)
+                            }
+                        }
+                    }
+                }
+            )
         }
-    }
-
-    /**
-     * Determines if the BottomBar should be shown for a given route.
-     * Inherits visibility from the parent Graph if not explicitly overridden by the route.
-     */
-    private fun shouldShowBottomBar(route: Route?): Boolean {
-        if (route == null) return false
-
-        val graph = routeRegistry.getGraphForRoute(route)
-
-        // If the graph itself says no bar, we hide it for everything inside.
-        if (graph != null && !graph.showMainBottomBar) return false
-
-        // Otherwise, respect the route's own property.
-        return route.showMainBottomBar
-    }
-
-    /**
-     * Determines if a route requires authentication.
-     * Inherits from the parent Graph if not explicitly overridden by the route.
-     */
-    private fun requiresAuth(route: Route?): Boolean {
-        if (route == null) return true
-
-        val graph = routeRegistry.getGraphForRoute(route)
-
-        // If the graph itself is public, all screens inside are public unless they override it.
-        if (graph != null && !graph.requiresAuth) return false
-
-        return route.requiresAuth
     }
 }

@@ -67,6 +67,7 @@ class RouteRegistry @Inject constructor(
             .filter { route.route.startsWith(it.route) }
             .maxByOrNull { it.route.length }
     }
+
     /**
      * Maps [RouteKey] to [Route] for type-safe lookups.
      * Built from all static routes in registered graphs.
@@ -156,6 +157,27 @@ class RouteRegistry @Inject constructor(
      * @return The registered route, or null if not found
      */
     fun getRoute(path: String): Route? = pathMap[normalizePath(path)]
+
+    /**
+     * Determines if a route is modal.
+     * Inherits modal behavior from the parent Graph if the graph itself is modal.
+     */
+    fun isModal(route: Route?): Boolean =
+        route != null && (getGraphForRoute(route)?.isModal == true || route.isModal)
+
+    /**
+     * Determines if the main BottomBar should be shown for a route.
+     * Inherits visibility from the parent Graph if overridden.
+     */
+    fun shouldShowBottomBar(route: Route?): Boolean =
+        route != null && (getGraphForRoute(route)?.showMainBottomBar != false && route.showMainBottomBar)
+
+    /**
+     * Determines if a route requires authentication.
+     * Inherits from the parent Graph if overridden.
+     */
+    fun requiresAuth(route: Route?): Boolean =
+        route != null && (getGraphForRoute(route)?.requiresAuth != false && route.requiresAuth)
 
     /**
      * Normalizes a URI path for consistent matching.

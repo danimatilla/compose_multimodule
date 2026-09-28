@@ -16,15 +16,6 @@ interface Screen : Route {
 
     companion object {
 
-        inline fun <reified K : Route> resolveMetadata(customMetadata: Map<String, Any>): Map<String, Any> {
-            val isModal = K::class.objectInstance?.isModal == true
-            return if (isModal) {
-                metadata { modalAnimation() } + customMetadata
-            } else {
-                customMetadata
-            }
-        }
-
         /**
          * Enhanced entry that automatically handles ViewModel initialization.
          */
@@ -57,6 +48,15 @@ interface Screen : Route {
             crossinline content: @Composable (K) -> Unit,
         ) {
             entry<K>(metadata = resolveMetadata<K>(metadata)) { route -> content(route) }
+        }
+
+        inline fun <reified K : Route> resolveMetadata(customMetadata: Map<String, Any>): Map<String, Any> {
+            val isModal = K::class.objectInstance?.isModal == true
+            return if (isModal) {
+                metadata { modalAnimation() } + customMetadata
+            } else {
+                customMetadata
+            }
         }
     }
 }
