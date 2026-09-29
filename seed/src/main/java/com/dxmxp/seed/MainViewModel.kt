@@ -3,7 +3,6 @@ package com.dxmxp.seed
 import android.net.Uri
 import androidx.lifecycle.viewModelScope
 import com.dxmxp.domain.AppException
-import com.dxmxp.domain.base.Logger
 import com.dxmxp.domain.common.fold
 import com.dxmxp.domain.use_case.AutoLoginUseCase
 import com.dxmxp.domain.use_case.HasSessionUseCase
@@ -24,7 +23,7 @@ class MainViewModel @Inject constructor(
     private val hasSessionUseCase: HasSessionUseCase,
     private val autoLoginUseCase: AutoLoginUseCase,
     private val routeRegistry: RouteRegistry,
-    private val deepLinkHandler: DeepLinkHandler
+    private val deepLinkHandler: DeepLinkHandler,
 ) : BaseViewModel<MainViewModel.State, MainViewModel.Effect, MainViewModel.Event>() {
 
     data class State(
@@ -140,6 +139,7 @@ class MainViewModel @Inject constructor(
                             if (isModal) push(route)
                             else root(route)
                         } else {
+                            val graph = if (route != graph) graph.withInitialRoute(route) else graph
                             if (isModal) {
                                 root(MainGraph)
                                 push(graph)

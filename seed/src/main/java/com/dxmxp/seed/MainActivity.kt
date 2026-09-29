@@ -62,7 +62,7 @@ class MainActivity : ComponentActivity() {
                     MainGraph.Home to Icons.Default.Home,
                     MainGraph.Search to Icons.Default.Search,
                     MainGraph.Menu to Icons.Default.Menu,
-                    StoriesGraph to Icons.Default.AutoStories,
+                    StoriesGraph() to Icons.Default.AutoStories,
                     ProfileGraph to Icons.Default.Person
                 )
             }

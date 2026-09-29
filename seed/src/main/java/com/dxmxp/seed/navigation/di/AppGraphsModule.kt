@@ -63,5 +63,5 @@ object AppGraphsModule {
 
     @Provides
     @IntoSet
-    fun provideStoriesGraph(): Graph = StoriesGraph
+    fun provideStoriesGraph(): Graph = StoriesGraph()
 }

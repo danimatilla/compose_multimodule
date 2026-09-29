@@ -17,35 +17,25 @@ import androidx.compose.runtime.CompositionLocalProvider
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.remember
 import androidx.compose.ui.Modifier
-import androidx.hilt.lifecycle.viewmodel.compose.hiltViewModel
-import androidx.lifecycle.ViewModel
 import androidx.navigation3.runtime.rememberNavBackStack
 import com.dxmxp.navigation.core.LocalNavigator
 import com.dxmxp.navigation.core.NavAction
 import com.dxmxp.navigation.core.Navigator
-import com.dxmxp.navigation.core.RouteRegistry
 import com.dxmxp.navigation.core.rememberNavigator
 import com.dxmxp.navigation.model.Route
 import com.dxmxp.navigation.utils.NavigationUtils
 import com.dxmxp.stories.navigation.routes.StoriesGraph
 import com.dxmxp.ui.screens.BottomBar
-import dagger.hilt.android.lifecycle.HiltViewModel
-import javax.inject.Inject
 
-@HiltViewModel
-class StoriesScaffoldViewModel @Inject constructor(
-    private val routeRegistry: RouteRegistry
-) : ViewModel()
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
 fun StoriesScaffold(
-    initialRoute: Route = StoriesGraph.Home,
-    rootNavigator: Navigator = LocalNavigator.current,
-    viewModel: StoriesScaffoldViewModel = hiltViewModel()
+    initialRoute: Route? = null,
+    rootNavigator: Navigator = LocalNavigator.current
 ) {
     val initialStack: List<Route> = remember(initialRoute) {
-        if (initialRoute != StoriesGraph.Home) {
+        if (initialRoute != null && initialRoute != StoriesGraph.Home) {
             listOf(StoriesGraph.Home, initialRoute)
         } else {
             listOf(StoriesGraph.Home)

@@ -60,7 +60,7 @@ data object MainGraph : Graph {
         screenEntry<Menu> { MenuScreen() }
 
         // Nested graphs
-        StoriesGraph.run { registerScreens() }
+        StoriesGraph().run { registerScreens() }
         ProfileGraph.run { registerScreens() }
     }
 }

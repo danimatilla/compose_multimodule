@@ -12,7 +12,6 @@ import com.dxmxp.navigation.model.Route
 import com.dxmxp.navigation.model.Screen
 import com.dxmxp.navigation.model.Screen.Companion.screenEntry
 import com.dxmxp.stories.navigation.StoriesScaffold
-import com.dxmxp.stories.navigation.routes.StoriesGraph.dynamicRoutePatterns
 import com.dxmxp.stories.screens.feed.HomeScreen
 import com.dxmxp.stories.screens.story_detail.StoryDetailScreen
 import com.dxmxp.stories.screens.story_detail.StoryDetailViewModel
@@ -56,10 +55,14 @@ import kotlinx.serialization.Serializable
  * - app://stories/detail?id=story_123 → StoriesGraph.StoryDetail(id="story_123")
  */
 @Serializable
-data object StoriesGraph : Graph {
+data class StoriesGraph(
+    override val initialRoute: Route? = null
+) : Graph {
 
     override val isModal: Boolean get() = true
     override val route: String get() = "/stories"
+
+    override fun withInitialRoute(route: Route): Graph = copy(initialRoute = route)
 
     @Serializable
     data object Home : Screen {
@@ -120,7 +123,7 @@ data object StoriesGraph : Graph {
      * The ViewModel injection is handled by Screen.screenEntry() helper.
      */
     override fun EntryProviderScope<NavKey>.registerScreens() {
-        screenEntry<StoriesGraph> { StoriesScaffold() }
+        screenEntry<StoriesGraph> { graph -> StoriesScaffold(initialRoute = graph.initialRoute) }
         screenEntry<Home> { HomeScreen() }
         screenEntry<Profile> { /* ProfileScreen() */ }
         screenEntry<StoryDetail, StoryDetailViewModel>(

@@ -1,11 +1,9 @@
 package com.dxmxp.navigation.model
 
+import android.net.Uri
 import androidx.navigation3.runtime.EntryProviderScope
 import androidx.navigation3.runtime.NavKey
-import com.dxmxp.navigation.core.RouteKey
 import com.dxmxp.navigation.core.RouteRegistration
-import android.net.Uri
-import com.dxmxp.navigation.model.Route
 
 /**
  * A Graph is a collection of related screens that share a common navigation context.
@@ -43,6 +41,16 @@ import com.dxmxp.navigation.model.Route
  * ```
  */
 interface Graph : Route {
+    /**
+     * Target sub-route within this graph (e.g. when opening from a deep link).
+     */
+    val initialRoute: Route? get() = null
+
+    /**
+     * Returns a copy of this graph configured with a target sub-route.
+     */
+    fun withInitialRoute(route: Route): Graph = this
+
     /**
      * Register all screens of this graph within the navigation system.
      * This is called by the router to set up the composable hierarchy.
