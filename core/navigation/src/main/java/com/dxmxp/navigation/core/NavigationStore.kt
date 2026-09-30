@@ -4,16 +4,13 @@ import kotlinx.coroutines.channels.BufferOverflow
 import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.MutableSharedFlow
 import kotlinx.coroutines.flow.asSharedFlow
-import javax.inject.Inject
-import javax.inject.Singleton
 
 /**
  * A store for passing large data between screens and handling optional results.
  * This avoids passing large objects through navigation routes, preventing
  * TransactionTooLargeException and keeping routes clean for Deep Linking.
  */
-@Singleton
-class NavigationStore @Inject constructor() {
+class NavigationStore {
     private val dataCache = mutableMapOf<String, Any>()
     private val resultFlows = mutableMapOf<String, MutableSharedFlow<Any>>()
 

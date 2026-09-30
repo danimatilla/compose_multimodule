@@ -1,9 +1,7 @@
 plugins {
     alias(libs.plugins.android.library)
     alias(libs.plugins.kotlin.compose)
-    alias(libs.plugins.hilt.android)
     alias(libs.plugins.kotlin.serialization)
-    alias(libs.plugins.ksp)
 }
 
 android {
@@ -39,9 +37,6 @@ dependencies {
 
     api(libs.androidx.navigation3.runtime)
     api(libs.androidx.navigation3.ui)
-
-    implementation(libs.hilt)
-    ksp(libs.hilt.compiler)
 
     implementation(libs.kotlin.reflect)
     implementation(libs.kotlinx.serialization.json)

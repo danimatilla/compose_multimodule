@@ -5,8 +5,6 @@ import com.dxmxp.navigation.core.NavAction
 import com.dxmxp.navigation.core.RouteRegistry
 import com.dxmxp.navigation.model.Graph
 import com.dxmxp.navigation.model.Route
-import javax.inject.Inject
-import javax.inject.Singleton
 
 /**
  * Result of processing a deep link.
@@ -22,8 +20,7 @@ sealed interface DeepLinkResult {
  * Resolves URIs, enforces authentication requirements, and generates
  * the exact [NavAction] hierarchy.
  */
-@Singleton
-class DeepLinkRouter @Inject constructor(
+class DeepLinkRouter(
     private val routeRegistry: RouteRegistry,
 ) {
     /**

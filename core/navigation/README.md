@@ -217,14 +217,11 @@ sealed interface NavAction {
 Deep link resolution is handled centrally by **`DeepLinkRouter`** inside `:core:navigation`.
 
 ```kotlin
-@Singleton
-class DeepLinkRouter @Inject constructor(
+class DeepLinkRouter(
     private val routeRegistry: RouteRegistry,
 ) {
     fun resolve(uri: Uri): Route?
-
     fun process(route: Route, mainGraph: Graph): NavAction
-
     fun handle(
         uri: Uri,
         mainGraph: Graph,
@@ -240,7 +237,12 @@ class DeepLinkRouter @Inject constructor(
 private fun handleDeepLink(uri: Uri) {
     viewModelScope.launch {
         val isAuthenticated = hasSessionUseCase(Unit)
-        when (val result = deepLinkRouter.handle(uri, mainGraph = MainGraph, authGraph = AuthGraph, isAuthenticated = isAuthenticated)) {
+        when (val result = deepLinkRouter.handle(
+            uri,
+            mainGraph = MainGraph,
+            authGraph = AuthGraph,
+            isAuthenticated = isAuthenticated,
+        )) {
             is DeepLinkResult.Success -> {
                 setEffect { Effect.Navigate(result.action) }
             }
@@ -346,18 +348,21 @@ data class StoriesGraph(
 }
 ```
 
-### 2. Register in `AppGraphsModule`
+### 2. Register the graphs in the app layer
 
 ```kotlin
-@Module
-@InstallIn(SingletonComponent::class)
-object AppGraphsModule {
+val graphs: Set<Graph> = setOf(
+    MainGraph,
+    AuthGraph,
+    ProfileGraph,
+    StoriesGraph(),
+)
 
-    @Provides
-    @IntoSet
-    fun provideStoriesGraph(): Graph = StoriesGraph()
-}
+val routeRegistry = RouteRegistry(graphs)
+val deepLinkRouter = DeepLinkRouter(routeRegistry)
 ```
+
+The app may do this from Hilt, Koin, or manually. The core module remains unchanged.
 
 ---
 
@@ -365,15 +370,17 @@ object AppGraphsModule {
 
 ### ✅ DO
 
-- **Keep `:core:navigation` completely feature-agnostic** - No hardcoded graph or route strings inside the navigation library.
-- **Use `DeepLinkRouter` for URI resolution and backstack construction** - Avoid custom URI parsers in Activity or ViewModels.
-- **Implement `withInitialRoute` on parameterized graphs** - Enables automatic deep link resolution to sub-screens.
-- **Use `NavigationStore` for large payload objects** - Avoid passing large Parcelable/Serializable objects in route arguments.
+- **Keep `:core:navigation` feature-agnostic** - no hardcoded feature routes or framework-specific wiring inside the core library.
+- **Use `DeepLinkRouter` for URI resolution and backstack construction** - avoid custom URI logic in Activity or ViewModel.
+- **Use a generic `NavigationModule`/graph provider at the app boundary** - keep DI concerns outside the navigation library.
+- **Implement `withInitialRoute` on parameterized graphs** - enables automatic deep link resolution to nested screens.
+- **Use `NavigationStore` for large payload objects** - avoid passing heavy models through route arguments.
 
 ### ❌ DON'T
 
-- **Hardcode route strings in navigation calls** - Always use typed routes (`navigator.push(StoriesGraph.Home)`).
-- **Manually build nested backstacks in UI** - Let `DeepLinkRouter` and `Graph.withInitialRoute` handle graph targets.
+- **Hardcode route strings in navigation calls** - always use typed routes (`navigator.push(StoriesGraph.Home)`).
+- **Manually build nested backstacks in UI** - let `DeepLinkRouter` and `Graph.withInitialRoute` handle graph targets.
+- **Import Hilt or Koin classes in `:core:navigation`** - the library should depend on its abstractions, not any specific injector.
 
 ---
 
@@ -392,10 +399,10 @@ core/navigation/
 │   │   ├── Screen.kt              # Screen helper & entry builders
 │   │   └── RouteKey.kt            # Type-safe key wrapper
 │   ├── di/
-│   │   └── NavigationModule.kt    # Hilt configuration
+│   │   └── NavigationModule.kt    # Generic graph provider contract
 │   ├── utils/
-│   │   ├── DeepLinkRouter.kt      # Autonomous Deep Link router & result models
-│   │   └── NavigationUtils.kt     # Animation & UI helpers
+│   │   ├── DeepLinkRouter.kt      # Deep link resolution & action builder
+│   │   └── DeepLinkHandler.kt     # Optional thin helper (if used by app code)
 │   └── common/
 │       └── InitializableViewModel.kt # ViewModel init contract
 └── build.gradle.kts
