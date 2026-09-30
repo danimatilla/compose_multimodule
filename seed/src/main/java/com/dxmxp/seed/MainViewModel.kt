@@ -10,7 +10,8 @@ import com.dxmxp.navigation.core.NavAction
 import com.dxmxp.navigation.core.RouteRegistry
 import com.dxmxp.navigation.model.Graph
 import com.dxmxp.navigation.model.Route
-import com.dxmxp.navigation.utils.DeepLinkHandler
+import com.dxmxp.navigation.utils.DeepLinkResult
+import com.dxmxp.navigation.utils.DeepLinkRouter
 import com.dxmxp.seed.navigation.routes.AuthGraph
 import com.dxmxp.seed.navigation.routes.MainGraph
 import com.dxmxp.ui.base.BaseViewModel
@@ -23,7 +24,7 @@ class MainViewModel @Inject constructor(
     private val hasSessionUseCase: HasSessionUseCase,
     private val autoLoginUseCase: AutoLoginUseCase,
     private val routeRegistry: RouteRegistry,
-    private val deepLinkHandler: DeepLinkHandler,
+    private val deepLinkRouter: DeepLinkRouter,
 ) : BaseViewModel<MainViewModel.State, MainViewModel.Effect, MainViewModel.Event>() {
 
     data class State(
@@ -36,6 +37,7 @@ class MainViewModel @Inject constructor(
     interface Event {
         data class HandleDeepLink(val uri: Uri) : Event
         data class OnRouteChanged(val route: Route?) : Event
+        data class OnRouteClicked(val route: Route) : Event
     }
 
     interface Effect {
@@ -89,6 +91,7 @@ class MainViewModel @Inject constructor(
         when (event) {
             is Event.HandleDeepLink -> handleDeepLink(event.uri)
             is Event.OnRouteChanged -> onRouteChange(event)
+            is Event.OnRouteClicked -> navigateToAuthenticatedRoute(event.route)
         }
     }
 
@@ -113,43 +116,26 @@ class MainViewModel @Inject constructor(
 
     private fun handleDeepLink(uri: Uri) {
         viewModelScope.launch {
-            deepLinkHandler.handle(uri)?.let { route ->
-                val hasSession = hasSessionUseCase(Unit)
-
-                if (routeRegistry.requiresAuth(route) && !hasSession) {
-                    // Save for after login
-                    setState { copy(pendingRoute = route) }
-                    setEffect { Effect.Navigate(NavAction.Root(AuthGraph)) }
-                } else {
-                    navigateToAuthenticatedRoute(route)
+            val isAuthenticated = hasSessionUseCase(Unit)
+            when (val result = deepLinkRouter.handle(uri, mainGraph = MainGraph, authGraph = AuthGraph, isAuthenticated = isAuthenticated)) {
+                is DeepLinkResult.Success -> {
+                    setEffect { Effect.Navigate(result.action) }
+                }
+                is DeepLinkResult.RequiresAuth -> {
+                    setState { copy(pendingRoute = result.pendingRoute) }
+                    result.action?.let { action ->
+                        setEffect { Effect.Navigate(action) }
+                    }
+                }
+                is DeepLinkResult.Unresolved -> {
+                    // Ignored or logged
                 }
             }
         }
     }
 
     private fun navigateToAuthenticatedRoute(route: Route) {
-        val graph = routeRegistry.getGraphForRoute(route)
-        val isModal = routeRegistry.isModal(route)
-
-        setEffect {
-            Effect.Navigate(
-                NavAction.UpdateStack {
-                    graph?.let { graph ->
-                        if (graph is MainGraph) {
-                            if (isModal) push(route)
-                            else root(route)
-                        } else {
-                            val graph = if (route != graph) graph.withInitialRoute(route) else graph
-                            if (isModal) {
-                                root(MainGraph)
-                                push(graph)
-                            } else {
-                                root(graph)
-                            }
-                        }
-                    }
-                }
-            )
-        }
+        val action = deepLinkRouter.process(route, MainGraph)
+        setEffect { Effect.Navigate(action) }
     }
 }

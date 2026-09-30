@@ -1,8 +1,8 @@
 # Core Navigation Module
 
-> **Type-safe, feature-modular navigation system for Android Compose with centralized deep link resolution.**
+> **Type-safe, feature-modular navigation system for Android Compose with centralized deep link resolution and nested graph management.**
 
-A comprehensive, well-structured navigation architecture built on Androidx Navigation 3 and Compose, providing type-safe route management, dynamic deep linking, and modular graph composition.
+A comprehensive, well-structured navigation architecture built on AndroidX Navigation 3 and Compose, providing type-safe route management, dynamic deep linking, automatic nested graph backstack composition, and modular graph isolation.
 
 ---
 
@@ -12,6 +12,8 @@ A comprehensive, well-structured navigation architecture built on Androidx Navig
 - [Features](#features)
 - [Architecture](#architecture)
 - [Core Concepts](#core-concepts)
+- [Deep Link Management](#deep-link-management)
+- [Nested Graphs & Sub-routes](#nested-graphs--sub-routes)
 - [Usage Guide](#usage-guide)
 - [Examples](#examples)
 - [Best Practices](#best-practices)
@@ -25,11 +27,13 @@ The **core:navigation** module provides the foundation for type-safe, modular na
 
 ### Key Benefits
 ✅ **Type-safe navigation** - Compiler catches route errors  
-✅ **Deep link support** - Automatic URI → Route resolution  
-✅ **Modular architecture** - Features define their own graphs  
+✅ **Autonomous Deep Link Router** - Centralized URI → Route → Backstack resolution  
+✅ **Automatic Nested Graph Support** - Deep links directly to nested screens render full parent scaffolds and backstacks  
+✅ **Modular architecture** - Features define their own graphs without knowledge of the main app  
+✅ **Polymorphic Modal Presentation** - `isModal = true` handles slide-up animations and bottom bar visibility  
 ✅ **Centralized registry** - Single source of truth for all routes  
 ✅ **Dynamic routing** - Support for parameterized routes  
-✅ **ViewModel injection** - Automatic typed ViewModel provisioning  
+✅ **ViewModel injection** - Automatic typed ViewModel provisioning (`InitializableViewModel`)  
 
 ---
 
@@ -45,8 +49,6 @@ data object Home : Screen {
 }
 ```
 
-**Resolution:** Type-safe lookup or deep link matching
-
 ### Dynamic Routes (Parameterized)
 Routes with parameters that create new instances on each navigation.
 
@@ -57,31 +59,30 @@ data class StoryDetail(val id: String) : Screen {
 }
 ```
 
-**Resolution:** URI parsing with query parameter extraction
-
-### Graph Composition
-Graphs are collections of screens that define a navigation context.
+### Modal Routes
+Routes or Graphs that present as overlays/dialogs with slide-up transitions.
 
 ```kotlin
 @Serializable
-data object StoriesGraph : Graph {
-    override val route: String = "/stories"
-    // ... screens ...
-    override fun staticRoutes() = setOf(...)
-    override fun dynamicRoutePatterns() = mapOf(...)
+data object Search : Screen {
+    override val route: String = "/main/search"
+    override val isModal: Boolean get() = true
 }
 ```
 
-### Deep Linking
-Incoming URIs like `app://stories/detail?id=123` are automatically resolved to route instances.
-
-### ViewModel Injection
-Screen entries can automatically inject typed ViewModels.
+### Nested Graph Composition with `initialRoute`
+Graphs are collections of screens that define a navigation context. They can accept an optional `initialRoute` when navigating to a deep sub-screen from a deep link.
 
 ```kotlin
-screenEntry<StoryDetail, StoryDetailViewModel>(
-    viewModelProvide = { hiltViewModel() }
-) { viewModel -> StoryDetailScreen(viewModel) }
+@Serializable
+data class StoriesGraph(
+    override val initialRoute: Route? = null
+) : Graph {
+    override val isModal: Boolean get() = true
+    override val route: String get() = "/stories"
+
+    override fun withInitialRoute(route: Route): Graph = copy(initialRoute = route)
+}
 ```
 
 ---
@@ -99,41 +100,46 @@ screenEntry<StoryDetail, StoryDetailViewModel>(
                  │ (injected via Hilt)
                  ↓
 ┌─────────────────────────────────────────────┐
-│  RouteRegistry (this module, Singleton)     │ ← Central lookup
+│  RouteRegistry (this module, Singleton)     │ ← Central route lookup
 │  ├── routeMap: Map<RouteKey, Route>         │
 │  ├── pathMap: Map<String, Route>            │
 │  └── routeCreators: Map<...>                │
 └────────────────┬────────────────────────────┘
                  │
-        ┌────────┴────────┐
-        ↓                 ↓
-   Type-safe      Deep Link
-   Lookup         Resolution
-   (Internal)     (External)
+                 ↓
+┌─────────────────────────────────────────────┐
+│  DeepLinkRouter (this module, Singleton)    │ ← Central Deep Link processing
+│  ├── Resolves URI → Route                   │
+│  ├── Checks requiresAuth requirement        │
+│  └── Builds atomic NavAction.UpdateStack    │
+└─────────────────────────────────────────────┘
 ```
 
-### Data Flow
+### Navigation Data Flow
 
-#### Internal Navigation (Type-safe)
+#### Internal Navigation
 ```
-navigator.push(MainGraph.Home)
+viewModel.setEvent(OnRouteClicked(route))
     ↓
-Route instance pushed to back stack
+deepLinkRouter.process(route, MainGraph)
     ↓
-Navigation engine renders screen
+NavAction.UpdateStack emitted
+    ↓
+navigator.navAction(action) updates NavBackStack
 ```
 
 #### Deep Link Navigation
 ```
 URI: app://stories/detail?id=123
     ↓
-RouteRegistry.createRouteFromUri()
+DeepLinkRouter.handle(uri, mainGraph, authGraph, isAuthenticated)
     ↓
-Pattern match + parameter extraction
+1. URI mapped to StoriesGraph.StoryDetail(id="123")
+2. Authentication verified
+3. Graph configured: StoriesGraph(initialRoute = StoryDetail("123"))
+4. Action created: root(MainGraph) -> push(StoriesGraph(initialRoute = StoryDetail("123")))
     ↓
-StoryDetail(id="123") created
-    ↓
-Navigation engine renders screen
+MainScaffold renders → StoriesScaffold renders → StoryDetailScreen rendered over Home
 ```
 
 ---
@@ -146,7 +152,8 @@ Base interface for all navigation keys. Must be `@Serializable`.
 ```kotlin
 interface Route : NavKey {
     val route: String
-    val showMainBottomBar: Boolean get() = true
+    val isModal: Boolean get() = false
+    val showMainBottomBar: Boolean get() = !isModal
     val requiresAuth: Boolean get() = true
 }
 ```
@@ -154,16 +161,14 @@ interface Route : NavKey {
 ### `Graph` Interface
 Collection of related screens with a common navigation context.
 
-**Responsibilities:**
-- Define screen hierarchy: `registerScreens()`
-- Expose static routes: `staticRoutes()`
-- Expose dynamic patterns: `dynamicRoutePatterns()`
-
 ```kotlin
 interface Graph : Route {
+    val initialRoute: Route? get() = null
+    fun withInitialRoute(route: Route): Graph = this
+
     fun EntryProviderScope<NavKey>.registerScreens()
-    fun staticRoutes(): Set<RouteRegistration> = ...
-    fun dynamicRoutePatterns(): Map<String, (Uri) -> Route?> = ...
+    fun staticRoutes(): Set<RouteRegistration>
+    fun dynamicRoutePatterns(): Map<String, (Uri) -> Route?>
 }
 ```
 
@@ -176,48 +181,118 @@ interface Screen : Route {
         inline fun <reified K : Route> EntryProviderScope<NavKey>.screenEntry(
             metadata: Map<String, Any> = emptyMap(),
             crossinline content: @Composable (K) -> Unit,
-        ) { }
+        ) {
+            // Screen entry implementation
+        }
     }
 }
 ```
 
-### `RouteKey`
-Type-safe wrapper for route paths. Prevents passing arbitrary strings.
+### `Navigator` & `NavAction`
+Encapsulates `NavBackStack<NavKey>` and provides atomic stack updates via `navAction()` and DSL `updateStack`.
 
 ```kotlin
-@JvmInline
-value class RouteKey private constructor(val value: String)
+class Navigator(private val backStack: NavBackStack<NavKey>) {
+    fun push(route: Route)
+    fun pop()
+    fun popTo(route: Route)
+    fun root(route: Route)
+    fun updateStack(block: StackBuilder.() -> Unit)
+    fun navAction(action: NavAction)
+}
 
-// Usage
-val key = RouteKey.of("/stories")
-val route = registry.getRoute(key)  // Type-safe!
-```
-
-### `RouteRegistry`
-Central singleton for route lookup and deep link resolution.
-
-```kotlin
-@Singleton
-class RouteRegistry @Inject constructor(
-    private val graphs: Set<@JvmSuppressWildcards Graph>
-) {
-    fun getRoute(key: RouteKey): Route?
-    fun getRoute(path: String): Route?
-    fun createRouteFromUri(uri: Uri): Route?
-    fun register(pattern: String, creator: (Uri) -> Route?)
+sealed interface NavAction {
+    data class Push(val route: Route) : NavAction
+    data object Pop : NavAction
+    data class PopTo(val route: Route) : NavAction
+    data class Root(val route: Route) : NavAction
+    data class UpdateStack(val block: Navigator.StackBuilder.() -> Unit) : NavAction
 }
 ```
 
-### `NavigationStore`
-Singleton cache for large data between screens (avoids `TransactionTooLargeException`).
+---
+
+## Deep Link Management
+
+Deep link resolution is handled centrally by **`DeepLinkRouter`** inside `:core:navigation`.
 
 ```kotlin
 @Singleton
-class NavigationStore @Inject constructor() {
-    fun <T> pushData(key: String, data: T)
-    fun <T> getData(key: String): T?
-    fun <T> observeResult(key: String): Flow<T>
-    fun emitResult(key: String, data: Any)
+class DeepLinkRouter @Inject constructor(
+    private val routeRegistry: RouteRegistry,
+) {
+    fun resolve(uri: Uri): Route?
+
+    fun process(route: Route, mainGraph: Graph): NavAction
+
+    fun handle(
+        uri: Uri,
+        mainGraph: Graph,
+        authGraph: Graph? = null,
+        isAuthenticated: Boolean = true,
+    ): DeepLinkResult
+}
+```
+
+### Using DeepLinkRouter in ViewModels
+
+```kotlin
+private fun handleDeepLink(uri: Uri) {
+    viewModelScope.launch {
+        val isAuthenticated = hasSessionUseCase(Unit)
+        when (val result = deepLinkRouter.handle(uri, mainGraph = MainGraph, authGraph = AuthGraph, isAuthenticated = isAuthenticated)) {
+            is DeepLinkResult.Success -> {
+                setEffect { Effect.Navigate(result.action) }
+            }
+            is DeepLinkResult.RequiresAuth -> {
+                setState { copy(pendingRoute = result.pendingRoute) }
+                result.action?.let { action ->
+                    setEffect { Effect.Navigate(action) }
+                }
+            }
+            is DeepLinkResult.Unresolved -> {
+                // Ignore or log
+            }
+        }
+    }
+}
+```
+
+---
+
+## Nested Graphs & Sub-routes
+
+When a deep link targets a screen inside a nested feature graph (e.g. `StoryDetail` inside `StoriesGraph`), the parent graph receives the target route via `initialRoute`.
+
+### Scaffold Implementation
+
+```kotlin
+@Composable
+fun StoriesScaffold(
+    initialRoute: Route? = null,
+    rootNavigator: Navigator = LocalNavigator.current,
+) {
+    val initialStack: List<Route> = remember(initialRoute) {
+        if (initialRoute != null && initialRoute != StoriesGraph.Home) {
+            listOf(StoriesGraph.Home, initialRoute)
+        } else {
+            listOf(StoriesGraph.Home)
+        }
+    }
+
+    val nestedBackStack = rememberNavBackStack(*initialStack.toTypedArray())
+    val nestedNavigator = rememberNavigator(nestedBackStack)
+
+    CompositionLocalProvider(LocalNavigator provides nestedNavigator) {
+        Scaffold(
+            // Scaffold content
+        ) { innerPadding ->
+            StoriesNavDisplay(
+                backStack = nestedBackStack,
+                modifier = Modifier.padding(innerPadding)
+            )
+        }
+    }
 }
 ```
 
@@ -225,181 +300,62 @@ class NavigationStore @Inject constructor() {
 
 ## Usage Guide
 
-### 1. Define a Graph
+### 1. Define a Feature Graph
 
 ```kotlin
 @Serializable
-data object StoryGraph : Graph {
-    override val route: String = "/stories"
-    override val isModal: Boolean = true
+data class StoriesGraph(
+    override val initialRoute: Route? = null
+) : Graph {
+    override val isModal: Boolean get() = true
+    override val route: String get() = "/stories"
+
+    override fun withInitialRoute(route: Route): Graph = copy(initialRoute = route)
 
     @Serializable
-    data object Feed : Screen {
-        override val route: String = "/stories/feed"
+    data object Home : Screen {
+        override val route: String get() = "/stories/home"
     }
 
     @Serializable
-    data class Detail(val id: String) : Screen {
-        override val route: String = "/stories/detail"
+    data class StoryDetail(val id: String) : Screen {
+        override val route: String get() = "/stories/detail"
     }
 
     override fun staticRoutes() = setOf(
         RouteRegistration(RouteKey.of(route), this),
-        RouteRegistration(RouteKey.of(Feed.route), Feed),
+        RouteRegistration(RouteKey.of(Home.route), Home),
     )
 
     override fun dynamicRoutePatterns() = mapOf(
         "/stories/detail" to { uri ->
             val id = uri.getQueryParameter("id") ?: return@mapOf null
-            Detail(id = id)
+            StoryDetail(id = id)
         }
     )
 
     override fun EntryProviderScope<NavKey>.registerScreens() {
-        screenEntry<StoryGraph> { StoriesScaffold() }
-        screenEntry<Feed> { FeedScreen() }
-        screenEntry<Detail, DetailViewModel>(
+        screenEntry<StoriesGraph> { graph ->
+            StoriesScaffold(initialRoute = graph.initialRoute)
+        }
+        screenEntry<Home> { HomeScreen() }
+        screenEntry<StoryDetail, StoryDetailViewModel>(
             viewModelProvide = { hiltViewModel() }
-        ) { vm -> DetailScreen(vm) }
+        ) { vm -> StoryDetailScreen(vm) }
     }
 }
 ```
 
-### 2. Register in AppGraphsModule
+### 2. Register in `AppGraphsModule`
 
 ```kotlin
 @Module
 @InstallIn(SingletonComponent::class)
 object AppGraphsModule {
-    
+
     @Provides
     @IntoSet
-    fun provideStoriesGraph(): Graph = StoriesGraph
-}
-```
-
-### 3. Use in Navigation
-
-```kotlin
-// Type-safe navigation (recommended)
-val navigator = LocalNavigator.current
-navigator.push(StoriesGraph.Feed)
-navigator.push(StoriesGraph.Detail(id = "story_123"))
-
-// Atomic stack updates via DSL
-navigator.updateStack {
-    root(MainGraph.Home)
-    push(StoriesGraph.Detail(id = "story_123"))
-}
-
-// Effect-based navigation via NavAction
-LaunchedEffect(Unit) {
-    viewModel.effect.collect(navigator::navAction)
-}
-
-// Deep links (automatic)
-// app://stories/feed → StoriesGraph.Feed
-// app://stories/detail?id=story_123 → StoriesGraph.Detail(id="story_123")
-```
-
----
-
-## Examples
-
-### Example 1: Simple Graph
-
-```kotlin
-@Serializable
-data object SettingsGraph : Graph {
-    override val route: String = "/settings"
-
-    @Serializable
-    data object Account : Screen {
-        override val route: String = "/settings/account"
-    }
-
-    @Serializable
-    data object Privacy : Screen {
-        override val route: String = "/settings/privacy"
-    }
-
-    override fun staticRoutes() = setOf(
-        RouteRegistration(RouteKey.of(route), this),
-        RouteRegistration(RouteKey.of(Account.route), Account),
-        RouteRegistration(RouteKey.of(Privacy.route), Privacy),
-    )
-
-    override fun EntryProviderScope<NavKey>.registerScreens() {
-        screenEntry<SettingsGraph> { SettingsScaffold() }
-        screenEntry<Account> { AccountScreen() }
-        screenEntry<Privacy> { PrivacyScreen() }
-    }
-}
-```
-
-### Example 2: Graph with Dynamic Routes
-
-```kotlin
-@Serializable
-data object ProductGraph : Graph {
-    override val route: String = "/products"
-
-    @Serializable
-    data object List : Screen {
-        override val route: String = "/products/list"
-    }
-
-    @Serializable
-    data class Detail(val productId: String, val category: String? = null) : Screen {
-        override val route: String = "/products/detail"
-    }
-
-    override fun staticRoutes() = setOf(
-        RouteRegistration(RouteKey.of(route), this),
-        RouteRegistration(RouteKey.of(List.route), List),
-    )
-
-    override fun dynamicRoutePatterns() = mapOf(
-        "/products/detail" to { uri ->
-            val id = uri.getQueryParameter("productId") ?: return@mapOf null
-            val category = uri.getQueryParameter("category")
-            Detail(productId = id, category = category)
-        }
-    )
-
-    override fun EntryProviderScope<NavKey>.registerScreens() {
-        screenEntry<ProductGraph> { ProductScaffold() }
-        screenEntry<List> { ProductListScreen() }
-        screenEntry<Detail, ProductViewModel>(
-            viewModelProvide = { hiltViewModel() }
-        ) { vm -> ProductDetailScreen(vm) }
-    }
-}
-```
-
-### Example 3: Passing Large Data
-
-Instead of passing large objects through routes, use `NavigationStore`:
-
-```kotlin
-// In source screen
-val navigationStore: NavigationStore by inject()
-val user = User(id = "123", name = "John", ...) // Large object
-navigationStore.pushData("user_detail_payload", user)
-navigator.push(UserDetail(userId = "123"))
-
-// In destination ViewModel
-val user: User? = navigationStore.getData("user_detail_payload")
-```
-
-### Example 4: Cross-Module Navigation
-
-```kotlin
-// Get a route from another module
-val registry: RouteRegistry by inject()
-val profileRoute = registry.getRoute(RouteKey.of("/profile"))
-if (profileRoute != null) {
-    navigator.push(profileRoute)
+    fun provideStoriesGraph(): Graph = StoriesGraph()
 }
 ```
 
@@ -409,139 +365,15 @@ if (profileRoute != null) {
 
 ### ✅ DO
 
-- **Use static routes for parameter-less screens**
-  ```kotlin
-  @Serializable
-  data object Home : Screen { ... }
-  ```
-
-- **Use dynamic patterns for parameterized routes**
-  ```kotlin
-  override fun dynamicRoutePatterns() = mapOf(
-      "/detail" to { uri -> Detail(id = uri.getQueryParameter("id")) }
-  )
-  ```
-
-- **Use `NavigationStore` for large data**
-  ```kotlin
-  navigationStore.pushData("key", largeObject)
-  ```
-
-- **Validate deep link parameters**
-  ```kotlin
-  val id = uri.getQueryParameter("id") ?: return@mapOf null
-  ```
-
-- **Keep graphs focused** - One graph per navigation context
+- **Keep `:core:navigation` completely feature-agnostic** - No hardcoded graph or route strings inside the navigation library.
+- **Use `DeepLinkRouter` for URI resolution and backstack construction** - Avoid custom URI parsers in Activity or ViewModels.
+- **Implement `withInitialRoute` on parameterized graphs** - Enables automatic deep link resolution to sub-screens.
+- **Use `NavigationStore` for large payload objects** - Avoid passing large Parcelable/Serializable objects in route arguments.
 
 ### ❌ DON'T
 
-- **Pass large objects through routes**
-  ```kotlin
-  // ❌ This can cause TransactionTooLargeException
-  data class Detail(val user: User) : Screen
-  
-  // ✅ Instead, use NavigationStore
-  ```
-
-- **Use unbounded strings for routes**
-  ```kotlin
-  // ❌ Error-prone
-  navigator.push("/stories/detail")
-  
-  // ✅ Type-safe
-  navigator.push(StoriesGraph.Detail(id = "123"))
-  ```
-
-- **Duplicate route definitions**
-  ```kotlin
-  // ❌ Register routes in multiple modules
-  
-  // ✅ Centralize in AppGraphsModule
-  ```
-
-- **Mix serialization formats**
-  ```kotlin
-  // Keep all routes and screens @Serializable
-  ```
-
----
-
-## Troubleshooting
-
-### Deep link not resolving
-
-**Issue:** `RouteRegistry.createRouteFromUri()` returns null
-
-**Solutions:**
-1. Check path normalization: `app://stories//detail` → `/stories/detail`
-2. Ensure patterns are registered in `dynamicRoutePatterns()`
-3. Use exact path matching, not partial (`"/stories/detail"` not `"/stories"`)
-4. Verify query parameters are extracted correctly
-
-```kotlin
-// Debug
-val uri = Uri.parse("app://stories/detail?id=123")
-val resolved = registry.createRouteFromUri(uri)
-Log.d("Navigation", "Resolved: $resolved")
-```
-
-### ViewModel not injected
-
-**Issue:** "Route has parameters but ViewModel does not implement InitializableViewModel"
-
-**Solution:** Ensure ViewModel implements the contract:
-
-```kotlin
-class DetailViewModel : ViewModel(), InitializableViewModel<StoriesGraph.Detail> {
-    override fun init(route: StoriesGraph.Detail) {
-        val id = route.id
-        // Load data using id
-    }
-}
-```
-
-### `Set<Graph>` not provided by Hilt
-
-**Issue:** `java.util.Set<? extends com.dxmxp.navigation.model.Graph> cannot be provided`
-
-**Solution:** Add `@JvmSuppressWildcards` in `RouteRegistry`:
-
-```kotlin
-class RouteRegistry @Inject constructor(
-    private val graphs: Set<@JvmSuppressWildcards Graph>,
-)
-```
-
-### Graphs not registered
-
-**Issue:** Routes from certain graphs not found
-
-**Solution:** Verify graphs are provided in `AppGraphsModule`:
-
-```kotlin
-@Module
-@InstallIn(SingletonComponent::class)
-object AppGraphsModule {
-    @Provides @IntoSet
-    fun provideMyGraph(): Graph = MyGraph  // ← Must be present
-}
-```
-
----
-
-## Integration Checklist
-
-- [ ] Core navigation module added to project
-- [ ] `Graph` interface implemented for each navigation context
-- [ ] `Screen` objects defined for each screen
-- [ ] `AppGraphsModule` created with all graphs registered
-- [ ] `RouteRegistry` injected where needed
-- [ ] Deep link patterns defined for parameterized routes
-- [ ] `NavigationStore` used for large data
-- [ ] ViewModels implement `InitializableViewModel` if needed
-- [ ] Tests written for route resolution
-- [ ] Documentation reviewed and understood
+- **Hardcode route strings in navigation calls** - Always use typed routes (`navigator.push(StoriesGraph.Home)`).
+- **Manually build nested backstacks in UI** - Let `DeepLinkRouter` and `Graph.withInitialRoute` handle graph targets.
 
 ---
 
@@ -551,19 +383,19 @@ object AppGraphsModule {
 core/navigation/
 ├── src/main/java/com/dxmxp/navigation/
 │   ├── core/
-│   │   ├── Navigator.kt           # Back stack wrapper
-│   │   ├── NavigationStore.kt     # Data cache singleton
-│   │   └── RouteRegistry.kt       # Route lookup + deep link resolution
+│   │   ├── Navigator.kt           # Back stack wrapper & DSL
+│   │   ├── NavigationStore.kt     # Large data cache singleton
+│   │   └── RouteRegistry.kt       # Central route lookup & registry
 │   ├── model/
 │   │   ├── Route.kt               # Base interface
-│   │   ├── Graph.kt               # Graph interface
-│   │   ├── Screen.kt              # Screen helper + entry builders
+│   │   ├── Graph.kt               # Graph interface with initialRoute
+│   │   ├── Screen.kt              # Screen helper & entry builders
 │   │   └── RouteKey.kt            # Type-safe key wrapper
 │   ├── di/
 │   │   └── NavigationModule.kt    # Hilt configuration
 │   ├── utils/
-│   │   ├── DeepLinkHandler.kt     # URI → Route converter
-│   │   └── NavigationUtils.kt     # Composable helpers
+│   │   ├── DeepLinkRouter.kt      # Autonomous Deep Link router & result models
+│   │   └── NavigationUtils.kt     # Animation & UI helpers
 │   └── common/
 │       └── InitializableViewModel.kt # ViewModel init contract
 └── build.gradle.kts
@@ -571,16 +403,5 @@ core/navigation/
 
 ---
 
-## See Also
-
-- **:seed** - App module with `AppGraphsModule` and example graphs
-- **:feature:stories** - Feature module showing graph composition
-- **:core:domain** - Domain layer with repositories
-- **:core:ui** - UI components and theme
-
----
-
-**Last Updated:** 2026-09-15  
-**Maintained By:** Navigation Team  
+**Maintained By:** Navigation Architecture Team  
 **License:** Apache 2.0
-

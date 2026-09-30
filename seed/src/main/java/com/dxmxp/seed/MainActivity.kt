@@ -26,7 +26,6 @@ import androidx.core.splashscreen.SplashScreen.Companion.installSplashScreen
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import androidx.navigation3.runtime.rememberNavBackStack
 import com.dxmxp.navigation.core.LocalNavigator
-import com.dxmxp.navigation.core.NavAction
 import com.dxmxp.navigation.core.rememberNavigator
 import com.dxmxp.navigation.model.Route
 import com.dxmxp.seed.navigation.MainNavDisplay
@@ -108,10 +107,7 @@ class MainActivity : ComponentActivity() {
                                     currentDestination = currentDestination,
                                     bottomBarItems = bottomBarItems,
                                     onClickItem = { route ->
-                                        navigator.navAction(
-                                            if (route.isModal) NavAction.Push(route)
-                                            else NavAction.Root(route)
-                                        )
+                                        viewModel.setEvent(MainViewModel.Event.OnRouteClicked(route))
                                     }
                                 )
                             }
