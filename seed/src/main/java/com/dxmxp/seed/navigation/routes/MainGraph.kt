@@ -6,6 +6,7 @@ import androidx.navigation3.runtime.NavKey
 import com.dxmxp.navigation.core.RouteKey
 import com.dxmxp.navigation.core.RouteRegistration
 import com.dxmxp.navigation.model.Graph
+import com.dxmxp.navigation.model.ModalRoute
 import com.dxmxp.navigation.model.Route
 import com.dxmxp.navigation.model.Screen
 import com.dxmxp.navigation.model.Screen.Companion.screenEntry
@@ -26,10 +27,10 @@ data object MainGraph : Graph {
         override val route: String get() = "${MainGraph.route}/home"
     }
 
+    @ModalRoute
     @Serializable
     data object Search : Screen {
         override val route: String get() = "${MainGraph.route}/search"
-        override val isModal: Boolean get() = true
     }
 
     @Serializable

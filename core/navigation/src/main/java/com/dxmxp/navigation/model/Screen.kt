@@ -51,7 +51,7 @@ interface Screen : Route {
         }
 
         inline fun <reified K : Route> resolveMetadata(customMetadata: Map<String, Any>): Map<String, Any> {
-            val isModal = K::class.objectInstance?.isModal == true
+            val isModal = Route.resolveIsModal<K>()
             return if (isModal) {
                 metadata { modalAnimation() } + customMetadata
             } else {

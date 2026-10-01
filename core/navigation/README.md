@@ -30,7 +30,7 @@ The **core:navigation** module provides the foundation for type-safe, modular na
 ✅ **Autonomous Deep Link Router** - Centralized URI → Route → Backstack resolution  
 ✅ **Automatic Nested Graph Support** - Deep links directly to nested screens render full parent scaffolds and backstacks  
 ✅ **Modular architecture** - Features define their own graphs without knowledge of the main app  
-✅ **Polymorphic Modal Presentation** - `isModal = true` handles slide-up animations and bottom bar visibility  
+✅ **Polymorphic Modal Presentation** - `@ModalRoute` annotation handles slide-up animations and bottom bar visibility  
 ✅ **Centralized registry** - Single source of truth for all routes  
 ✅ **Dynamic routing** - Support for parameterized routes  
 ✅ **ViewModel injection** - Automatic typed ViewModel provisioning (`InitializableViewModel`)  
@@ -60,13 +60,13 @@ data class StoryDetail(val id: String) : Screen {
 ```
 
 ### Modal Routes
-Routes or Graphs that present as overlays/dialogs with slide-up transitions.
+Routes or Graphs annotated with `@ModalRoute` present as overlays/dialogs with slide-up transitions and automatic bottom bar hiding.
 
 ```kotlin
+@ModalRoute
 @Serializable
 data object Search : Screen {
     override val route: String = "/main/search"
-    override val isModal: Boolean get() = true
 }
 ```
 
@@ -74,11 +74,11 @@ data object Search : Screen {
 Graphs are collections of screens that define a navigation context. They can accept an optional `initialRoute` when navigating to a deep sub-screen from a deep link.
 
 ```kotlin
+@ModalRoute
 @Serializable
 data class StoriesGraph(
     override val initialRoute: Route? = null
 ) : Graph {
-    override val isModal: Boolean get() = true
     override val route: String get() = "/stories"
 
     override fun withInitialRoute(route: Route): Graph = copy(initialRoute = route)
@@ -146,15 +146,24 @@ MainScaffold renders → StoriesScaffold renders → StoryDetailScreen rendered 
 
 ## Core Concepts
 
-### `Route` Interface
-Base interface for all navigation keys. Must be `@Serializable`.
+### `@ModalRoute` Annotation & `Route` Interface
+Base interface for all navigation keys. Must be `@Serializable`. Mark any class/object with `@ModalRoute` to make it present as a modal.
 
 ```kotlin
+@Target(AnnotationTarget.CLASS)
+@Retention(AnnotationRetention.RUNTIME)
+annotation class ModalRoute
+
 interface Route : NavKey {
     val route: String
-    val isModal: Boolean get() = false
-    val showMainBottomBar: Boolean get() = !isModal
+    val showMainBottomBar: Boolean get() = !Route.isModal(this)
     val requiresAuth: Boolean get() = true
+
+    companion object {
+        fun isModal(route: Route?): Boolean
+        fun isModal(clazz: Class<out Route>): Boolean
+        inline fun <reified K : Route> resolveIsModal(): Boolean
+    }
 }
 ```
 
@@ -182,7 +191,7 @@ interface Screen : Route {
             metadata: Map<String, Any> = emptyMap(),
             crossinline content: @Composable (K) -> Unit,
         ) {
-            // Screen entry implementation
+            // Automatically detects @ModalRoute and applies modal animation
         }
     }
 }
@@ -305,11 +314,11 @@ fun StoriesScaffold(
 ### 1. Define a Feature Graph
 
 ```kotlin
+@ModalRoute
 @Serializable
 data class StoriesGraph(
     override val initialRoute: Route? = null
 ) : Graph {
-    override val isModal: Boolean get() = true
     override val route: String get() = "/stories"
 
     override fun withInitialRoute(route: Route): Graph = copy(initialRoute = route)
@@ -371,6 +380,7 @@ The app may do this from Hilt, Koin, or manually. The core module remains unchan
 ### ✅ DO
 
 - **Keep `:core:navigation` feature-agnostic** - no hardcoded feature routes or framework-specific wiring inside the core library.
+- **Use `@ModalRoute` annotation for modals** - annotate any `Screen` or `Graph` class/object to handle slide-up animations and hide the bottom bar automatically.
 - **Use `DeepLinkRouter` for URI resolution and backstack construction** - avoid custom URI logic in Activity or ViewModel.
 - **Use a generic `NavigationModule`/graph provider at the app boundary** - keep DI concerns outside the navigation library.
 - **Implement `withInitialRoute` on parameterized graphs** - enables automatic deep link resolution to nested screens.
@@ -394,7 +404,7 @@ core/navigation/
 │   │   ├── NavigationStore.kt     # Large data cache singleton
 │   │   └── RouteRegistry.kt       # Central route lookup & registry
 │   ├── model/
-│   │   ├── Route.kt               # Base interface
+│   │   ├── Route.kt               # Base interface & @ModalRoute annotation
 │   │   ├── Graph.kt               # Graph interface with initialRoute
 │   │   ├── Screen.kt              # Screen helper & entry builders
 │   │   └── RouteKey.kt            # Type-safe key wrapper

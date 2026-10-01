@@ -8,6 +8,7 @@ import com.dxmxp.domain.model.Story
 import com.dxmxp.navigation.core.RouteKey
 import com.dxmxp.navigation.core.RouteRegistration
 import com.dxmxp.navigation.model.Graph
+import com.dxmxp.navigation.model.ModalRoute
 import com.dxmxp.navigation.model.Route
 import com.dxmxp.navigation.model.Screen
 import com.dxmxp.navigation.model.Screen.Companion.screenEntry
@@ -32,7 +33,7 @@ import kotlinx.serialization.Serializable
  * It demonstrates both static and dynamic route patterns.
  *
  * Features:
- * - Modal presentation: isModal = true (presented as overlay/dialog)
+ * - Modal presentation: @ModalRoute (presented as overlay/dialog)
  * - Dynamic deep linking: Resolves story IDs from query parameters
  * - ViewModel injection: StoryDetail screen receives a typed ViewModel
  *
@@ -54,12 +55,12 @@ import kotlinx.serialization.Serializable
  * - app://stories/profile → StoriesGraph.Profile
  * - app://stories/detail?id=story_123 → StoriesGraph.StoryDetail(id="story_123")
  */
+@ModalRoute
 @Serializable
 data class StoriesGraph(
-    override val initialRoute: Route? = null
+    override val initialRoute: Route? = null,
 ) : Graph {
 
-    override val isModal: Boolean get() = true
     override val route: String get() = "/stories"
 
     override fun withInitialRoute(route: Route): Graph = copy(initialRoute = route)

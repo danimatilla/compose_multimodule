@@ -99,14 +99,14 @@ LaunchedEffect(Unit) {
 }
 ```
 
-### 5. Modal Screens (`isModal`)
-Override `isModal = true` on any `Route` or `Graph` to automatically apply slide-up transitions, hide the bottom bar, and render as an overlay above main screens:
+### 5. Modal Screens (`@ModalRoute`)
+Annotate any `Route` or `Graph` with `@ModalRoute` to automatically apply slide-up transitions, hide the bottom bar, and render as an overlay above main screens:
 
 ```kotlin
+@ModalRoute
 @Serializable
 data class StoryDetail(val id: String) : Screen {
     override val route = "/stories/detail"
-    override val isModal = true // Automatic modal presentation & animation
 }
 ```
 

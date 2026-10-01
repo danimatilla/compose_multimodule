@@ -97,7 +97,7 @@ class RouteRegistry(
      * Determines if a route is modal.
      */
     fun isModal(route: Route?): Boolean =
-        route != null && (getGraphForRoute(route)?.isModal == true || route.isModal)
+        route != null && (getGraphForRoute(route)?.let { Route.isModal(it) } == true || Route.isModal(route))
 
     /**
      * Determines if the main BottomBar should be shown for a route.
