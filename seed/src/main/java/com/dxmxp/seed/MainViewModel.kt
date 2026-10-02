@@ -3,6 +3,7 @@ package com.dxmxp.seed
 import android.net.Uri
 import androidx.lifecycle.viewModelScope
 import com.dxmxp.domain.AppException
+import com.dxmxp.domain.base.Logger
 import com.dxmxp.domain.common.fold
 import com.dxmxp.domain.use_case.AutoLoginUseCase
 import com.dxmxp.domain.use_case.HasSessionUseCase
@@ -25,6 +26,7 @@ class MainViewModel @Inject constructor(
     private val autoLoginUseCase: AutoLoginUseCase,
     private val routeRegistry: RouteRegistry,
     private val deepLinkRouter: DeepLinkRouter,
+    private val logger: Logger
 ) : BaseViewModel<MainViewModel.State, MainViewModel.Effect, MainViewModel.Event>() {
 
     data class State(
@@ -128,7 +130,7 @@ class MainViewModel @Inject constructor(
                     }
                 }
                 is DeepLinkResult.Unresolved -> {
-                    // Ignored or logged
+                    logger.e(TAG, result.toString())
                 }
             }
         }
@@ -137,5 +139,9 @@ class MainViewModel @Inject constructor(
     private fun navigateToAuthenticatedRoute(route: Route) {
         val action = deepLinkRouter.process(route, MainGraph)
         setEffect { Effect.Navigate(action) }
+    }
+
+    private companion object{
+        val TAG: String = MainViewModel::class.java.name
     }
 }

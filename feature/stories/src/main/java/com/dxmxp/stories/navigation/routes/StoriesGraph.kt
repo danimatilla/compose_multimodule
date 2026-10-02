@@ -49,7 +49,7 @@ data class StoriesGraph(
     )
 
     override fun dynamicRoutePatterns(): Map<String, (Uri) -> Route?> = mapOf(
-        StoryDetail::route.name to { uri ->
+        STORIES_DETAIL_PATH to { uri ->
             uri.getQueryParameter(StoryDetail::id.name)
                 ?.takeIf { it.isNotBlank() }
                 ?.let { id -> StoryDetail(id = id) }
