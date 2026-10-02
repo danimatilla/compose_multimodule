@@ -6,7 +6,6 @@ import androidx.navigation3.runtime.NavKey
 import com.dxmxp.navigation.core.RouteKey
 import com.dxmxp.navigation.core.RouteRegistration
 import com.dxmxp.navigation.model.Graph
-import com.dxmxp.navigation.model.ModalRoute
 import com.dxmxp.navigation.model.Route
 import com.dxmxp.navigation.model.Screen
 import com.dxmxp.navigation.model.Screen.Companion.screenEntry
@@ -20,28 +19,24 @@ import kotlinx.serialization.Serializable
 @Serializable
 data object MainGraph : Graph {
 
-    override val route: String get() = "/seed"
+    override val route: String get() = MAIN_GRAPH_PATH
 
     @Serializable
     data object Home : Screen {
-        override val route: String get() = "${MainGraph.route}/home"
+        override val route: String get() = MAIN_HOME_PATH
     }
 
-    @ModalRoute
+    @Route.ModalRoute
     @Serializable
     data object Search : Screen {
-        override val route: String get() = "${MainGraph.route}/search"
+        override val route: String get() = MAIN_SEARCH_PATH
     }
 
     @Serializable
     data object Menu : Screen {
-        override val route: String get() = "${MainGraph.route}/menu"
+        override val route: String get() = MAIN_MENU_PATH
     }
 
-    /**
-     * Declare this graph and all its static screens in the route registry.
-     * These are accessible via type-safe keys or deep links.
-     */
     override fun staticRoutes(): Set<RouteRegistration> = setOf(
         RouteRegistration(RouteKey.of(route), this),
         RouteRegistration(RouteKey.of(Home.route), Home),
@@ -51,9 +46,6 @@ data object MainGraph : Graph {
 
     override fun dynamicRoutePatterns(): Map<String, (Uri) -> Route?> = emptyMap()
 
-    /**
-     * Register all composable screens for this graph.
-     */
     override fun EntryProviderScope<NavKey>.registerScreens() {
         screenEntry<MainGraph> { HomeScreen() }
         screenEntry<Home> { HomeScreen() }
@@ -64,4 +56,9 @@ data object MainGraph : Graph {
         StoriesGraph().run { registerScreens() }
         ProfileGraph.run { registerScreens() }
     }
+
+    private const val MAIN_GRAPH_PATH = "/seed"
+    private const val MAIN_HOME_PATH = "$MAIN_GRAPH_PATH/home"
+    private const val MAIN_SEARCH_PATH = "$MAIN_GRAPH_PATH/search"
+    private const val MAIN_MENU_PATH = "$MAIN_GRAPH_PATH/menu"
 }

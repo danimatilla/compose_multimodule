@@ -17,17 +17,13 @@ import kotlinx.serialization.Serializable
 @Serializable
 data object ProfileGraph : Graph {
 
-    override val route: String get() = "/profile"
-    override val requiresAuth: Boolean get() = true
+    override val route: String get() = PROFILE_GRAPH_PATH
 
     @Serializable
     data object Settings : Screen {
-        override val route: String get() = "${ProfileGraph.route}/settings"
+        override val route: String get() = PROFILE_SETTINGS_PATH
     }
 
-    /**
-     * Declare this graph and its static screens in the route registry.
-     */
     override fun staticRoutes(): Set<RouteRegistration> = setOf(
         RouteRegistration(RouteKey.of(route), this),
         RouteRegistration(RouteKey.of(Settings.route), Settings),
@@ -35,11 +31,11 @@ data object ProfileGraph : Graph {
 
     override fun dynamicRoutePatterns(): Map<String, (Uri) -> Route?> = emptyMap()
 
-    /**
-     * Register all composable screens for this graph.
-     */
     override fun EntryProviderScope<NavKey>.registerScreens() {
         screenEntry<ProfileGraph> { ProfileScreen() }
         screenEntry<Settings> { SettingsScreen() }
     }
+
+    private const val PROFILE_GRAPH_PATH = "/profile"
+    private const val PROFILE_SETTINGS_PATH = "$PROFILE_GRAPH_PATH/settings"
 }

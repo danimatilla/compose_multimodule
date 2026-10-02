@@ -26,7 +26,7 @@ class StoryDetailViewModel @Inject constructor() :
     override fun createInitialState(): State = State()
 
     override fun init(route: StoriesGraph.StoryDetail) {
-        setState { copy(storyId = route.id, story = route.story) }
+        setState { copy(storyId = route.id) }
     }
 
     override fun handleEvent(event: Event) {

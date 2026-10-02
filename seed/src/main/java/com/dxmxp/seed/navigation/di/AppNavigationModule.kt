@@ -22,7 +22,7 @@ import javax.inject.Singleton
  */
 @Module
 @InstallIn(SingletonComponent::class)
-object AppGraphsModule : NavigationModule {
+object AppNavigationModule : NavigationModule {
 
     override fun graphs(): Set<Graph> = setOf(
         MainGraph,

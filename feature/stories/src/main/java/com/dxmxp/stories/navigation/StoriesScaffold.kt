@@ -72,7 +72,7 @@ fun StoriesScaffold(
                     bottomBarItems = navigationBarItems,
                     currentDestination = currentDestination,
                     onClickItem = { route ->
-                        nestedNavigator.navAction(NavAction.Push(route))
+                        nestedNavigator.navAction(NavAction.Root(route))
                     }
                 )
             },

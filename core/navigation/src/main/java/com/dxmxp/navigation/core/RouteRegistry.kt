@@ -114,9 +114,14 @@ class RouteRegistry(
     /**
      * Normalizes a URI path for consistent matching.
      */
-    private fun normalizePath(uri: Uri): String? = uri.path
-        ?.trimEnd('/')
-        ?.ifBlank { null }
+    private fun normalizePath(uri: Uri): String? {
+        val fullPath = if (!uri.host.isNullOrBlank() && uri.scheme != "https") {
+            "/${uri.host}${uri.path ?: ""}"
+        } else {
+            uri.path
+        }
+        return fullPath?.trimEnd('/')?.ifBlank { null }
+    }
 
     /**
      * Normalizes a string path for consistent matching.

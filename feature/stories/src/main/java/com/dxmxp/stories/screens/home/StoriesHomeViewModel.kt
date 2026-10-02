@@ -1,4 +1,4 @@
-package com.dxmxp.stories.screens.feed
+package com.dxmxp.stories.screens.home
 
 import com.dxmxp.domain.model.Story
 import com.dxmxp.navigation.core.NavAction
@@ -8,7 +8,7 @@ import dagger.hilt.android.lifecycle.HiltViewModel
 import javax.inject.Inject
 
 @HiltViewModel
-class HomeViewModel @Inject constructor() : BaseViewModel<HomeViewModel.State, HomeViewModel.Effect, HomeViewModel.Event>() {
+class StoriesHomeViewModel @Inject constructor() : BaseViewModel<StoriesHomeViewModel.State, StoriesHomeViewModel.Effect, StoriesHomeViewModel.Event>() {
 
     data class State(
         val stories: List<Story>? = null
@@ -27,7 +27,7 @@ class HomeViewModel @Inject constructor() : BaseViewModel<HomeViewModel.State, H
     override fun handleEvent(event: Event) {
         when (event) {
             is Event.OpenDetail -> {
-                val route = StoriesGraph.StoryDetail(id = event.story.id, story = event.story)
+                val route = StoriesGraph.StoryDetail(id = event.story.id)
                 setEffect { Effect.Navigate(NavAction.Push(route)) }
             }
         }

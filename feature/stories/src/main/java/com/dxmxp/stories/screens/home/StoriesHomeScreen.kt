@@ -1,4 +1,4 @@
-package com.dxmxp.stories.screens.feed
+package com.dxmxp.stories.screens.home
 
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.lazy.LazyColumn
@@ -17,13 +17,11 @@ import androidx.hilt.lifecycle.viewmodel.compose.hiltViewModel
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import com.dxmxp.domain.model.Story
 import com.dxmxp.navigation.core.LocalNavigator
-import com.dxmxp.navigation.core.NavAction
-import com.dxmxp.stories.navigation.routes.StoriesGraph
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
 fun HomeScreen(
-    viewModel: HomeViewModel = hiltViewModel()
+    viewModel: StoriesHomeViewModel = hiltViewModel()
 ) {
     val state by viewModel.uiState.collectAsStateWithLifecycle()
     val navigator = LocalNavigator.current
@@ -36,7 +34,7 @@ fun HomeScreen(
     LaunchedEffect(Unit) {
         viewModel.effect.collect { effect ->
             when (effect) {
-                is HomeViewModel.Effect.Navigate -> navigator.navAction(effect.action)
+                is StoriesHomeViewModel.Effect.Navigate -> navigator.navAction(effect.action)
             }
         }
     }
@@ -44,8 +42,8 @@ fun HomeScreen(
 
 @Composable
 private fun Content(
-    state: HomeViewModel.State,
-    onEvent: (HomeViewModel.Event) -> Unit
+    state: StoriesHomeViewModel.State,
+    onEvent: (StoriesHomeViewModel.Event) -> Unit
 ) {
     state.stories?.let { stories ->
         val listState = rememberLazyListState()
@@ -57,7 +55,7 @@ private fun Content(
                     headlineContent = { Text(story.title) },
                     supportingContent = { Text(story.description) },
                     modifier = Modifier.clickable(
-                        onClick = { onEvent(HomeViewModel.Event.OpenDetail(story)) }
+                        onClick = { onEvent(StoriesHomeViewModel.Event.OpenDetail(story)) }
                     )
                 )
 
@@ -73,7 +71,7 @@ private fun Content(
 @Composable
 private fun FeedScreenPreview() {
     Content(
-        state = HomeViewModel.State(
+        state = StoriesHomeViewModel.State(
             stories = (1..20).map {
                 Story(
                     id = "$it",

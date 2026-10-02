@@ -2,10 +2,6 @@ package com.dxmxp.navigation.model
 
 import androidx.navigation3.runtime.NavKey
 
-@Target(AnnotationTarget.CLASS)
-@Retention(AnnotationRetention.RUNTIME)
-annotation class ModalRoute
-
 /**
  * Common interface for all navigation keys.
  * Routes should be @Serializable classes or objects.
@@ -37,4 +33,8 @@ interface Route : NavKey {
             return isModal(K::class.java)
         }
     }
+
+    @Target(AnnotationTarget.CLASS)
+    @Retention(AnnotationRetention.RUNTIME)
+    annotation class ModalRoute
 }
