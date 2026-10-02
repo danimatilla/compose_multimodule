@@ -32,10 +32,7 @@ import com.dxmxp.navigation.core.RouteRegistration
  *     )
  *
  *     override fun dynamicRoutePatterns() = mapOf(
- *         "/main/detail" to { uri ->
- *             val id = uri.getQueryParameter("id") ?: return@mapOf null
- *             DetailScreen(id)
- *         }
+ *         routePattern<DetailScreen>("/main/detail")
  *     )
  * }
  * ```
@@ -80,10 +77,7 @@ interface Graph : Route {
      * Example:
      * ```
      * override fun dynamicRoutePatterns() = mapOf(
-     *     "/stories/detail" to { uri ->
-     *         val id = uri.getQueryParameter("id") ?: return@mapOf null
-     *         StoryDetail(id = id)
-     *     }
+     *     routePattern<StoryDetail>("/stories/detail")
      * )
      * ```
      */

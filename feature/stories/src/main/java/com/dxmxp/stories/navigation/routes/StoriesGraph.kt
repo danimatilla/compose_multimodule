@@ -10,6 +10,7 @@ import com.dxmxp.navigation.model.Graph
 import com.dxmxp.navigation.model.Route
 import com.dxmxp.navigation.model.Screen
 import com.dxmxp.navigation.model.Screen.Companion.screenEntry
+import com.dxmxp.navigation.utils.routePattern
 import com.dxmxp.stories.navigation.StoriesScaffold
 import com.dxmxp.stories.screens.home.HomeScreen
 import com.dxmxp.stories.screens.story_detail.StoryDetailScreen
@@ -49,11 +50,7 @@ data class StoriesGraph(
     )
 
     override fun dynamicRoutePatterns(): Map<String, (Uri) -> Route?> = mapOf(
-        STORIES_DETAIL_PATH to { uri ->
-            uri.getQueryParameter(StoryDetail::id.name)
-                ?.takeIf { it.isNotBlank() }
-                ?.let { id -> StoryDetail(id = id) }
-        }
+        routePattern<StoryDetail>(STORIES_DETAIL_PATH),
     )
 
     override fun EntryProviderScope<NavKey>.registerScreens() {

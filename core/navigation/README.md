@@ -339,10 +339,7 @@ data class StoriesGraph(
     )
 
     override fun dynamicRoutePatterns() = mapOf(
-        "/stories/detail" to { uri ->
-            val id = uri.getQueryParameter("id") ?: return@mapOf null
-            StoryDetail(id = id)
-        }
+        routePattern<StoryDetail>("/stories/detail"),
     )
 
     override fun EntryProviderScope<NavKey>.registerScreens() {

@@ -116,14 +116,16 @@ data class StoryDetail(val id: String) : Screen {
 Authentication state is checked at the root level in `MainActivity` to decide the initial route. Screens can also trigger navigation to Auth via effects.
 
 ## 🔗 Deep Links
-The `RouteRegistry` maps URIs to screens explicitly. 
-Registration is done in `MainActivity` or module initializers:
+The `RouteRegistry` maps URIs to screens using graph-level dynamic route patterns.
+Dynamic routes parse parameters automatically using `routePattern<T>()`:
 ```kotlin
-routeRegistry.register("/stories/detail") { uri ->
-    uri.getQueryParameter("id")?.let { id ->
-        StoriesScaffoldGraph.StoryDetail(id = id)
-    }
-}
+override fun dynamicRoutePatterns(): Map<String, (Uri) -> Route?> = mapOf(
+    routePattern<StoryDetail>("/stories/detail"),
+)
+```
+Or manually via `Uri.parseRoute<T>()`:
+```kotlin
+val storyDetail: StoryDetail? = uri.parseRoute<StoryDetail>()
 ```
 
 ## 🏗 Modularization Strategy
