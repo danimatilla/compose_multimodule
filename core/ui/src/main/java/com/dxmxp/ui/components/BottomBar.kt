@@ -1,4 +1,4 @@
-package com.dxmxp.ui.screens
+package com.dxmxp.ui.components
 
 import androidx.compose.animation.AnimatedVisibility
 import androidx.compose.animation.expandVertically
