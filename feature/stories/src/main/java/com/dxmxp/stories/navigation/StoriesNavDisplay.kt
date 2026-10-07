@@ -17,7 +17,7 @@ fun StoriesNavDisplay(
 ) {
     val entryProvider = remember {
         entryProvider {
-            StoriesGraph().run { registerScreens() }
+            StoriesGraph.Default.run { registerScreens() }
         }
     }
 

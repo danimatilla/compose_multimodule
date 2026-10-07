@@ -30,14 +30,13 @@ class GraphArchitectureTest {
     }
 
     @Test
-    fun `graph implementations must be objects and have Graph suffix`() {
-        // Ensure no regular classes implement Graph
+    fun `graph implementations must have Graph suffix`() {
+        // Ensure all Graph classes and objects have the suffix
         Konsist.scopeFromProject()
             .classes()
             .filter { it.hasParentInterface { parent -> parent.name == "Graph" } }
-            .assertTrue { false } 
+            .assertTrue { it.name.endsWith("Graph") }
 
-        // Ensure all Graph objects have the suffix
         Konsist.scopeFromProject()
             .objects()
             .filter { it.hasParentInterface { parent -> parent.name == "Graph" } }

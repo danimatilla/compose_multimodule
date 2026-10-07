@@ -28,7 +28,7 @@ object AppNavigationModule : NavigationModule {
         MainGraph,
         AuthGraph,
         ProfileGraph,
-        StoriesGraph(),
+        StoriesGraph.Default,
     )
 
     @Provides

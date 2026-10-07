@@ -32,7 +32,7 @@ import com.dxmxp.seed.navigation.MainNavDisplay
 import com.dxmxp.seed.navigation.routes.MainGraph
 import com.dxmxp.seed.navigation.routes.ProfileGraph
 import com.dxmxp.stories.navigation.routes.StoriesGraph
-import com.dxmxp.ui.screens.BottomBar
+import com.dxmxp.ui.components.BottomBar
 import com.dxmxp.ui.theme.SeedTheme
 import dagger.hilt.android.AndroidEntryPoint
 
@@ -61,7 +61,7 @@ class MainActivity : ComponentActivity() {
                     MainGraph.Home to Icons.Default.Home,
                     MainGraph.Search to Icons.Default.Search,
                     MainGraph.Menu to Icons.Default.Menu,
-                    StoriesGraph() to Icons.Default.AutoStories,
+                    StoriesGraph.Default to Icons.Default.AutoStories,
                     ProfileGraph to Icons.Default.Person
                 )
             }

@@ -361,7 +361,7 @@ val graphs: Set<Graph> = setOf(
     MainGraph,
     AuthGraph,
     ProfileGraph,
-    StoriesGraph(),
+    StoriesGraph.Default,
 )
 
 val routeRegistry = RouteRegistry(graphs)

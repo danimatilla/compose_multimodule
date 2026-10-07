@@ -22,7 +22,10 @@ annotation class NavigationDslMarker
  *
  * @property backStack The underlying Navigation 3 backstack holding [NavKey] elements.
  */
-class Navigator(private val backStack: NavBackStack<NavKey>) {
+class Navigator(
+    private val backStack: NavBackStack<NavKey>,
+    val parent: Navigator? = null
+) {
 
     /**
      * Builder class for constructing and mutating a list of navigation routes atomically.
@@ -129,9 +132,15 @@ class Navigator(private val backStack: NavBackStack<NavKey>) {
 
     /**
      * Pops the top element off the navigation stack.
+     * If this navigator cannot pop ([canPop] is false) and a [parent] navigator exists,
+     * delegates the pop operation to the [parent].
      */
     fun pop() {
-        updateStack { pop() }
+        if (canPop) {
+            updateStack { pop() }
+        } else {
+            parent?.pop()
+        }
     }
 
     /**
@@ -157,6 +166,12 @@ class Navigator(private val backStack: NavBackStack<NavKey>) {
      */
     val currentDestination: NavKey?
         get() = backStack.lastOrNull()
+
+    /**
+     * Indicates whether there are multiple destinations in the backstack, meaning a [pop] operation can be performed.
+     */
+    val canPop: Boolean
+        get() = backStack.size > 1
 }
 
 /**
@@ -202,11 +217,15 @@ sealed interface NavAction {
  * Creates and remembers a [Navigator] instance bound to the provided [backStack].
  *
  * @param backStack The [NavBackStack] instance to be managed.
+ * @param parent Optional parent [Navigator] instance for nested navigation delegation.
  * @return A remembered [Navigator] instance.
  */
 @Composable
-fun rememberNavigator(backStack: NavBackStack<NavKey>): Navigator {
-    return remember(backStack) { Navigator(backStack) }
+fun rememberNavigator(
+    backStack: NavBackStack<NavKey>,
+    parent: Navigator? = null
+): Navigator {
+    return remember(backStack, parent) { Navigator(backStack, parent = parent) }
 }
 
 /**

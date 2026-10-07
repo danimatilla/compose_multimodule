@@ -62,10 +62,12 @@ data class StoriesGraph(
         ) { viewModel -> StoryDetailScreen(viewModel) }
     }
 
-    private companion object {
+    companion object {
         const val STORIES_GRAPH_PATH = "/stories"
         const val STORIES_HOME_PATH = "$STORIES_GRAPH_PATH/home"
         const val STORIES_PROFILE_PATH = "$STORIES_GRAPH_PATH/profile"
         const val STORIES_DETAIL_PATH = "$STORIES_GRAPH_PATH/detail"
+
+        val Default = StoriesGraph()
     }
 }
