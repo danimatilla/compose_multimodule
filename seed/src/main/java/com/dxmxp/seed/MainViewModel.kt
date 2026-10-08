@@ -32,7 +32,6 @@ class MainViewModel @Inject constructor(
     data class State(
         val initialRoute: Route? = null,
         val showBottomBar: Boolean = false,
-        val showTopBar: Boolean = false,
         val pendingRoute: Route? = null,
         val currentGraph: Graph? = null
     )
@@ -86,7 +85,6 @@ class MainViewModel @Inject constructor(
             copy(
                 initialRoute = route,
                 showBottomBar = routeRegistry.shouldShowBottomBar(route),
-                showTopBar = routeRegistry.shouldShowTopBar(route)
             )
         }
     }
@@ -102,7 +100,6 @@ class MainViewModel @Inject constructor(
     private fun onRouteChange(event: Event.OnRouteChanged) {
         val state = uiState.value
         val showBottomBar = routeRegistry.shouldShowBottomBar(event.route)
-        val showTopBar = routeRegistry.shouldShowTopBar(event.route)
 
         event.route?.let {
             val graph = routeRegistry.getGraphForRoute(it)
@@ -119,17 +116,11 @@ class MainViewModel @Inject constructor(
                 copy(
                     pendingRoute = null,
                     showBottomBar = showBottomBar,
-                    showTopBar = showTopBar
                 )
             }
             navigateToAuthenticatedRoute(destination)
         } else {
-            setState {
-                copy(
-                    showBottomBar = showBottomBar,
-                    showTopBar = showTopBar
-                )
-            }
+            setState { copy(showBottomBar = showBottomBar) }
         }
     }
 
