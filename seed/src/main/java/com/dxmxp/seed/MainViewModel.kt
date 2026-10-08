@@ -32,6 +32,7 @@ class MainViewModel @Inject constructor(
     data class State(
         val initialRoute: Route? = null,
         val showBottomBar: Boolean = false,
+        val showTopBar: Boolean = false,
         val pendingRoute: Route? = null,
         val currentGraph: Graph? = null
     )
@@ -84,7 +85,8 @@ class MainViewModel @Inject constructor(
         setState {
             copy(
                 initialRoute = route,
-                showBottomBar = routeRegistry.shouldShowBottomBar(route)
+                showBottomBar = routeRegistry.shouldShowBottomBar(route),
+                showTopBar = routeRegistry.shouldShowTopBar(route)
             )
         }
     }
@@ -99,7 +101,8 @@ class MainViewModel @Inject constructor(
 
     private fun onRouteChange(event: Event.OnRouteChanged) {
         val state = uiState.value
-        val showBar = routeRegistry.shouldShowBottomBar(event.route)
+        val showBottomBar = routeRegistry.shouldShowBottomBar(event.route)
+        val showTopBar = routeRegistry.shouldShowTopBar(event.route)
 
         event.route?.let {
             val graph = routeRegistry.getGraphForRoute(it)
@@ -107,28 +110,49 @@ class MainViewModel @Inject constructor(
         }
 
         // If we have a pending route and we just transitioned to an authenticated area
-        if ((state.pendingRoute != null) && (event.route != null) && routeRegistry.requiresAuth(event.route)) {
+        if ((state.pendingRoute != null) && (event.route != null) && routeRegistry.requiresAuth(
+                event.route
+            )
+        ) {
             val destination = state.pendingRoute
-            setState { copy(pendingRoute = null, showBottomBar = showBar) }
+            setState {
+                copy(
+                    pendingRoute = null,
+                    showBottomBar = showBottomBar,
+                    showTopBar = showTopBar
+                )
+            }
             navigateToAuthenticatedRoute(destination)
         } else {
-            setState { copy(showBottomBar = showBar) }
+            setState {
+                copy(
+                    showBottomBar = showBottomBar,
+                    showTopBar = showTopBar
+                )
+            }
         }
     }
 
     private fun handleDeepLink(uri: Uri) {
         viewModelScope.launch {
             val isAuthenticated = hasSessionUseCase(Unit)
-            when (val result = deepLinkRouter.handle(uri, mainGraph = MainGraph, authGraph = AuthGraph, isAuthenticated = isAuthenticated)) {
+            when (val result = deepLinkRouter.handle(
+                uri,
+                mainGraph = MainGraph,
+                authGraph = AuthGraph,
+                isAuthenticated = isAuthenticated
+            )) {
                 is DeepLinkResult.Success -> {
                     setEffect { Effect.Navigate(result.action) }
                 }
+
                 is DeepLinkResult.RequiresAuth -> {
                     setState { copy(pendingRoute = result.pendingRoute) }
                     result.action?.let { action ->
                         setEffect { Effect.Navigate(action) }
                     }
                 }
+
                 is DeepLinkResult.Unresolved -> {
                     logger.e(TAG, result.toString())
                 }
@@ -141,7 +165,7 @@ class MainViewModel @Inject constructor(
         setEffect { Effect.Navigate(action) }
     }
 
-    private companion object{
+    private companion object {
         val TAG: String = MainViewModel::class.java.name
     }
 }

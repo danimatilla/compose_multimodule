@@ -6,6 +6,7 @@ import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.height
 import androidx.compose.material3.Button
+import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
@@ -16,8 +17,7 @@ import androidx.compose.ui.unit.dp
 import androidx.hilt.lifecycle.viewmodel.compose.hiltViewModel
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import com.dxmxp.navigation.core.LocalNavigator
-import com.dxmxp.seed.navigation.routes.AuthGraph
-
+import com.dxmxp.ui.components.SeedTopAppBar
 
 @Composable
 fun ProfileScreen(
@@ -40,6 +40,7 @@ fun ProfileScreen(
     }
 }
 
+@OptIn(ExperimentalMaterial3Api::class)
 @Composable
 private fun Content(
     state: ProfileViewModel.State,
@@ -47,16 +48,23 @@ private fun Content(
 ) {
     Column(
         modifier = Modifier.fillMaxSize(),
-        verticalArrangement = Arrangement.Center,
-        horizontalAlignment = Alignment.CenterHorizontally
     ) {
-        Text("Profile Screen")
-        Spacer(modifier = Modifier.height(16.dp))
-        Button(
-            onClick = { onEvent(ProfileViewModel.Event.OnLogoutClick) },
-            enabled = state.isLoading == false
+        SeedTopAppBar(title = { Text("Profile") })
+        Column(
+            modifier = Modifier
+                .fillMaxSize()
+                .weight(1f),
+            verticalArrangement = Arrangement.Center,
+            horizontalAlignment = Alignment.CenterHorizontally,
         ) {
-            Text("Logout")
+            Text("Profile Screen")
+            Spacer(modifier = Modifier.height(16.dp))
+            Button(
+                onClick = { onEvent(ProfileViewModel.Event.OnLogoutClick) },
+                enabled = state.isLoading == false,
+            ) {
+                Text("Logout")
+            }
         }
     }
 }

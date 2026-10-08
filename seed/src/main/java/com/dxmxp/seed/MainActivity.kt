@@ -6,6 +6,7 @@ import androidx.activity.ComponentActivity
 import androidx.activity.compose.setContent
 import androidx.activity.enableEdgeToEdge
 import androidx.activity.viewModels
+import androidx.compose.foundation.layout.WindowInsets
 import androidx.compose.foundation.layout.padding
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.AutoStories
@@ -21,7 +22,6 @@ import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Modifier
-import androidx.compose.ui.unit.dp
 import androidx.core.splashscreen.SplashScreen.Companion.installSplashScreen
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import androidx.navigation3.runtime.rememberNavBackStack
@@ -101,6 +101,7 @@ class MainActivity : ComponentActivity() {
                         val showBottomBar = uiState.showBottomBar && (currentRoute?.showMainBottomBar == true)
 
                         Scaffold(
+                            contentWindowInsets = WindowInsets(0, 0, 0, 0),
                             bottomBar = {
                                 BottomBar(
                                     shouldShowBottomBar = showBottomBar,
@@ -111,10 +112,10 @@ class MainActivity : ComponentActivity() {
                                     }
                                 )
                             }
-                        ) { _ ->
+                        ) { innerPadding ->
                             MainNavDisplay(
                                 backStack = backStack,
-                                modifier = Modifier.padding(0.dp)
+                                modifier = Modifier.padding(innerPadding)
                             )
                         }
                     }
