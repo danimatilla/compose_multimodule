@@ -28,10 +28,12 @@ import androidx.navigation3.runtime.rememberNavBackStack
 import com.dxmxp.navigation.core.LocalNavigator
 import com.dxmxp.navigation.core.rememberNavigator
 import com.dxmxp.navigation.model.Route
-import com.dxmxp.seed.navigation.MainNavDisplay
+import com.dxmxp.navigation.ui.NavGraphDisplay
+import com.dxmxp.seed.navigation.routes.AuthGraph
 import com.dxmxp.seed.navigation.routes.MainGraph
 import com.dxmxp.seed.navigation.routes.ProfileGraph
 import com.dxmxp.stories.navigation.routes.StoriesGraph
+import com.dxmxp.ui.common.registerCommonScreens
 import com.dxmxp.ui.components.BottomBar
 import com.dxmxp.ui.theme.SeedTheme
 import dagger.hilt.android.AndroidEntryPoint
@@ -98,7 +100,8 @@ class MainActivity : ComponentActivity() {
                         LocalNavigator provides navigator,
                     ) {
                         val currentRoute = currentDestination as? Route
-                        val showBottomBar = uiState.showBottomBar && (currentRoute?.showMainBottomBar == true)
+                        val showBottomBar =
+                            uiState.showBottomBar && (currentRoute?.showMainBottomBar == true)
 
                         Scaffold(
                             contentWindowInsets = WindowInsets(0, 0, 0, 0),
@@ -113,10 +116,14 @@ class MainActivity : ComponentActivity() {
                                 )
                             }
                         ) { innerPadding ->
-                            MainNavDisplay(
+                            NavGraphDisplay(
                                 backStack = backStack,
                                 modifier = Modifier.padding(innerPadding)
-                            )
+                            ) {
+                                registerCommonScreens()
+                                AuthGraph.run { registerScreens() }
+                                MainGraph.run { registerScreens() }
+                            }
                         }
                     }
                 }

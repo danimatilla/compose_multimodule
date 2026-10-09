@@ -10,7 +10,7 @@ import com.dxmxp.ui.screens.WebViewScreen
  * Extension to register common UI screens from the core:ui module.
  * This keeps the core:navigation module pure and free from UI implementations.
  */
-fun EntryProviderScope<NavKey>.registerCommonEntries() {
+fun EntryProviderScope<NavKey>.registerCommonScreens() {
     screenEntry<WebView> { webView ->
         WebViewScreen(screen = webView)
     }

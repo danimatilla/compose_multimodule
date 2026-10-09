@@ -1,7 +1,5 @@
 package com.dxmxp.stories.navigation
 
-import androidx.compose.animation.AnimatedVisibility
-import androidx.compose.animation.fadeIn
 import androidx.compose.foundation.layout.WindowInsets
 import androidx.compose.foundation.layout.padding
 import androidx.compose.material.icons.Icons
@@ -11,7 +9,6 @@ import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.Scaffold
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.CompositionLocalProvider
-import androidx.compose.runtime.getValue
 import androidx.compose.runtime.remember
 import androidx.compose.ui.Modifier
 import androidx.navigation3.runtime.rememberNavBackStack
@@ -20,8 +17,9 @@ import com.dxmxp.navigation.core.NavAction
 import com.dxmxp.navigation.core.Navigator
 import com.dxmxp.navigation.core.rememberNavigator
 import com.dxmxp.navigation.model.Route
-import com.dxmxp.navigation.utils.NavigationUtils
+import com.dxmxp.navigation.ui.NavGraphDisplay
 import com.dxmxp.stories.navigation.routes.StoriesGraph
+import com.dxmxp.ui.common.registerCommonScreens
 import com.dxmxp.ui.components.BottomBar
 
 
@@ -62,10 +60,13 @@ fun StoriesScaffold(
                 )
             },
         ) { innerPadding ->
-            StoriesNavDisplay(
+            NavGraphDisplay(
                 backStack = nestedBackStack,
                 modifier = Modifier.padding(innerPadding)
-            )
+            ) {
+                registerCommonScreens()
+                StoriesGraph.Default.run { registerScreens() }
+            }
         }
     }
 }

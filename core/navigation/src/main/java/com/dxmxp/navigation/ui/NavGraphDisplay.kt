@@ -1,28 +1,23 @@
-package com.dxmxp.seed.navigation
+package com.dxmxp.navigation.ui
 
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.remember
 import androidx.compose.ui.Modifier
+import androidx.navigation3.runtime.EntryProviderScope
 import androidx.navigation3.runtime.NavBackStack
 import androidx.navigation3.runtime.NavKey
 import androidx.navigation3.runtime.entryProvider
 import androidx.navigation3.ui.NavDisplay
-import com.dxmxp.seed.navigation.routes.AuthGraph
-import com.dxmxp.seed.navigation.routes.MainGraph
-import com.dxmxp.ui.common.registerCommonEntries
 
 @Composable
-fun MainNavDisplay(
+fun NavGraphDisplay(
     modifier: Modifier = Modifier,
-    backStack: NavBackStack<NavKey>
+    backStack: NavBackStack<NavKey>,
+    registerScreens: EntryProviderScope<NavKey>.() -> Unit
 ) {
     val entryProvider = remember {
-        entryProvider {
-            registerCommonEntries()
-            AuthGraph.run { registerScreens() }
-            MainGraph.run { registerScreens() }
-        }
+        entryProvider(builder = registerScreens)
     }
 
     NavDisplay(
