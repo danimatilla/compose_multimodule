@@ -15,6 +15,7 @@ import androidx.compose.runtime.State
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
+import androidx.compose.runtime.saveable.rememberSaveable
 import androidx.compose.runtime.setValue
 import androidx.navigation3.runtime.MetadataScope
 import androidx.navigation3.ui.NavDisplay
@@ -24,11 +25,13 @@ object NavigationUtils {
 
     @Composable
     fun rememberModalContentVisible(): State<Boolean> {
-        var visible by remember { mutableStateOf(false) }
+        var visible by rememberSaveable { mutableStateOf(false) }
 
-        LaunchedEffect(Unit) {
-            delay(MODAL_ENTER_DURATION_MS.toLong())
-            visible = true
+        LaunchedEffect(visible) {
+            if (!visible) {
+                delay(MODAL_ENTER_DURATION_MS.toLong())
+                visible = true
+            }
         }
 
         return remember(visible) { mutableStateOf(visible) }
