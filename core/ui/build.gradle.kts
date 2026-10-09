@@ -41,7 +41,6 @@ composeCompiler {
 }
 
 dependencies {
-    implementation(project(":core:domain"))
     api(project(":core:navigation"))
 
     implementation(libs.hilt)

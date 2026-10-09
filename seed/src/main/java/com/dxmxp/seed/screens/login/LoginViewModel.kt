@@ -6,7 +6,7 @@ import com.dxmxp.domain.use_case.LoginUseCase
 import com.dxmxp.navigation.core.NavAction
 import com.dxmxp.seed.navigation.routes.MainGraph
 import com.dxmxp.ui.base.BaseViewModel
-import com.dxmxp.ui.common.collectInto
+import com.dxmxp.domain.common.collectInto
 import dagger.hilt.android.lifecycle.HiltViewModel
 import javax.inject.Inject
 

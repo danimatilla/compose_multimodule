@@ -33,7 +33,6 @@ android {
 }
 
 dependencies {
-    implementation(project(":core:domain"))
 
     api(libs.androidx.navigation3.runtime)
     api(libs.androidx.navigation3.ui)

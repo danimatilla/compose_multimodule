@@ -1,7 +1,6 @@
-package com.dxmxp.ui.common
+package com.dxmxp.domain.common
 
 import com.dxmxp.domain.AppException
-import com.dxmxp.domain.common.DataResult
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Job
 import kotlinx.coroutines.flow.Flow
