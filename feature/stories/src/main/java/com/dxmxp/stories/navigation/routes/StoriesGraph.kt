@@ -16,6 +16,7 @@ import com.dxmxp.stories.screens.home.HomeScreen
 import com.dxmxp.stories.screens.story_detail.StoryDetailScreen
 import com.dxmxp.stories.screens.story_detail.StoryDetailViewModel
 import kotlinx.serialization.Serializable
+import kotlin.io.encoding.Base64
 
 
 @Route.ModalRoute

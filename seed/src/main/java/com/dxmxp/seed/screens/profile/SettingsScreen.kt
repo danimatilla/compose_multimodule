@@ -8,6 +8,7 @@ import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import com.dxmxp.seed.navigation.routes.ProfileGraph
 import com.dxmxp.ui.components.SeedTopAppBar
 
 @OptIn(ExperimentalMaterial3Api::class)
@@ -16,7 +17,10 @@ fun SettingsScreen() {
     Column(
         modifier = Modifier.fillMaxSize(),
     ) {
-        SeedTopAppBar(title = { Text("Settings") })
+        SeedTopAppBar(
+            title = { Text("Settings") },
+            currentRoute = ProfileGraph.Settings,
+        )
         Column(
             modifier = Modifier
                 .fillMaxSize()

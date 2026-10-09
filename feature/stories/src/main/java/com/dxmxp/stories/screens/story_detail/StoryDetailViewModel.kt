@@ -13,8 +13,7 @@ class StoryDetailViewModel @Inject constructor() :
     BaseViewModel<StoryDetailViewModel.State, StoryDetailViewModel.Effect, StoryDetailViewModel.Event>()
 {
     data class State(
-        val storyId: String? = null,
-        val story: Story? = null
+        val storyId: String? = null
     )
 
     interface Event {

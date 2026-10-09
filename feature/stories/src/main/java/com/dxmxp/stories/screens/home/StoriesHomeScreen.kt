@@ -1,6 +1,10 @@
 package com.dxmxp.stories.screens.home
 
+import androidx.compose.animation.AnimatedVisibility
+import androidx.compose.animation.fadeIn
 import androidx.compose.foundation.clickable
+import androidx.compose.foundation.layout.Column
+import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.itemsIndexed
 import androidx.compose.foundation.lazy.rememberLazyListState
@@ -17,6 +21,9 @@ import androidx.hilt.lifecycle.viewmodel.compose.hiltViewModel
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import com.dxmxp.domain.model.Story
 import com.dxmxp.navigation.core.LocalNavigator
+import com.dxmxp.navigation.utils.NavigationUtils
+import com.dxmxp.stories.navigation.routes.StoriesGraph
+import com.dxmxp.ui.components.SeedTopAppBar
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
@@ -40,27 +47,45 @@ fun HomeScreen(
     }
 }
 
+@OptIn(ExperimentalMaterial3Api::class)
 @Composable
 private fun Content(
     state: StoriesHomeViewModel.State,
     onEvent: (StoriesHomeViewModel.Event) -> Unit
 ) {
-    state.stories?.let { stories ->
-        val listState = rememberLazyListState()
-        LazyColumn(
-            state = listState
-        ) {
-            itemsIndexed(stories, key = { _, story -> story.id }) { index, story ->
-                ListItem(
-                    headlineContent = { Text(story.title) },
-                    supportingContent = { Text(story.description) },
-                    modifier = Modifier.clickable(
-                        onClick = { onEvent(StoriesHomeViewModel.Event.OpenDetail(story)) }
-                    )
-                )
+    val allowContent by NavigationUtils.rememberModalContentVisible()
 
-                if (index != stories.lastIndex) {
-                    HorizontalDivider()
+    Column(
+        modifier = Modifier.fillMaxSize()
+    ) {
+        SeedTopAppBar(
+            title = { Text("Stories") },
+            currentRoute = StoriesGraph.Home
+        )
+
+        AnimatedVisibility(
+            visible = allowContent,
+            enter = fadeIn()
+        ) {
+            state.stories?.let { stories ->
+                val listState = rememberLazyListState()
+                LazyColumn(
+                    state = listState,
+                    modifier = Modifier.weight(1f)
+                ) {
+                    itemsIndexed(stories, key = { _, story -> story.id }) { index, story ->
+                        ListItem(
+                            headlineContent = { Text(story.title) },
+                            supportingContent = { Text(story.description) },
+                            modifier = Modifier.clickable(
+                                onClick = { onEvent(StoriesHomeViewModel.Event.OpenDetail(story)) }
+                            )
+                        )
+
+                        if (index != stories.lastIndex) {
+                            HorizontalDivider()
+                        }
+                    }
                 }
             }
         }

@@ -8,6 +8,7 @@ import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import com.dxmxp.seed.navigation.routes.MainGraph
 import com.dxmxp.ui.components.SeedTopAppBar
 
 @OptIn(ExperimentalMaterial3Api::class)
@@ -16,7 +17,10 @@ fun MenuScreen() {
     Column(
         modifier = Modifier.fillMaxSize(),
     ) {
-        SeedTopAppBar(title = { Text("Menu") })
+        SeedTopAppBar(
+            title = { Text("Menu") },
+            currentRoute = MainGraph.Menu,
+        )
         Column(
             modifier = Modifier
                 .fillMaxSize()

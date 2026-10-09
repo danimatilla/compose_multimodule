@@ -1,10 +1,5 @@
 package com.dxmxp.ui.components
 
-import androidx.compose.animation.AnimatedVisibility
-import androidx.compose.animation.expandVertically
-import androidx.compose.animation.fadeIn
-import androidx.compose.animation.fadeOut
-import androidx.compose.animation.shrinkVertically
 import androidx.compose.foundation.layout.RowScope
 import androidx.compose.foundation.layout.WindowInsets
 import androidx.compose.material.icons.Icons
@@ -18,7 +13,6 @@ import androidx.compose.material3.TopAppBarColors
 import androidx.compose.material3.TopAppBarDefaults
 import androidx.compose.material3.TopAppBarScrollBehavior
 import androidx.compose.runtime.Composable
-import androidx.compose.runtime.remember
 import androidx.compose.ui.Modifier
 import com.dxmxp.navigation.core.LocalNavigator
 import com.dxmxp.navigation.core.NavAction
@@ -53,9 +47,7 @@ fun SeedTopAppBar(
     modifier: Modifier = Modifier,
     title: @Composable () -> Unit = {},
     navigator: Navigator = LocalNavigator.current,
-    currentRoute: Route? = navigator.currentDestination as? Route,
-    canPop: Boolean = navigator.canPop,
-    isModal: Boolean = Route.isModal(currentRoute) || Route.isModal(navigator.parent?.currentDestination as? Route),
+    currentRoute: Route? = null,
     onNavigationClick: (() -> Unit)? = null,
     navigationIcon: (@Composable () -> Unit)? = null,
     actions: @Composable RowScope.() -> Unit = {},
@@ -63,15 +55,18 @@ fun SeedTopAppBar(
     colors: TopAppBarColors = TopAppBarDefaults.topAppBarColors(),
     scrollBehavior: TopAppBarScrollBehavior? = null,
 ) {
-    val boundIsModal = remember { isModal }
-    val boundCanPop = remember { canPop }
+    val activeRoute = currentRoute ?: (navigator.currentDestination as? Route)
+    val isDirectModal = Route.isModal(activeRoute)
+    val isModal = isDirectModal || Route.isModal(navigator.parent?.currentDestination as? Route)
+    val canPop = navigator.canPop && (currentRoute == null || currentRoute == navigator.currentDestination)
 
     val navIconToRender = navIconToRender(
         navigationIcon = navigationIcon,
-        boundIsModal = boundIsModal,
+        isDirectModal = isDirectModal,
+        canPop = canPop,
+        isModal = isModal,
         onNavigationClick = onNavigationClick,
         navigator = navigator,
-        boundCanPop = boundCanPop
     )
 
     TopAppBar(
@@ -88,42 +83,30 @@ fun SeedTopAppBar(
 @Composable
 private fun navIconToRender(
     navigationIcon: @Composable (() -> Unit)?,
-    boundIsModal: Boolean,
+    isDirectModal: Boolean,
+    canPop: Boolean,
+    isModal: Boolean,
     onNavigationClick: (() -> Unit)?,
     navigator: Navigator,
-    boundCanPop: Boolean
 ): @Composable (() -> Unit)? {
-    return navigationIcon ?: when {
-        boundIsModal -> {
-            {
-                IconButton(
-                    onClick = {
-                        onNavigationClick?.invoke() ?: navigator.pop()
-                    },
-                ) {
-                    Icon(
-                        imageVector = Icons.Default.Close,
-                        contentDescription = "Close",
-                    )
-                }
-            }
-        }
+    if (navigationIcon != null) return navigationIcon
 
-        boundCanPop -> {
-            {
-                IconButton(
-                    onClick = {
-                        onNavigationClick?.invoke() ?: navigator.pop()
-                    },
-                ) {
-                    Icon(
-                        imageVector = Icons.AutoMirrored.Filled.ArrowBack,
-                        contentDescription = "Back",
-                    )
-                }
-            }
-        }
-
+    val (icon, contentDescription) = when {
+        isDirectModal || (isModal && !canPop) -> Icons.Default.Close to "Close"
+        canPop -> Icons.AutoMirrored.Filled.ArrowBack to "Back"
         else -> null
+    } ?: return null
+
+    return {
+        IconButton(
+            onClick = {
+                onNavigationClick?.invoke() ?: navigator.pop()
+            },
+        ) {
+            Icon(
+                imageVector = icon,
+                contentDescription = contentDescription,
+            )
+        }
     }
 }

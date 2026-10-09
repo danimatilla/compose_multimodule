@@ -2,6 +2,7 @@ package com.dxmxp.stories.navigation
 
 import androidx.compose.animation.AnimatedVisibility
 import androidx.compose.animation.fadeIn
+import androidx.compose.foundation.layout.WindowInsets
 import androidx.compose.foundation.layout.padding
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.Home
@@ -22,7 +23,6 @@ import com.dxmxp.navigation.model.Route
 import com.dxmxp.navigation.utils.NavigationUtils
 import com.dxmxp.stories.navigation.routes.StoriesGraph
 import com.dxmxp.ui.components.BottomBar
-import com.dxmxp.ui.components.SeedTopAppBar
 
 
 @OptIn(ExperimentalMaterial3Api::class)
@@ -42,8 +42,6 @@ fun StoriesScaffold(
     val nestedBackStack = rememberNavBackStack(*initialStack.toTypedArray())
     val nestedNavigator = rememberNavigator(nestedBackStack, parent = rootNavigator)
 
-    val isScaffoldReady by NavigationUtils.rememberModalContentVisible()
-
     val navigationBarItems = listOf(
         StoriesGraph.Home to Icons.Default.Home,
         StoriesGraph.Profile to Icons.Default.Person,
@@ -53,7 +51,7 @@ fun StoriesScaffold(
 
     CompositionLocalProvider(LocalNavigator provides nestedNavigator) {
         Scaffold(
-            topBar = { SeedTopAppBar() },
+            contentWindowInsets = WindowInsets(0, 0, 0, 0),
             bottomBar = {
                 BottomBar(
                     bottomBarItems = navigationBarItems,
@@ -64,15 +62,10 @@ fun StoriesScaffold(
                 )
             },
         ) { innerPadding ->
-            AnimatedVisibility(
-                visible = isScaffoldReady,
-                enter = fadeIn()
-            ) {
-                StoriesNavDisplay(
-                    backStack = nestedBackStack,
-                    modifier = Modifier.padding(innerPadding)
-                )
-            }
+            StoriesNavDisplay(
+                backStack = nestedBackStack,
+                modifier = Modifier.padding(innerPadding)
+            )
         }
     }
 }

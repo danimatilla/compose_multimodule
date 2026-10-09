@@ -17,6 +17,7 @@ import androidx.compose.ui.unit.dp
 import androidx.hilt.lifecycle.viewmodel.compose.hiltViewModel
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import com.dxmxp.navigation.core.LocalNavigator
+import com.dxmxp.seed.navigation.routes.ProfileGraph
 import com.dxmxp.ui.components.SeedTopAppBar
 
 @Composable
@@ -49,7 +50,10 @@ private fun Content(
     Column(
         modifier = Modifier.fillMaxSize(),
     ) {
-        SeedTopAppBar(title = { Text("Profile") })
+        SeedTopAppBar(
+            title = { Text("Profile") },
+            currentRoute = ProfileGraph,
+        )
         Column(
             modifier = Modifier
                 .fillMaxSize()

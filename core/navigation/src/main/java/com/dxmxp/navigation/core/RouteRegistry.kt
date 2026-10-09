@@ -106,12 +106,6 @@ class RouteRegistry(
         route != null && (getGraphForRoute(route)?.showMainBottomBar != false && route.showMainBottomBar)
 
     /**
-     * Determines if the main TopBar should be shown for a route.
-     */
-    fun shouldShowTopBar(route: Route?): Boolean =
-        route != null && (getGraphForRoute(route)?.showMainTopBar != false && route.showMainTopBar)
-
-    /**
      * Determines if a route requires authentication.
      */
     fun requiresAuth(route: Route?): Boolean =

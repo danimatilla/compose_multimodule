@@ -11,6 +11,7 @@ import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import com.dxmxp.navigation.core.LocalNavigator
 import com.dxmxp.navigation.core.NavAction
+import com.dxmxp.seed.navigation.routes.MainGraph
 import com.dxmxp.ui.components.SeedTopAppBar
 import com.dxmxp.ui.screens.WebView
 
@@ -22,7 +23,10 @@ fun HomeScreen() {
     Column(
         modifier = Modifier.fillMaxSize(),
     ) {
-        SeedTopAppBar(title = { Text("Home") })
+        SeedTopAppBar(
+            title = { Text("Home") },
+            currentRoute = MainGraph.Home,
+        )
         Column(
             modifier = Modifier
                 .fillMaxSize()
