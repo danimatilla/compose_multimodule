@@ -7,6 +7,7 @@ import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Surface
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.CompositionLocalProvider
 import androidx.compose.runtime.remember
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
@@ -17,6 +18,7 @@ import androidx.compose.ui.text.TextStyle
 import androidx.compose.ui.text.style.TextDecoration
 import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.tooling.preview.Preview
+import androidx.compose.ui.tooling.preview.PreviewLightDark
 import androidx.compose.ui.unit.dp
 import com.dxmxp.ui.theme.SeedTheme
 
@@ -25,13 +27,14 @@ import com.dxmxp.ui.theme.SeedTheme
  *
  * Supports:
  * - HTML Tags (`<b>`, `<i>`, `<u>`, `<s>`, `<h1>`-`<h6>`, `<p>`, `<br>`, `<font>`, `<code>`, `<sub>`, `<sup>`, `<small>`, `<big>`, `<ul>`, `<ol>`, `<li>`, etc.) with default HTML styling out-of-the-box
- * - Optionally mapping HTML tags to design system tokens via [tagStyles] (e.g. `h1` -> `MaterialTheme.typography.headlineLarge` / `TitleXL`)
+ * - External tag-to-design-token configuration via [LocalHtmlTagStyles] or explicit [tagStyles]
+ * - Dynamic tag resolution via [HtmlTagStyles.tagResolver] for arbitrary HTML tags at runtime
  * - Link rendering (`<a href="...">`) with configurable click handling via [onLinkClick]
  * - Inline CSS styles (`style="color: red; font-weight: bold; background-color: yellow; font-size: 16sp;"`)
  *
  * @param html The HTML formatted string to render
  * @param modifier Composable modifier
- * @param tagStyles Optional mapping of HTML tags to design system typography tokens. If null, standard default HTML tag styles are applied.
+ * @param tagStyles Optional mapping of HTML tags to design system typography tokens. Defaults to [LocalHtmlTagStyles.current].
  * @param style Base text style
  * @param color Text color
  * @param linkColor Color applied to HTML links
@@ -46,7 +49,7 @@ import com.dxmxp.ui.theme.SeedTheme
 fun HtmlText(
     html: String,
     modifier: Modifier = Modifier,
-    tagStyles: HtmlTagStyles? = null,
+    tagStyles: HtmlTagStyles? = LocalHtmlTagStyles.current,
     style: TextStyle = LocalTextStyle.current,
     color: Color = Color.Unspecified,
     linkColor: Color = MaterialTheme.colorScheme.primary,
@@ -87,7 +90,7 @@ fun HtmlText(
     )
 }
 
-@Preview(showBackground = true)
+@PreviewLightDark
 @Composable
 private fun HtmlTextDefaultPreview() {
     SeedTheme {
@@ -107,23 +110,37 @@ private fun HtmlTextDefaultPreview() {
     }
 }
 
-@Preview(showBackground = true)
+@PreviewLightDark
 @Composable
-private fun HtmlTextDesignTokensPreview() {
+private fun HtmlTextExternalConfigPreview() {
     SeedTheme {
         Surface {
             Column(modifier = Modifier.padding(16.dp)) {
-                // Uso opcional vinculando etiquetas a tokens de diseño (p. ej. h1 -> TitleXL / headlineLarge)
-                HtmlText(
-                    html = """
-                        <h1>Encabezado H1 vinculado a Token TitleXL</h1>
-                        <p>Párrafo vinculado a Token BodyMedium.</p>
-                    """.trimIndent(),
-                    tagStyles = HtmlTagStyles(
-                        h1 = MaterialTheme.typography.headlineLarge, // Token de diseño
-                        p = MaterialTheme.typography.bodyMedium
-                    )
+                val headlineMedium = MaterialTheme.typography.headlineMedium
+                val headlineLarge = MaterialTheme.typography.headlineLarge
+                val bodyMedium = MaterialTheme.typography.bodyMedium
+
+                // Configuración externa mediante CompositionLocal + Dynamic Tag Resolver
+                val externalHtmlConfig = HtmlTagStyles(
+                    tagStyles = mapOf(
+                        "h1" to headlineLarge, // Token TitleXL
+                        "p" to bodyMedium
+                    ),
+                    tagResolver = { tagName ->
+                        // Resolver dinámico para cualquier tag desconocido que llegue en tiempo de ejecución
+                        if (tagName.contains("title")) headlineMedium else null
+                    }
                 )
+
+                CompositionLocalProvider(LocalHtmlTagStyles provides externalHtmlConfig) {
+                    HtmlText(
+                        html = """
+                            <h1>Encabezado H1 configurado externamente (TitleXL)</h1>
+                            <p>Párrafo configurado externamente.</p>
+                            <custom-title>Tag dinámico resuelto por tagResolver</custom-title>
+                        """.trimIndent()
+                    )
+                }
             }
         }
     }
