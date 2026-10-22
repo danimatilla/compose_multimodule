@@ -93,9 +93,8 @@ internal object HtmlParser {
                             var paragraphStyle = tokenTextStyle?.toParagraphStyle()
 
                             // Fallback built-in tag styles if design token is not set
-                            val defaultTagStyle = getBuiltInTagStyle(tagName, attributes)
-                            if (defaultTagStyle != null) {
-                                spanStyle = spanStyle?.merge(defaultTagStyle) ?: defaultTagStyle
+                            if (spanStyle == null) {
+                                spanStyle = getBuiltInTagStyle(tagName, attributes)
                             }
 
                             // Process inline CSS style="..."
