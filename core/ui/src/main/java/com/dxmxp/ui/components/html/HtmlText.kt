@@ -1,7 +1,9 @@
 package com.dxmxp.ui.components.html
 
+import androidx.compose.foundation.border
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.padding
+import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material3.LocalTextStyle
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Surface
@@ -17,7 +19,6 @@ import androidx.compose.ui.text.TextLayoutResult
 import androidx.compose.ui.text.TextStyle
 import androidx.compose.ui.text.style.TextDecoration
 import androidx.compose.ui.text.style.TextOverflow
-import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.tooling.preview.PreviewLightDark
 import androidx.compose.ui.unit.dp
 import com.dxmxp.ui.theme.SeedTheme
@@ -31,10 +32,12 @@ import com.dxmxp.ui.theme.SeedTheme
  * - Dynamic tag resolution via [HtmlTagStyles.tagResolver] for arbitrary HTML tags at runtime
  * - Link rendering (`<a href="...">`) with configurable click handling via [onLinkClick]
  * - Inline CSS styles (`style="color: red; font-weight: bold; background-color: yellow; font-size: 16sp;"`)
+ * - Debug mode inspection via [debugConfig] or [LocalHtmlDebugConfig] to visualize carriage returns (`↵`) and element bounding boxes
  *
  * @param html The HTML formatted string to render
  * @param modifier Composable modifier
  * @param tagStyles Optional mapping of HTML tags to design system typography tokens. Defaults to [LocalHtmlTagStyles.current].
+ * @param debugConfig Debug configuration for visualizing line breaks and element bounding boxes. Defaults to [LocalHtmlDebugConfig.current].
  * @param style Base text style
  * @param color Text color
  * @param linkColor Color applied to HTML links
@@ -50,6 +53,7 @@ fun HtmlText(
     html: String,
     modifier: Modifier = Modifier,
     tagStyles: HtmlTagStyles? = LocalHtmlTagStyles.current,
+    debugConfig: HtmlDebugConfig = LocalHtmlDebugConfig.current,
     style: TextStyle = LocalTextStyle.current,
     color: Color = Color.Unspecified,
     linkColor: Color = MaterialTheme.colorScheme.primary,
@@ -69,18 +73,29 @@ fun HtmlText(
         SpanStyle(color = linkColor, textDecoration = linkTextDecoration)
     }
 
-    val annotatedString = remember(html, tagStyles, defaultLinkStyle) {
+    val annotatedString = remember(html, tagStyles, defaultLinkStyle, debugConfig) {
         HtmlTextHelper.parseHtml(
             html = html,
             tagStyles = tagStyles,
             defaultLinkStyle = defaultLinkStyle,
-            onLinkClick = effectiveOnLinkClick
+            onLinkClick = effectiveOnLinkClick,
+            debugConfig = debugConfig
         )
+    }
+
+    val effectiveModifier = if (debugConfig.enabled && debugConfig.showContainerBorder) {
+        modifier.border(
+            width = 1.dp,
+            color = Color(0xFFE91E63), // Debug magenta/pink border
+            shape = RoundedCornerShape(2.dp)
+        )
+    } else {
+        modifier
     }
 
     Text(
         text = annotatedString,
-        modifier = modifier,
+        modifier = effectiveModifier,
         style = style,
         color = color,
         softWrap = softWrap,
@@ -104,6 +119,30 @@ private fun HtmlTextDefaultPreview() {
                         <p style="color: #E91E63; font-weight: bold;">Estilo inline CSS personalizado.</p>
                         <p><a href="https://kotlinlang.org">Enlace por defecto</a></p>
                     """.trimIndent()
+                )
+            }
+        }
+    }
+}
+
+@PreviewLightDark
+@Composable
+private fun HtmlTextDebugPreview() {
+    SeedTheme {
+        Surface {
+            Column(modifier = Modifier.padding(16.dp)) {
+                // Vista en modo Debug: inspección de retornos de carro (↵), cajas de elementos y contenedor
+                HtmlText(
+                    html = """
+                        <h1>Encabezado H1 en Debug</h1>
+                        <p>Párrafo con <b>negrita</b>, <i>cursiva</i> y <a href="#">enlace</a>.</p>
+                        <code>val x = 42</code>
+                    """.trimIndent(),
+                    debugConfig = HtmlDebugConfig(
+                        enabled = true,
+                        showElementBoxes = true,
+                        showContainerBorder = true
+                    )
                 )
             }
         }

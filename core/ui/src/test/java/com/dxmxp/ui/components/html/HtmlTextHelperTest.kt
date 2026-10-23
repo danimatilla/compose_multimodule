@@ -10,6 +10,7 @@ import androidx.compose.ui.unit.em
 import androidx.compose.ui.unit.sp
 import org.junit.Assert.assertEquals
 import org.junit.Assert.assertNotNull
+import org.junit.Assert.assertTrue
 import org.junit.Test
 
 class HtmlTextHelperTest {
@@ -169,5 +170,20 @@ class HtmlTextHelperTest {
         val paragraphs = annotatedString.paragraphStyles
         assertEquals(1, paragraphs.size)
         assertEquals(39.sp, paragraphs[0].item.lineHeight)
+    }
+
+    @Test
+    fun `parseHtml renders debug paragraph ends and element box tints when debugMode is enabled`() {
+        val html = "<p>Line 1</p><p>Line 2</p>"
+        val debugConfig = HtmlDebugConfig(enabled = true, showParagraphEnds = true, showElementBoxes = true)
+
+        val annotatedString = HtmlTextHelper.parseHtml(html, debugConfig = debugConfig)
+
+        // Verify pilcrow symbol '¶' is rendered in the text
+        assertTrue(annotatedString.text.contains("¶"))
+
+        // Verify background tint is applied for element box
+        val styles = annotatedString.spanStyles
+        assertNotNull(styles.find { it.item.background == Color(0x264CAF50) }) // Green debug box for paragraph
     }
 }

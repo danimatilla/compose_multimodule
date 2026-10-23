@@ -37,7 +37,8 @@ internal object HtmlParser {
         html: String,
         tagStyles: HtmlTagStyles? = null,
         defaultLinkStyle: SpanStyle? = null,
-        onLinkClick: ((String) -> Unit)? = null
+        onLinkClick: ((String) -> Unit)? = null,
+        debugConfig: HtmlDebugConfig? = null
     ): AnnotatedString {
         if (html.isEmpty()) return AnnotatedString("")
 
@@ -67,7 +68,7 @@ internal object HtmlParser {
                     if (tagContent.startsWith("/")) {
                         // Closing tag
                         val tagName = tagContent.substring(1).trim().lowercase()
-                        closeTag(tagName, builder, tagStack, tagStyles, defaultLinkStyle, onLinkClick)
+                        closeTag(tagName, builder, tagStack, tagStyles, defaultLinkStyle, onLinkClick, debugConfig)
                     } else {
                         // Opening or self-closing tag
                         val isSelfClosing = tagContent.endsWith("/")
@@ -79,7 +80,8 @@ internal object HtmlParser {
                             builder.append("\n")
                         } else if (tagName == "hr") {
                             ensureNewline(builder)
-                            builder.append("───\n")
+                            builder.append("───")
+                            ensureNewline(builder)
                         } else if (!isSelfClosing) {
                             if (BLOCK_TAGS.contains(tagName)) {
                                 ensureNewline(builder)
@@ -99,6 +101,15 @@ internal object HtmlParser {
                             }
                             if (paragraphStyle == null) {
                                 paragraphStyle = getBuiltInParagraphStyle(tagName)
+                            }
+
+                            // Process debug element bounding box tints if enabled
+                            if (debugConfig?.enabled == true && debugConfig.showElementBoxes) {
+                                val debugBoxColor = getDebugBoxColor(tagName)
+                                if (debugBoxColor != Color.Unspecified) {
+                                    val debugSpanStyle = SpanStyle(background = debugBoxColor)
+                                    spanStyle = spanStyle?.merge(debugSpanStyle) ?: debugSpanStyle
+                                }
                             }
 
                             // Process inline CSS style="..."
@@ -170,7 +181,8 @@ internal object HtmlParser {
         tagStack: MutableList<OpenTag>,
         tagStyles: HtmlTagStyles?,
         defaultLinkStyle: SpanStyle?,
-        onLinkClick: ((String) -> Unit)?
+        onLinkClick: ((String) -> Unit)?,
+        debugConfig: HtmlDebugConfig?
     ) {
         val index = tagStack.indexOfLast { it.name == tagName }
         if (index != -1) {
@@ -179,6 +191,9 @@ internal object HtmlParser {
             applyOpenTag(openTag, endPos, builder, tagStyles, defaultLinkStyle, onLinkClick)
 
             if (BLOCK_TAGS.contains(tagName)) {
+                if (debugConfig?.enabled == true && debugConfig.showParagraphEnds) {
+                    appendParagraphEnd(builder, debugConfig)
+                }
                 ensureNewline(builder)
             }
         }
@@ -221,6 +236,24 @@ internal object HtmlParser {
         }
     }
 
+    private fun appendParagraphEnd(
+        builder: AnnotatedString.Builder,
+        debugConfig: HtmlDebugConfig
+    ) {
+        val start = builder.length
+        builder.append(debugConfig.paragraphEndSymbol)
+        val end = builder.length
+        builder.addStyle(
+            SpanStyle(
+                color = Color(0xFFE91E63), // Pink/Red debug indicator
+                fontWeight = FontWeight.Bold,
+                fontSize = 0.75.em
+            ),
+            start,
+            end
+        )
+    }
+
     private fun ensureNewline(builder: AnnotatedString.Builder) {
         if (builder.length > 0 && builder.toAnnotatedString().text.last() != '\n') {
             builder.append("\n")
@@ -246,6 +279,19 @@ internal object HtmlParser {
         }
 
         return Pair(tagName, attributes)
+    }
+
+    private fun getDebugBoxColor(tagName: String): Color {
+        return when (tagName.lowercase()) {
+            "h1", "h2", "h3", "h4", "h5", "h6" -> Color(0x332196F3) // Subtle Blue
+            "p", "div", "section", "article" -> Color(0x264CAF50) // Subtle Green
+            "a" -> Color(0x33FF9800) // Subtle Orange
+            "code", "tt", "pre" -> Color(0x339C27B0) // Subtle Purple
+            "b", "strong", "i", "em", "u", "s", "span" -> Color(0x33FFEB3B) // Subtle Yellow
+            "ul", "ol", "li" -> Color(0x2600BCD4) // Subtle Cyan
+            "blockquote" -> Color(0x26795548) // Subtle Brown
+            else -> Color(0x269E9E9E) // Subtle Grey
+        }
     }
 
     private fun getBuiltInParagraphStyle(tagName: String): ParagraphStyle? {
