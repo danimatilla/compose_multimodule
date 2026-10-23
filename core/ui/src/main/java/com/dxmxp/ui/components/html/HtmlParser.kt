@@ -14,6 +14,7 @@ import androidx.compose.ui.text.style.BaselineShift
 import androidx.compose.ui.text.style.TextDecoration
 import androidx.compose.ui.unit.TextUnit
 import androidx.compose.ui.unit.em
+import androidx.compose.ui.unit.isSpecified
 import androidx.compose.ui.unit.sp
 
 /**
@@ -96,6 +97,9 @@ internal object HtmlParser {
                             if (spanStyle == null) {
                                 spanStyle = getBuiltInTagStyle(tagName, attributes)
                             }
+                            if (paragraphStyle == null) {
+                                paragraphStyle = getBuiltInParagraphStyle(tagName)
+                            }
 
                             // Process inline CSS style="..."
                             val cssStyleAttr = attributes["style"]
@@ -103,7 +107,14 @@ internal object HtmlParser {
                                 val cssSpanStyle = CssStyleParser.parseSpanStyle(cssStyleAttr)
                                 spanStyle = spanStyle?.merge(cssSpanStyle) ?: cssSpanStyle
 
-                                val cssParaStyle = CssStyleParser.parseParagraphStyle(cssStyleAttr)
+                                var cssParaStyle = CssStyleParser.parseParagraphStyle(cssStyleAttr)
+                                if (cssParaStyle == null && BLOCK_TAGS.contains(tagName) && cssSpanStyle.fontSize.isSpecified) {
+                                    val fontSize = cssSpanStyle.fontSize
+                                    val computedLineHeight = if (fontSize.isSp) (fontSize.value * 1.3f).sp else if (fontSize.isEm) (fontSize.value * 1.3f).em else TextUnit.Unspecified
+                                    if (computedLineHeight.isSpecified) {
+                                        cssParaStyle = ParagraphStyle(lineHeight = computedLineHeight)
+                                    }
+                                }
                                 if (cssParaStyle != null) {
                                     paragraphStyle = paragraphStyle?.merge(cssParaStyle) ?: cssParaStyle
                                 }
@@ -235,6 +246,18 @@ internal object HtmlParser {
         }
 
         return Pair(tagName, attributes)
+    }
+
+    private fun getBuiltInParagraphStyle(tagName: String): ParagraphStyle? {
+        return when (tagName) {
+            "h1" -> ParagraphStyle(lineHeight = 2.5.em)
+            "h2" -> ParagraphStyle(lineHeight = 1.9.em)
+            "h3" -> ParagraphStyle(lineHeight = 1.5.em)
+            "h4" -> ParagraphStyle(lineHeight = 1.3.em)
+            "h5" -> ParagraphStyle(lineHeight = 1.1.em)
+            "h6" -> ParagraphStyle(lineHeight = 0.9.em)
+            else -> null
+        }
     }
 
     private fun getBuiltInTagStyle(tagName: String, attributes: Map<String, String>): SpanStyle? {
