@@ -6,6 +6,7 @@ import androidx.compose.ui.text.font.FontFamily
 import androidx.compose.ui.text.font.FontStyle
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextDecoration
+import androidx.compose.ui.unit.em
 import androidx.compose.ui.unit.sp
 import org.junit.Assert.assertEquals
 import org.junit.Assert.assertNotNull
@@ -15,25 +16,25 @@ class HtmlTextHelperTest {
 
     @Test
     fun `parseCssColor parses named colors correctly`() {
-        assertEquals(Color(0xFFFF0000), HtmlTextHelper.parseCssColor("red"))
-        assertEquals(Color(0xFF00FF00), HtmlTextHelper.parseCssColor("lime"))
-        assertEquals(Color(0xFF0000FF), HtmlTextHelper.parseCssColor("blue"))
-        assertEquals(Color(0xFF000000), HtmlTextHelper.parseCssColor("black"))
-        assertEquals(Color(0xFFFFFFFF), HtmlTextHelper.parseCssColor("white"))
-        assertEquals(Color.Transparent, HtmlTextHelper.parseCssColor("transparent"))
+        assertEquals(Color(0xFFFF0000), HtmlTextHelper.parseCssColor("red") as Any)
+        assertEquals(Color(0xFF00FF00), HtmlTextHelper.parseCssColor("lime") as Any)
+        assertEquals(Color(0xFF0000FF), HtmlTextHelper.parseCssColor("blue") as Any)
+        assertEquals(Color(0xFF000000), HtmlTextHelper.parseCssColor("black") as Any)
+        assertEquals(Color(0xFFFFFFFF), HtmlTextHelper.parseCssColor("white") as Any)
+        assertEquals(Color.Transparent, HtmlTextHelper.parseCssColor("transparent") as Any)
     }
 
     @Test
     fun `parseCssColor parses hex colors correctly`() {
-        assertEquals(Color(0xFFFF0000), HtmlTextHelper.parseCssColor("#f00"))
-        assertEquals(Color(0xFFFF0000), HtmlTextHelper.parseCssColor("#ff0000"))
-        assertEquals(Color(0x80FF0000), HtmlTextHelper.parseCssColor("#ff000080"))
+        assertEquals(Color(0xFFFF0000), HtmlTextHelper.parseCssColor("#f00") as Any)
+        assertEquals(Color(0xFFFF0000), HtmlTextHelper.parseCssColor("#ff0000") as Any)
+        assertEquals(Color(0x80FF0000), HtmlTextHelper.parseCssColor("#ff000080") as Any)
     }
 
     @Test
     fun `parseCssColor parses rgb and rgba colors correctly`() {
-        assertEquals(Color(red = 255, green = 0, blue = 0, alpha = 255), HtmlTextHelper.parseCssColor("rgb(255, 0, 0)"))
-        assertEquals(Color(red = 0, green = 128, blue = 255, alpha = 127), HtmlTextHelper.parseCssColor("rgba(0, 128, 255, 0.5)"))
+        assertEquals(Color(red = 255, green = 0, blue = 0, alpha = 255), HtmlTextHelper.parseCssColor("rgb(255, 0, 0)") as Any)
+        assertEquals(Color(red = 0, green = 128, blue = 255, alpha = 127), HtmlTextHelper.parseCssColor("rgba(0, 128, 255, 0.5)") as Any)
     }
 
     @Test
@@ -42,7 +43,7 @@ class HtmlTextHelperTest {
         val spanStyle = HtmlTextHelper.parseCssStyle(css)
 
         assertEquals(FontWeight.Bold, spanStyle.fontWeight)
-        assertEquals(FontStyle.Italic, spanStyle.fontStyle)
+        assertEquals(FontStyle.Italic, spanStyle.fontStyle as Any)
         assertEquals(TextDecoration.Underline, spanStyle.textDecoration)
     }
 
@@ -71,7 +72,7 @@ class HtmlTextHelperTest {
         assertEquals(11, styles[0].end)
 
         // "Compose" -> italic
-        assertEquals(FontStyle.Italic, styles[1].item.fontStyle)
+        assertEquals(FontStyle.Italic, styles[1].item.fontStyle as Any)
         assertEquals(16, styles[1].start)
         assertEquals(23, styles[1].end)
     }
@@ -133,7 +134,7 @@ class HtmlTextHelperTest {
         val styles = annotatedString.spanStyles
         assertEquals(1, styles.size)
         assertEquals(20.sp, styles[0].item.fontSize)
-        assertEquals(Color.Red, styles[0].item.color)
+        assertEquals(Color.Red, styles[0].item.color as Any)
     }
 
     @Test
@@ -143,5 +144,30 @@ class HtmlTextHelperTest {
 
         val styles = annotatedString.spanStyles
         assertNotNull(styles.find { it.item.color == Color(0xFF00FF00) })
+    }
+
+    @Test
+    fun `parseHtml applies correct heading line height in ParagraphStyle`() {
+        val html = "<h1>Heading 1</h1><h2>Heading 2</h2>"
+        val annotatedString = HtmlTextHelper.parseHtml(html)
+
+        val paragraphs = annotatedString.paragraphStyles
+        assertEquals(2, paragraphs.size)
+
+        // h1 -> 2.5.em line height
+        assertEquals(2.5.em, paragraphs[0].item.lineHeight)
+
+        // h2 -> 1.9.em line height
+        assertEquals(1.9.em, paragraphs[1].item.lineHeight)
+    }
+
+    @Test
+    fun `parseHtml applies proportional line height for inline CSS font size`() {
+        val html = "<p style=\"font-size: 30sp;\">Large Paragraph</p>"
+        val annotatedString = HtmlTextHelper.parseHtml(html)
+
+        val paragraphs = annotatedString.paragraphStyles
+        assertEquals(1, paragraphs.size)
+        assertEquals(39.sp, paragraphs[0].item.lineHeight)
     }
 }
