@@ -187,13 +187,13 @@ internal object HtmlParser {
         val index = tagStack.indexOfLast { it.name == tagName }
         if (index != -1) {
             val openTag = tagStack.removeAt(index)
+            if (BLOCK_TAGS.contains(tagName) && debug) {
+                appendParagraphEnd(builder)
+            }
             val endPos = builder.length
             applyOpenTag(openTag, endPos, builder, tagStyles, defaultLinkStyle, onLinkClick)
 
             if (BLOCK_TAGS.contains(tagName)) {
-                if (debug) {
-                    appendParagraphEnd(builder)
-                }
                 ensureNewline(builder)
             }
         }
@@ -293,9 +293,9 @@ internal object HtmlParser {
 
     private fun getBuiltInParagraphStyle(tagName: String): ParagraphStyle? {
         return when (tagName) {
-            "h1" -> ParagraphStyle(lineHeight = 2.5.em)
-            "h2" -> ParagraphStyle(lineHeight = 1.9.em)
-            "h3" -> ParagraphStyle(lineHeight = 1.5.em)
+            "h1" -> ParagraphStyle(lineHeight = 2.6.em)
+            "h2" -> ParagraphStyle(lineHeight = 1.95.em)
+            "h3" -> ParagraphStyle(lineHeight = 1.52.em)
             "h4" -> ParagraphStyle(lineHeight = 1.3.em)
             "h5" -> ParagraphStyle(lineHeight = 1.1.em)
             "h6" -> ParagraphStyle(lineHeight = 0.9.em)

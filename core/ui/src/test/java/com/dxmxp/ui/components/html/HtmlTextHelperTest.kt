@@ -155,11 +155,11 @@ class HtmlTextHelperTest {
         val paragraphs = annotatedString.paragraphStyles
         assertEquals(2, paragraphs.size)
 
-        // h1 -> 2.5.em line height
-        assertEquals(2.5.em, paragraphs[0].item.lineHeight)
+        // h1 -> 2.6.em line height (2.0.em font size * 1.3)
+        assertEquals(2.6.em, paragraphs[0].item.lineHeight)
 
-        // h2 -> 1.9.em line height
-        assertEquals(1.9.em, paragraphs[1].item.lineHeight)
+        // h2 -> 1.95.em line height (1.5.em font size * 1.3)
+        assertEquals(1.95.em, paragraphs[1].item.lineHeight)
     }
 
     @Test

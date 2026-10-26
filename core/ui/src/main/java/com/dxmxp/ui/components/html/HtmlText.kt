@@ -1,6 +1,7 @@
 package com.dxmxp.ui.components.html
 
 import androidx.compose.foundation.border
+import androidx.compose.foundation.isSystemInDarkTheme
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.shape.RoundedCornerShape
@@ -40,7 +41,7 @@ import com.dxmxp.ui.theme.SeedTheme
  * @param debug Debug flag for visualizing paragraph endings (`¶`) and element bounding boxes. Defaults to [LocalHtmlDebug.current].
  * @param style Base text style
  * @param color Text color
- * @param linkColor Color applied to HTML links
+ * @param linkColor Color applied to HTML links. Defaults to accessible link blue in Light/Dark themes.
  * @param linkTextDecoration Text decoration applied to HTML links
  * @param onLinkClick Callback invoked when an HTML link is clicked. If null, opens URI via [LocalUriHandler].
  * @param softWrap Whether text should break at soft line breaks
@@ -56,7 +57,7 @@ fun HtmlText(
     debug: Boolean = LocalHtmlDebug.current,
     style: TextStyle = LocalTextStyle.current,
     color: Color = Color.Unspecified,
-    linkColor: Color = MaterialTheme.colorScheme.primary,
+    linkColor: Color = Color.Unspecified,
     linkTextDecoration: TextDecoration = TextDecoration.Underline,
     onLinkClick: ((String) -> Unit)? = null,
     softWrap: Boolean = true,
@@ -69,8 +70,19 @@ fun HtmlText(
         runCatching { uriHandler.openUri(url) }
     }
 
-    val defaultLinkStyle = remember(linkColor, linkTextDecoration) {
-        SpanStyle(color = linkColor, textDecoration = linkTextDecoration)
+    val isDark = isSystemInDarkTheme()
+    val effectiveLinkColor = remember(linkColor, isDark) {
+        if (linkColor != Color.Unspecified) {
+            linkColor
+        } else if (isDark) {
+            Color(0xFF8AB4F8) // Accessible bright link blue for Dark Theme
+        } else {
+            Color(0xFF0B57D0) // Accessible deep link blue for Light Theme
+        }
+    }
+
+    val defaultLinkStyle = remember(effectiveLinkColor, linkTextDecoration) {
+        SpanStyle(color = effectiveLinkColor, textDecoration = linkTextDecoration)
     }
 
     val annotatedString = remember(html, tagStyles, defaultLinkStyle, debug) {
