@@ -173,11 +173,9 @@ class HtmlTextHelperTest {
     }
 
     @Test
-    fun `parseHtml renders debug paragraph ends and element box tints when debugMode is enabled`() {
+    fun `parseHtml renders debug paragraph ends and element box tints when debug is enabled`() {
         val html = "<p>Line 1</p><p>Line 2</p>"
-        val debugConfig = HtmlDebugConfig(enabled = true, showParagraphEnds = true, showElementBoxes = true)
-
-        val annotatedString = HtmlTextHelper.parseHtml(html, debugConfig = debugConfig)
+        val annotatedString = HtmlTextHelper.parseHtml(html, debug = true)
 
         // Verify pilcrow symbol '¶' is rendered in the text
         assertTrue(annotatedString.text.contains("¶"))

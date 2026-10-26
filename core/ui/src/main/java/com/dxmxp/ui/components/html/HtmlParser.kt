@@ -38,7 +38,7 @@ internal object HtmlParser {
         tagStyles: HtmlTagStyles? = null,
         defaultLinkStyle: SpanStyle? = null,
         onLinkClick: ((String) -> Unit)? = null,
-        debugConfig: HtmlDebugConfig? = null
+        debug: Boolean = false
     ): AnnotatedString {
         if (html.isEmpty()) return AnnotatedString("")
 
@@ -68,7 +68,7 @@ internal object HtmlParser {
                     if (tagContent.startsWith("/")) {
                         // Closing tag
                         val tagName = tagContent.substring(1).trim().lowercase()
-                        closeTag(tagName, builder, tagStack, tagStyles, defaultLinkStyle, onLinkClick, debugConfig)
+                        closeTag(tagName, builder, tagStack, tagStyles, defaultLinkStyle, onLinkClick, debug)
                     } else {
                         // Opening or self-closing tag
                         val isSelfClosing = tagContent.endsWith("/")
@@ -104,7 +104,7 @@ internal object HtmlParser {
                             }
 
                             // Process debug element bounding box tints if enabled
-                            if (debugConfig?.enabled == true && debugConfig.showElementBoxes) {
+                            if (debug) {
                                 val debugBoxColor = getDebugBoxColor(tagName)
                                 if (debugBoxColor != Color.Unspecified) {
                                     val debugSpanStyle = SpanStyle(background = debugBoxColor)
@@ -182,7 +182,7 @@ internal object HtmlParser {
         tagStyles: HtmlTagStyles?,
         defaultLinkStyle: SpanStyle?,
         onLinkClick: ((String) -> Unit)?,
-        debugConfig: HtmlDebugConfig?
+        debug: Boolean
     ) {
         val index = tagStack.indexOfLast { it.name == tagName }
         if (index != -1) {
@@ -191,8 +191,8 @@ internal object HtmlParser {
             applyOpenTag(openTag, endPos, builder, tagStyles, defaultLinkStyle, onLinkClick)
 
             if (BLOCK_TAGS.contains(tagName)) {
-                if (debugConfig?.enabled == true && debugConfig.showParagraphEnds) {
-                    appendParagraphEnd(builder, debugConfig)
+                if (debug) {
+                    appendParagraphEnd(builder)
                 }
                 ensureNewline(builder)
             }
@@ -236,12 +236,9 @@ internal object HtmlParser {
         }
     }
 
-    private fun appendParagraphEnd(
-        builder: AnnotatedString.Builder,
-        debugConfig: HtmlDebugConfig
-    ) {
+    private fun appendParagraphEnd(builder: AnnotatedString.Builder) {
         val start = builder.length
-        builder.append(debugConfig.paragraphEndSymbol)
+        builder.append("¶")
         val end = builder.length
         builder.addStyle(
             SpanStyle(

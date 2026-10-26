@@ -32,12 +32,12 @@ import com.dxmxp.ui.theme.SeedTheme
  * - Dynamic tag resolution via [HtmlTagStyles.tagResolver] for arbitrary HTML tags at runtime
  * - Link rendering (`<a href="...">`) with configurable click handling via [onLinkClick]
  * - Inline CSS styles (`style="color: red; font-weight: bold; background-color: yellow; font-size: 16sp;"`)
- * - Debug mode inspection via [debugConfig] or [LocalHtmlDebugConfig] to visualize carriage returns (`↵`) and element bounding boxes
+ * - Debug mode inspection via [debug] flag or [LocalHtmlDebug] to visualize paragraph endings (`¶`) and element bounding boxes
  *
  * @param html The HTML formatted string to render
  * @param modifier Composable modifier
  * @param tagStyles Optional mapping of HTML tags to design system typography tokens. Defaults to [LocalHtmlTagStyles.current].
- * @param debugConfig Debug configuration for visualizing line breaks and element bounding boxes. Defaults to [LocalHtmlDebugConfig.current].
+ * @param debug Debug flag for visualizing paragraph endings (`¶`) and element bounding boxes. Defaults to [LocalHtmlDebug.current].
  * @param style Base text style
  * @param color Text color
  * @param linkColor Color applied to HTML links
@@ -53,7 +53,7 @@ fun HtmlText(
     html: String,
     modifier: Modifier = Modifier,
     tagStyles: HtmlTagStyles? = LocalHtmlTagStyles.current,
-    debugConfig: HtmlDebugConfig = LocalHtmlDebugConfig.current,
+    debug: Boolean = LocalHtmlDebug.current,
     style: TextStyle = LocalTextStyle.current,
     color: Color = Color.Unspecified,
     linkColor: Color = MaterialTheme.colorScheme.primary,
@@ -73,17 +73,17 @@ fun HtmlText(
         SpanStyle(color = linkColor, textDecoration = linkTextDecoration)
     }
 
-    val annotatedString = remember(html, tagStyles, defaultLinkStyle, debugConfig) {
+    val annotatedString = remember(html, tagStyles, defaultLinkStyle, debug) {
         HtmlTextHelper.parseHtml(
             html = html,
             tagStyles = tagStyles,
             defaultLinkStyle = defaultLinkStyle,
             onLinkClick = effectiveOnLinkClick,
-            debugConfig = debugConfig
+            debug = debug
         )
     }
 
-    val effectiveModifier = if (debugConfig.enabled && debugConfig.showContainerBorder) {
+    val effectiveModifier = if (debug) {
         modifier.border(
             width = 1.dp,
             color = Color(0xFFE91E63), // Debug magenta/pink border
@@ -131,18 +131,14 @@ private fun HtmlTextDebugPreview() {
     SeedTheme {
         Surface {
             Column(modifier = Modifier.padding(16.dp)) {
-                // Vista en modo Debug: inspección de retornos de carro (↵), cajas de elementos y contenedor
+                // Vista en modo Debug simple mediante el flag `debug = true`
                 HtmlText(
                     html = """
                         <h1>Encabezado H1 en Debug</h1>
                         <p>Párrafo con <b>negrita</b>, <i>cursiva</i> y <a href="#">enlace</a>.</p>
                         <code>val x = 42</code>
                     """.trimIndent(),
-                    debugConfig = HtmlDebugConfig(
-                        enabled = true,
-                        showElementBoxes = true,
-                        showContainerBorder = true
-                    )
+                    debug = true
                 )
             }
         }

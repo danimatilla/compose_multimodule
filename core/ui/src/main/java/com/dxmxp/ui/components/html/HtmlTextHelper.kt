@@ -17,16 +17,16 @@ object HtmlTextHelper {
      * @param tagStyles Optional mapping of HTML tags to design system tokens (e.g., h1 -> TitleXL)
      * @param defaultLinkStyle Optional default style applied to <a> tags if not overridden by tagStyles
      * @param onLinkClick Callback invoked when a link is clicked
-     * @param debugConfig Optional debug configuration for visualizing carriage returns and element boxes
+     * @param debug Flag to enable debug visualization (pilcrow symbol ¶, element boxes, etc.)
      */
     fun parseHtml(
         html: String,
         tagStyles: HtmlTagStyles? = null,
         defaultLinkStyle: SpanStyle? = null,
         onLinkClick: ((String) -> Unit)? = null,
-        debugConfig: HtmlDebugConfig? = null
+        debug: Boolean = false
     ): AnnotatedString {
-        return HtmlParser.parse(html, tagStyles, defaultLinkStyle, onLinkClick, debugConfig)
+        return HtmlParser.parse(html, tagStyles, defaultLinkStyle, onLinkClick, debug)
     }
 
     /**
@@ -51,7 +51,7 @@ fun String.parseHtml(
     tagStyles: HtmlTagStyles? = null,
     defaultLinkStyle: SpanStyle? = null,
     onLinkClick: ((String) -> Unit)? = null,
-    debugConfig: HtmlDebugConfig? = null
+    debug: Boolean = false
 ): AnnotatedString {
-    return HtmlTextHelper.parseHtml(this, tagStyles, defaultLinkStyle, onLinkClick, debugConfig)
+    return HtmlTextHelper.parseHtml(this, tagStyles, defaultLinkStyle, onLinkClick, debug)
 }
