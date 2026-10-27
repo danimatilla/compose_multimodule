@@ -130,7 +130,7 @@ val storyDetail: StoryDetail? = uri.parseRoute<StoryDetail>()
 
 ## 🏗 Modularization Strategy
 - `:core:navigation`: Core interfaces, Navigator, and Registry.
-- `:core:ui`: Design System and common UI components.
+- `:core:ui`: Design System, common UI components, and native HTML rendering (`HtmlText` with `HtmlTagStyles`, inline CSS, link interception, and debug inspection mode).
 - `:core:domain` / `:core:data`: Business logic and Repositories.
 - `:feature:stories`: Feature module. Defines its own graph and internal routes.
 - `:seed`: App module. Integrates all features and defines the Root flow.

@@ -25,25 +25,21 @@ import androidx.compose.ui.unit.dp
 import com.dxmxp.ui.theme.SeedTheme
 
 /**
- * A Jetpack Compose component for displaying HTML formatted text.
+ * A Jetpack Compose component for displaying HTML formatted text with unified configuration.
  *
  * Supports:
  * - HTML Tags (`<b>`, `<i>`, `<u>`, `<s>`, `<h1>`-`<h6>`, `<p>`, `<br>`, `<font>`, `<code>`, `<sub>`, `<sup>`, `<small>`, `<big>`, `<ul>`, `<ol>`, `<li>`, etc.) with default HTML styling out-of-the-box
- * - External tag-to-design-token configuration via [LocalHtmlTagStyles] or explicit [tagStyles]
- * - Dynamic tag resolution via [HtmlTagStyles.tagResolver] for arbitrary HTML tags at runtime
- * - Link rendering (`<a href="...">`) with configurable click handling via [onLinkClick]
+ * - Unified configuration via [HtmlConfig] or CompositionLocals ([LocalHtmlTagStyles], [LocalHtmlDebug])
+ * - Dynamic tag resolution via [HtmlTagStyles.tagResolver]
+ * - Link rendering (`<a href="...">`) with configurable click handling
  * - Inline CSS styles (`style="color: red; font-weight: bold; background-color: yellow; font-size: 16sp;"`)
- * - Debug mode inspection via [debug] flag or [LocalHtmlDebug] to visualize paragraph endings (`¶`) and element bounding boxes
+ * - Debug mode inspection to visualize paragraph endings (`¶`) and element bounding boxes
  *
  * @param html The HTML formatted string to render
  * @param modifier Composable modifier
- * @param tagStyles Optional mapping of HTML tags to design system typography tokens. Defaults to [LocalHtmlTagStyles.current].
- * @param debug Debug flag for visualizing paragraph endings (`¶`) and element bounding boxes. Defaults to [LocalHtmlDebug.current].
+ * @param config Unified configuration for tag styles, link callbacks, and debug mode
  * @param style Base text style
  * @param color Text color
- * @param linkColor Color applied to HTML links. Defaults to accessible link blue in Light/Dark themes.
- * @param linkTextDecoration Text decoration applied to HTML links
- * @param onLinkClick Callback invoked when an HTML link is clicked. If null, opens URI via [LocalUriHandler].
  * @param softWrap Whether text should break at soft line breaks
  * @param overflow How visual overflow should be handled
  * @param maxLines Maximum number of lines to display
@@ -53,36 +49,25 @@ import com.dxmxp.ui.theme.SeedTheme
 fun HtmlText(
     html: String,
     modifier: Modifier = Modifier,
-    tagStyles: HtmlTagStyles? = LocalHtmlTagStyles.current,
-    debug: Boolean = LocalHtmlDebug.current,
+    config: HtmlConfig? = null,
     style: TextStyle = LocalTextStyle.current,
     color: Color = Color.Unspecified,
-    linkColor: Color = Color.Unspecified,
-    linkTextDecoration: TextDecoration = TextDecoration.Underline,
-    onLinkClick: ((String) -> Unit)? = null,
     softWrap: Boolean = true,
     overflow: TextOverflow = TextOverflow.Clip,
     maxLines: Int = Int.MAX_VALUE,
     onTextLayout: ((TextLayoutResult) -> Unit)? = null
 ) {
     val uriHandler = LocalUriHandler.current
-    val effectiveOnLinkClick: (String) -> Unit = onLinkClick ?: { url ->
+    val tagStyles = config?.tagStyles ?: LocalHtmlTagStyles.current
+    val debug = config?.debug ?: LocalHtmlDebug.current
+    val effectiveOnLinkClick: (String) -> Unit = config?.onLinkClick ?: { url ->
         runCatching { uriHandler.openUri(url) }
     }
 
     val isDark = isSystemInDarkTheme()
-    val effectiveLinkColor = remember(linkColor, isDark) {
-        if (linkColor != Color.Unspecified) {
-            linkColor
-        } else if (isDark) {
-            Color(0xFF8AB4F8) // Accessible bright link blue for Dark Theme
-        } else {
-            Color(0xFF0B57D0) // Accessible deep link blue for Light Theme
-        }
-    }
-
-    val defaultLinkStyle = remember(effectiveLinkColor, linkTextDecoration) {
-        SpanStyle(color = effectiveLinkColor, textDecoration = linkTextDecoration)
+    val defaultLinkColor = if (isDark) Color(0xFF8AB4F8) else Color(0xFF0B57D0)
+    val defaultLinkStyle = remember(defaultLinkColor) {
+        SpanStyle(color = defaultLinkColor, textDecoration = TextDecoration.Underline)
     }
 
     val annotatedString = remember(html, tagStyles, defaultLinkStyle, debug) {
@@ -98,7 +83,7 @@ fun HtmlText(
     val effectiveModifier = if (debug) {
         modifier.border(
             width = 1.dp,
-            color = Color(0xFFE91E63), // Debug magenta/pink border
+            color = Color(0xFFE91E63),
             shape = RoundedCornerShape(2.dp)
         )
     } else {
@@ -116,6 +101,33 @@ fun HtmlText(
         onTextLayout = onTextLayout ?: {}
     )
 }
+
+/**
+ * Convenience overload for [HtmlText] accepting an inline link click callback and debug flag.
+ */
+@Composable
+fun HtmlText(
+    html: String,
+    modifier: Modifier = Modifier,
+    onLinkClick: ((String) -> Unit)?,
+    style: TextStyle = LocalTextStyle.current,
+    color: Color = Color.Unspecified,
+    debug: Boolean = LocalHtmlDebug.current,
+    softWrap: Boolean = true,
+    overflow: TextOverflow = TextOverflow.Clip,
+    maxLines: Int = Int.MAX_VALUE,
+    onTextLayout: ((TextLayoutResult) -> Unit)? = null
+) = HtmlText(
+    html = html,
+    modifier = modifier,
+    config = HtmlConfig(onLinkClick = onLinkClick, debug = debug),
+    style = style,
+    color = color,
+    softWrap = softWrap,
+    overflow = overflow,
+    maxLines = maxLines,
+    onTextLayout = onTextLayout
+)
 
 @PreviewLightDark
 @Composable
@@ -143,14 +155,14 @@ private fun HtmlTextDebugPreview() {
     SeedTheme {
         Surface {
             Column(modifier = Modifier.padding(16.dp)) {
-                // Vista en modo Debug simple mediante el flag `debug = true`
+                // Vista en modo Debug unificado mediante HtmlConfig
                 HtmlText(
                     html = """
                         <h1>Encabezado H1 en Debug</h1>
                         <p>Párrafo con <b>negrita</b>, <i>cursiva</i> y <a href="#">enlace</a>.</p>
                         <code>val x = 42</code>
                     """.trimIndent(),
-                    debug = true
+                    config = HtmlConfig(debug = true)
                 )
             }
         }
