@@ -4,6 +4,32 @@ import android.util.Log
 import com.dxmxp.navigation.core.RouteRegistry
 import com.dxmxp.navigation.model.Graph
 import com.dxmxp.navigation.model.Route
+import kotlin.reflect.KClass
+import kotlin.reflect.full.primaryConstructor
+
+/**
+ * Icon associations and legend symbols used in the RouteTreeLogger representation.
+ */
+enum class RouteTreeIcon(val emoji: String, val description: String) {
+    GRAPH("📕", "Graph"),
+    STATIC_SCREEN("📃", "Static Screen"),
+    DYNAMIC_SCREEN("📜", "Dynamic Screen"),
+    REQUIRE_AUTH("🔒", "Require Auth"),
+    NO_BOTTOM_BAR("❌", "No MainBottomBar"),
+    MODAL("Ⓜ️", "Modal");
+
+    override fun toString(): String = emoji
+
+    companion object {
+        /**
+         * Builds the two-line legend for the route tree logger output.
+         */
+        fun buildLegend(): String {
+            return "${GRAPH.emoji}: ${GRAPH.description}; ${STATIC_SCREEN.emoji}: ${STATIC_SCREEN.description}; ${DYNAMIC_SCREEN.emoji}: ${DYNAMIC_SCREEN.description}\n" +
+                   "${REQUIRE_AUTH.emoji}: ${REQUIRE_AUTH.description}; ${NO_BOTTOM_BAR.emoji}: ${NO_BOTTOM_BAR.description}; ${MODAL.emoji}: ${MODAL.description}"
+        }
+    }
+}
 
 /**
  * Standalone utility to build and log the hierarchical route tree and nested graphs.
@@ -64,6 +90,7 @@ object RouteTreeLogger {
 
         val sb = StringBuilder()
         sb.append("\nNavigation Route Tree:\n")
+        sb.append(RouteTreeIcon.buildLegend()).append("\n")
         sb.append("======================\n")
 
         val rootList = roots.toList()
@@ -147,11 +174,17 @@ object RouteTreeLogger {
         availableNestedGraphs: Set<Graph>,
     ) {
         val isModal = Route.isModal(graph)
-        val modalTag = if (isModal) " | Modal" else ""
-        val botomBarTag = if (!graph.showMainBottomBar) " | ❌ MainBottomBar" else ""
+        val modalTag = if (isModal) "${RouteTreeIcon.MODAL}" else ""
+        val bottomBarTag = if (!graph.showMainBottomBar) "${RouteTreeIcon.NO_BOTTOM_BAR}" else ""
         val graphName = graph::class.java.simpleName.ifBlank { "Graph" }
+        val authTag = if (graph.requiresAuth) "${RouteTreeIcon.REQUIRE_AUTH}" else ""
+        val legends = listOf(authTag, bottomBarTag, modalTag)
+            .filter { it.isNotEmpty() }
+            .takeIf { it.isNotEmpty() }
+            ?.joinToString(separator = "|", prefix = "[", postfix = "]")
+            .orEmpty()
 
-        sb.append("${prefix}📕 $graphName [${graph.route}] :: ${if (graph.requiresAuth) "🔒" else "🔓"}$botomBarTag$modalTag\n")
+        sb.append("${prefix}${RouteTreeIcon.GRAPH} $graphName :: ${graph.route} $legends\n")
 
         val staticScreens = graph.staticRoutes()
             .map { it.route }
@@ -167,7 +200,7 @@ object RouteTreeLogger {
 
         childIndex = appendStaticScreens(sb, staticScreens, indent, childIndex, totalChildrenCount)
         childIndex =
-            appendDynamicPatterns(sb, dynamicPatterns, indent, childIndex, totalChildrenCount)
+            appendDynamicPatterns(sb, graph, dynamicPatterns, indent, childIndex, totalChildrenCount)
         appendNestedGraphs(
             sb,
             nestedForThisGraph,
@@ -191,15 +224,21 @@ object RouteTreeLogger {
             val isLastChild = currentIndex == totalChildrenCount
             val screenPrefix = if (isLastChild) "└── " else "├── "
             val screenName = screen::class.java.simpleName.ifBlank { "Screen" }
-            val screenModalTag = if (Route.isModal(screen)) " :: Modal" else ""
+            val modalTag = if (Route.isModal(screen)) "${RouteTreeIcon.MODAL}" else ""
+            val legends = listOf(modalTag)
+                .filter { it.isNotEmpty() }
+                .takeIf { it.isNotEmpty() }
+                ?.joinToString(separator = "|", prefix = "[", postfix = "]")
+                .orEmpty()
 
-            sb.append("$indent$screenPrefix📃 $screenName [${screen.route}]$screenModalTag\n")
+            sb.append("$indent$screenPrefix${RouteTreeIcon.STATIC_SCREEN} $screenName :: ${screen.route} $legends\n")
         }
         return currentIndex
     }
 
     private fun appendDynamicPatterns(
         sb: StringBuilder,
+        graph: Graph,
         dynamicPatterns: List<String>,
         indent: String,
         startIndex: Int,
@@ -210,10 +249,46 @@ object RouteTreeLogger {
             currentIndex++
             val isLastChild = currentIndex == totalChildrenCount
             val patternPrefix = if (isLastChild) "└── " else "├── "
+            val screenName = resolvePatternScreenName(graph, pattern)
 
-            sb.append("$indent$patternPrefix📜 Pattern: $pattern\n")
+            sb.append("$indent$patternPrefix${RouteTreeIcon.DYNAMIC_SCREEN} $screenName :: $pattern\n")
         }
         return currentIndex
+    }
+
+    private fun resolvePatternScreenName(graph: Graph, pattern: String): String {
+        val staticClasses = graph.staticRoutes().map { it.route::class.java }.toSet()
+        val nestedClasses = graph::class.java.declaredClasses
+
+        val matchingClass = nestedClasses.find { clazz ->
+            Route::class.java.isAssignableFrom(clazz) && clazz !in staticClasses
+        } ?: nestedClasses.find { Route::class.java.isAssignableFrom(it) }
+
+        if (matchingClass != null) {
+            val name = matchingClass.simpleName
+            if (name.isNotBlank()) {
+                val paramsString = extractConstructorParameters(matchingClass)
+                return if (paramsString.isNotBlank()) "$name($paramsString)" else name
+            }
+        }
+
+        val lastSegment = pattern.trimEnd('/').substringAfterLast('/')
+        return lastSegment.replaceFirstChar { if (it.isLowerCase()) it.titlecase() else it.toString() }
+    }
+
+    private fun extractConstructorParameters(clazz: Class<*>): String {
+        return try {
+            val kClass = clazz.kotlin
+            val primaryConstructor = kClass.primaryConstructor ?: return ""
+            primaryConstructor.parameters.joinToString(", ") { param ->
+                val paramName = param.name ?: "arg"
+                val typeName = (param.type.classifier as? KClass<*>)?.simpleName ?: "Any"
+                val optionalSuffix = if (param.isOptional) "?" else ""
+                "$paramName: $typeName$optionalSuffix"
+            }
+        } catch (_: Throwable) {
+            ""
+        }
     }
 
     private fun appendNestedGraphs(
