@@ -1,5 +1,6 @@
 package com.dxmxp.seed.navigation.di
 
+import com.dxmxp.domain.base.Logger
 import com.dxmxp.navigation.core.RouteRegistry
 import com.dxmxp.navigation.di.NavigationModule
 import com.dxmxp.navigation.model.Graph
@@ -33,7 +34,10 @@ object AppNavigationModule : NavigationModule {
 
     @Provides
     @Singleton
-    fun provideRouteRegistry(): RouteRegistry = RouteRegistry(graphs())
+    fun provideRouteRegistry(logger: Logger): RouteRegistry = RouteRegistry(
+        graphs = graphs(),
+        logPrinter = { tag, message -> logger.d(tag, message) }
+    )
 
     @Provides
     @Singleton

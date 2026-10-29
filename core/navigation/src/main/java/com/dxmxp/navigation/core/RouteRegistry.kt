@@ -12,6 +12,7 @@ import com.dxmxp.navigation.model.Route
  */
 class RouteRegistry(
     private val graphs: Set<Graph>,
+    logPrinter: ((tag: String, message: String) -> Unit)? = null,
 ) {
     /**
      * Finds the graph that contains the given route.
@@ -57,6 +58,7 @@ class RouteRegistry(
         graphs.forEach { graph ->
             routeCreators.putAll(graph.dynamicRoutePatterns())
         }
+        com.dxmxp.navigation.utils.RouteTreeLogger.log(graphs, logPrinter)
     }
 
     /**
