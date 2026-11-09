@@ -1,245 +1,101 @@
-# Auditoría del proyecto compose_multimodule
+# Auditoría de Arquitectura del Proyecto `compose_multimodule` (Arquetipo Base)
 
-## 1. Resumen ejecutivo
+## 1. Resumen Ejecutivo
 
-El proyecto tiene una base arquitectónica sólida y bien pensada para una aplicación Android modular con Jetpack Compose. La separación por módulos, la navegación centralizada y la estructura base de ViewModels son puntos fuertes.
+El proyecto **`compose_multimodule`** es un **Arquetipo de Arquitectura Multi-módulo para Android** diseñado como plantilla/starter kit de nivel de producción utilizando Jetpack Compose, Navigation 3, Hilt y Clean Architecture.
 
-Sin embargo, aún hay varios elementos incompletos o frágiles que deberían resolverse antes de considerarlo una base lista para producción.
+Como **arquetipo base**, su objetivo no es ser un producto final para el usuario final, sino ofrecer una **base técnica sólida, escalable, mantenible y tipada** sobre la cual construir aplicaciones Android enterprise o de gran escala.
 
-## 2. Fortalezas
-
-### 2.1 Modularización clara
-
-El proyecto está bien dividido en módulos:
-
-- `:seed`
-- `:core:navigation`
-- `:core:ui`
-- `:core:domain`
-- `:core:data`
-- `:feature:stories`
-
-Esto facilita:
-
-- escalabilidad
-- aislamiento de responsabilidades
-- reutilización
-- pruebas por capas
-
-### 2.2 Arquitectura de navegación robusta
-
-La capa `:core:navigation` cuenta con:
-
-- `Route`
-- `Graph`
-- `Screen`
-- `Navigator`
-- `RouteRegistry`
-- `DeepLinkRouter`
-
-Esto da una base muy buena para navegación tipada, nested stacks y deep links.
-
-### 2.3 Uso de patrones modernos
-
-Se usa:
-
-- Jetpack Compose
-- Navigation 3
-- Hilt
-- Kotlin Serialization
-- ViewModel con patrón `State / Event / Effect`
-- arquitectura de Screens con `Content`
-
-Todo esto está alineado con enfoques modernos de Android.
-
-### 2.4 Pruebas de arquitectura
-
-Se han añadido tests con Konsist para validar:
-
-- estructura de ViewModels
-- patrón de Screens
-- orden de `State`, `Event`, `Effect`
-
-Esto ayuda a mantener consistencia y calidad.
+La auditoría confirma que la base arquitectónica es de un nivel excelente: la separación en capas (`core:navigation`, `core:ui`, `core:domain`, `core:data`), la navegación tipada desacoplada con Navigation 3, el patrón de UI `State/Event/Effect`, y la validación automatizada mediante tests de gobernanza arquitectónica (Konsist) convierten este arquetipo en una plantilla sumamente robusta.
 
 ---
 
-## 3. Hallazgos relevantes
+## 2. Fortalezas Arquitectónicas
 
-### 3.1 Ruta de perfil de Stories sin implementación real
+### 2.1 Modularización y Separación de Responsabilidades
 
-En `StoriesGraph` existe una ruta llamada `Profile`, pero su registro es un placeholder:
+El proyecto cuenta con una división clara por capas y módulos independientes:
 
-```kotlin
-screenEntry<Profile> { /* ProfileScreen() */ }
-```
+- **`:seed`**: Módulo ejecutable (`app`) que actúa como ensamblador de dependencias y contenedor de la aplicación.
+- **`:core:navigation`**: Capa de navegación abstracta e independiente de UI, basada en Navigation 3, con `RouteRegistry`, `DeepLinkRouter`, `NavAction` y soporte para navegación modal y anidada.
+- **`:core:ui`**: Design System, componentes reutilizables (`SeedTopAppBar`, `BottomBar`, `HtmlText`), tema M3 y definición del `BaseViewModel`.
+- **`:core:domain`**: Lógica de negocio pura en Kotlin (UseCases, modelos de dominio, excepciones comunes, interfaces de repositorio).
+- **`:core:data`**: Implementación de datos (Retrofit, Room, DataStore con cifrado `CryptoManager`, manejo de red y paginación).
+- **`:feature:stories`**: Módulo de características de ejemplo (`feature module`) que demuestra la implementación del arquetipo en un caso de uso real.
 
-Esto deja una ruta funcionalmente vacía y puede provocar una UI incompleta o no esperada.
+### 2.2 Navegación Tipada y Desacoplada (Navigation 3)
 
-### 3.2 TODO en pantalla de detalle
+- **`RouteRegistry`**: Registro centralizado de rutas dinámicas y estáticas.
+- **Matching prioritario**: Prioriza coincidencias estáticas exactas e inspecciona la especificidad por longitud de ruta en fallbacks, eliminando ambigüedades.
+- **`DeepLinkRouter`**: Encapsula la resolución de Deep Links, verificación de sesión/autenticación implícita y construcción de `NavAction`.
+- **Soporte de Modales y Stack Root**: Manejo limpio de pantallas modales sobre stacks principales mediante metadatos y animaciones integradas.
 
-En `StoryDetailScreen.kt` hay un efecto vacío:
+### 2.3 Patrón de UI MVI Riguroso (`State / Event / Effect`)
 
-```kotlin
-LaunchedEffect(Unit) {
-    viewModel.effect.collect { effect ->
-        // TODO: Add effects here.
-    }
-}
-```
+- Estructura unificada basada en `BaseViewModel<State, Effect, Event>`.
+- Separación estricta del composable principal (`Screen`) y el composable puro de renderizado (`Content`), favoreciendo las previas de Compose y los tests de UI.
+- Uso de `collectAsStateWithLifecycle()` y gestión reactiva de efectos únicos vía `LaunchedEffect`.
 
-Esto implica que la pantalla no maneja completamente sus efectos de navegación o estado.
+### 2.4 Gobernanza Automática mediante Konsist
 
-### 3.3 Lógica de navegación centralizada en MainViewModel
+El proyecto incluye tests de arquitectura automatizados en `:core:ui`:
 
-`MainViewModel` maneja demasiadas responsabilidades:
-
-- sesión
-- auto-login
-- deep links
-- estado de bottom bar
-- pending route
-- navegación global
-
-Esto no es necesariamente incorrecto, pero sí puede convertirse en un “god ViewModel” a medida que crezca el producto.
-
-### 3.4 `RouteRegistry` puede generar conflictos de matching
-
-La lógica de resolución usa prefijos de rutas:
-
-```kotlin
-route.route.startsWith(it.route)
-```
-
-Esto puede producir falsos positivos cuando existen rutas similares o con prefijos compartidos.
-
-### 3.5 Deep links no están completamente protegidos por tests
-
-Aunque la base de deep links está bien diseñada, no hay una validación real de:
-
-- flujo completo
-- rutas no resueltas
-- rutas que requieren auth
-- rutas modales
-- rutas anidadas
-
-### 3.6 La app tiene más carácter de demo/arquitectura que de producto terminado
-
-Hay varios elementos visuales o funcionales que parecen estar pensados como demostración, no como flujo final de negocio.
+- **`GraphArchitectureTest`**: Garantiza que todos los grafos cumplan la interfaz `Graph`, anotación `@Serializable`, sufijo `Graph` y registro de pantallas.
+- **`ScreenArchitectureTest`**: Fuerza el patrón de screens (`Content`, `onEvent`, recepción de `viewModel`, consumo de efectos y estado).
+- **`ViewModelArchitectureTest`**: Valida que los ViewModels hereden de `BaseViewModel` y que las estructuras `State`, `Event`, `Effect` sigan el orden y contrato del arquetipo.
 
 ---
 
-## 4. Puntos fuertes por módulo
+## 3. Estado de los Hallazgos y Evaluación como Arquetipo
 
-### `:core:navigation`
+### 3.1 Resolución de Ambigüedad en `RouteRegistry`
+- **Estado**: **Mitigado / Resuelto**.
+- **Análisis**: `RouteRegistry` busca primero coincidencias estáticas exactas (`it.route == route`) y rutas estáticas completas en URIs antes de recurrir al emparejamiento por prefijo (`startsWith`), seleccionando el grafo de mayor longitud (`maxByOrNull { it.route.length }`).
 
-Es la mejor parte del proyecto. Tiene una base sólida para:
+### 3.2 Lógica de Orquestación en `MainViewModel`
+- **Estado**: **Correcto dentro del rol del Arquetipo**.
+- **Análisis**: `MainViewModel` actúa como el orquestador raíz de la app (gestión de inicio de sesión reactivo y enrutamiento inicial). La lógica de Deep Links está adecuadamente delegada a `DeepLinkRouter` y la autenticación a los casos de uso (`HasSessionUseCase`, `AutoLoginUseCase`).
 
-- routing tipado
-- backstack
-- nested navigation
-- deep linking
-- modal behavior
-- decisiones centralizadas de UI
+### 3.3 Módulos y Pantallas de Ejemplo (`:feature:stories`)
+- **Estado**: **Por diseño del Arquetipo (Módulo de referencia/ejemplo)**.
+- **Análisis**: Elementos como `StoriesGraph.Profile` (placeholder) y los TODOs en `StoryDetailScreen` son puntos de extensión intencionados dentro del módulo de demostración `:feature:stories`. Muestran a los desarrolladores cómo agregar nuevos destinos en un grafo modular.
 
-### `:core:ui`
-
-Tiene estructura adecuada para un design system y componentes reutilizables. La base de pantallas y ViewModels está bien planteada.
-
-### `:feature:stories`
-
-Tiene una estructura clara y muy buena para un módulo independiente, pero aún falta completar:
-
-- `Profile`
-- `StoryDetail` effects
-- navegación real en rutas no usadas
-
-### `:seed`
-
-Es el módulo de app que integra todo, y la raíz de la app está bien pensada. Sin embargo, la lógica central está muy cargada.
+### 3.4 Cobertura de Pruebas de Unidad para Navegación
+- **Estado**: **Enfocado en Gobernanza; Ampliable en Pruebas Unitarias Directas**.
+- **Análisis**: Existen pruebas de navegación básica (`NavigatorTest`), pruebas de gobernanza (`Konsist`) y scripts de pruebas e2e en ADB (`scripts/test_deeplinks.ps1`). Añadir pruebas unitarias directas para `DeepLinkRouter` y `RouteRegistry` reforzará la batería de tests del arquetipo.
 
 ---
 
-## 5. Riesgos de mantenimiento
+## 4. Matriz de Evaluación del Arquetipo
 
-### 5.1 Acoplamiento semántico en root flow
-
-`MainViewModel` hace muchas cosas. A futuro:
-
-- será más difícil testear
-- será más difícil depurar
-- será más propenso a errores de regresión
-
-### 5.2 Rutas dinámicas potencialmente ambiguas
-
-Con más pantallas, se incrementa el riesgo de rutas ambiguas o del tipo `/stories/...` y `/stories/detail`.
-
-### 5.3 Comportamiento de modales y nested stacks
-
-La lógica de modal vs. root y nested graphs es potente, pero requiere una disciplina y una batería de tests fuerte para evitar errores silenciosos.
+| Dimensión | Puntuación | Justificación |
+| :--- | :---: | :--- |
+| **Arquitectura y Modularidad** | **9.5/10** | Excelente desacoplamiento de capas (`navigation`, `ui`, `domain`, `data`, `features`). |
+| **Navegación (Nav 3 + Deep Links)** | **9.0/10** | Sistema de navegación tipado, extensible, con modales, deeplinks y registry central. |
+| **Gobernanza y Standard Enforcement** | **9.5/10** | Pruebas Konsist automáticas para ViewModel, Screens y Graphs. |
+| **Calidad de Código y Patrones MVI** | **9.0/10** | Unificación de UI State/Event/Effect, BaseViewModel y Clean Data Layer. |
+| **Aptitud como Arquetipo / Starter Template** | **9.0/10** | Altamente preparado para ser clonado como base de proyectos enterprise. |
 
 ---
 
-## 6. Recomendaciones prioritarias
+## 5. Recomendaciones de Evolución para el Arquetipo
 
-### Prioridad alta
+### Prioridad Alta (Para potenciar la plantilla)
+1. **Pruebas unitarias directas de `DeepLinkRouter`**:
+   - Crear `DeepLinkRouterTest` validando flujos de deep links autenticados, no autenticados, modales y rutas no resueltas.
+2. **Documentar Puntos de Extensión**:
+   - Añadir notas KDoc / README en `:feature:stories` indicando que es un módulo de referencia/ejemplo para copiar al crear nuevas features (`:feature:dashboard`, `:feature:profile`, etc.).
 
-1. Completar `StoriesGraph.Profile`
-2. Resolver el TODO de `StoryDetailScreen`
-3. Añadir tests de navegación real:
-   - deep links
-   - auth required
-   - modal stack
-   - nested graphs
-
-### Prioridad media
-
-4. Separar lógica de root del `MainViewModel`
-   - mover auth logic a casos de uso o state holder específico
-   - dejar `MainViewModel` más orientado a UI state
-5. Mejorar matching de `RouteRegistry`
-   - evitar `startsWith` sin control de ambigüedad
-   - priorizar matches exactos y más específicos
-
-### Prioridad media-baja
-
-6. Completar pantallas con flujo real
-7. Revisar placeholders y TODOs
-8. Añadir cobertura de pruebas de regresión para deep links y navegación
+### Prioridad Media
+3. **Consolidación de Placeholders de Módulos Feature**:
+   - Completar o documentar explícitamente la pantalla `StoriesGraph.Profile` para evitar confusión entre la pantalla de perfil global de `:seed` (`ProfileGraph`) y la de ejemplo.
+4. **Template/Scaffold Generator Script (Opcional)**:
+   - Ofrecer un script o plantilla para generar automáticamente la estructura de un nuevo módulo `:feature:xxx` siguiendo las reglas Konsist del arquetipo.
 
 ---
 
-## 7. Conclusión
+## 6. Conclusión
 
-El proyecto tiene una excelente base arquitectónica y una estructura modular muy seria. La capa de navegación está muy bien planteada y es probablemente la parte más sólida.
+El proyecto **`compose_multimodule`** es un **arquetipo de arquitectura excepcional** para aplicaciones Android modernas. Sigue las mejores prácticas promovidas por Google y la comunidad Android (Compose, Navigation 3, Hilt, Clean Architecture, Konsist).
 
-Sin embargo, aún está incompleto como aplicación funcional real:
-
-- hay pantallas placeholder
-- hay TODOs activos
-- faltan pruebas de navegación real
-- la lógica del root se está cargando demasiado
-
-En otras palabras:
-
-- como referencia arquitectónica: muy buena
-- como producto funcional terminado: todavía no está pulido
-
----
-
-## 8. Valoración general
-
-Puntuación aproximada:
-
-- Arquitectura: 8.5/10
-- Modularización: 8/10
-- Navegación: 8.5/10
-- Product readiness: 6/10
-- Calidad de tests: 6/10
-
-Si quieres, puedo convertir esta auditoría en una versión:
-
-- más técnica
-- más breve para presentación
-- o en formato checklist de mejoras priorizadas.
-
+Como **arquetipo**, cumple sobresalientemente su propósito de proporcionar una base técnica robusta, consistente y escalable para nuevos desarrollos.
